@@ -14,12 +14,12 @@ int main() {
 
     // Check if the string was created successfully
     if (result_create != STRING_SUCCESS) {
-        printf("Error: %s\n", string_result_to_string(result_create));
+        printf("[ERROR] %s\n", string_result_to_string(result_create));
         return 1;
     }
 
     // Print the string
-    printf("String: %s\n", str->data);
+    printf("[INFO] String: %s\n", str->data);
 
     // Get the length of the string
     size_t length = 0;
@@ -27,12 +27,12 @@ int main() {
 
     // Check if the length was retrieved successfully
     if (result_length != STRING_SUCCESS) {
-        printf("Error: %s\n", string_result_to_string(result_length));
+        printf("[ERROR] %s\n", string_result_to_string(result_length));
         return 1;
     }
 
     // Print the length of the string
-    printf("Length: %zu\n", length);
+    printf("[INFO] Length: %zu\n", length);
 
     // Destroy the string
     string_destroy(str);

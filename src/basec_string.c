@@ -38,24 +38,23 @@ StringResult string_create(const char* str, String** str_out) {
 
     // Allocate memory for the string
     String* string = (String*)malloc(sizeof(String));
-
-    // Check if the memory allocation failed
     if (string == NULL) {
         return STRING_ERROR_MALLOC;
     }
 
     // Allocate memory for the string data
     string->data = (char*)malloc(strlen(str) + 1);
-
-    // Check if the memory allocation failed
     if (string->data == NULL) {
         free(string);
         return STRING_ERROR_MALLOC;
     }
 
-    // Copy the string data and set the length
-    strcpy(string->data, str);
+    // Get the length of the string
     string->length = strlen(str);
+
+    // Copy the string data and null-terminate it
+    memcpy(string->data, str, string->length);
+    string->data[string->length] = '\0';
 
     // Set the output string
     *str_out = string;
@@ -97,11 +96,28 @@ StringResult string_copy(String* str, String** str_out) {
         return STRING_ERROR_NULL_POINTER;
     }
 
-    // Create a new string
-    StringResult result = string_create(str->data, str_out);
+    // Allocate memory for the string structure
+    *str_out = (String*)malloc(sizeof(String));
+    if (*str_out == NULL) {
+        return STRING_ERROR_MALLOC;
+    }
 
-    // Return the result
-    return result;
+    // Allocate memory for the string data
+    (*str_out)->data = (char*)malloc(str->length + 1);
+    if ((*str_out)->data == NULL) {
+        free(*str_out);
+        return STRING_ERROR_MALLOC;
+    }
+
+    // Set the length of the copied string
+    (*str_out)->length = str->length;
+
+    // Copy the string data and null-terminate it
+    memcpy((*str_out)->data, str->data, str->length);
+    (*str_out)->data[str->length] = '\0';
+
+    // Return the success result
+    return STRING_SUCCESS;
 }
 
 /**
@@ -131,11 +147,9 @@ StringResult string_concat(String* str1, String* str2, String** str_out) {
         return STRING_ERROR_MALLOC;
     }
 
-    // Copy the strings
+    // Copy the strings and null-terminate the concatenated string
     memcpy(concat_str->data, str1->data, str1->length);
     memcpy(concat_str->data + str1->length, str2->data, str2->length);
-
-    // Null-terminate the concatenated string
     concat_str->data[str1->length + str2->length] = '\0';
 
     // Set the length of the concatenated string

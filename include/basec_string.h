@@ -1,6 +1,6 @@
 /**
  * @file string.h
- * @brief A simple string implementation
+ * @brief Implementation of a String type and functions
  */
 #ifndef BASEC_STRING_H
 #define BASEC_STRING_H
@@ -9,18 +9,21 @@
 #include <string.h>
 #include <stdlib.h>
 
+/**
+ * @brief Result of a string operation
+ */
 typedef enum {
-    STRING_SUCCESS,
-    STRING_ERROR_NULL_POINTER,
-    STRING_ERROR_MALLOC
+    STRING_SUCCESS,            //< The operation was successful
+    STRING_ERROR_NULL_POINTER, //< The string is NULL
+    STRING_ERROR_MALLOC        //< The memory allocation failed
 } StringResult;
 
 /**
- * @brief A simple string implementation
+ * @brief String type
  */
 typedef struct {
-    char* data;
-    size_t length;
+    char*  data;    //< The string data
+    size_t length;  //< The length of the string
 } String;
 
 /**
@@ -44,7 +47,8 @@ StringResult string_create(const char* str, String** str_out);
  * @brief Get the length of a string
  * 
  * @param str The string to get the length of
- * @return The length of the string
+ * @param length_out The output length
+ * @return A StringResult
  */
 StringResult string_length(const String* str, size_t* length_out);
 
