@@ -8,6 +8,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 /**
  * @brief Result of a string operation
@@ -15,7 +16,9 @@
 typedef enum {
     STRING_SUCCESS,            //< The operation was successful
     STRING_ERROR_NULL_POINTER, //< The string is NULL
-    STRING_ERROR_MALLOC        //< The memory allocation failed
+    STRING_ERROR_MALLOC,       //< The memory allocation failed
+    STRING_ERROR_REALLOC,      //< The memory reallocation failed
+    STRING_ERROR_EMPTY         //< The string is empty
 } StringResult;
 
 /**
@@ -44,6 +47,15 @@ const char* string_result_to_string(StringResult result);
 StringResult string_create(const char* str, String** str_out);
 
 /**
+ * @brief Set the value of a string
+ * 
+ * @param str The string to set
+ * @param value The value to set the string to
+ * @return A StringResult
+ */
+StringResult string_set(String* str, const char* value);
+
+/**
  * @brief Get the length of a string
  * 
  * @param str The string to get the length of
@@ -70,6 +82,16 @@ StringResult string_copy(String* str, String** str_out);
  * @return A StringResult
  */
 StringResult string_concat(String* str1, String* str2, String** str_out);
+
+/**
+ * @brief Check if a string contains another string
+ * 
+ * @param str The string to check
+ * @param substr The substring to check for
+ * @param contains_out The output contains
+ * @return A StringResult
+ */
+StringResult string_contains(String* str, String* substr, bool* contains_out);
 
 /**
  * @brief Destroy a string

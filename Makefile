@@ -6,7 +6,7 @@ INC_DIR=include
 BIN_DIR=bin
 
 TEST_DIR=test
-TEST_BIN_DIR=test/bin
+TEST_BIN_DIR=bin/test
 
 SRC=$(wildcard $(SRC_DIR)/*.c)
 SRC_INCLUDE=$(wildcard $(INC_DIR)/*.h)

@@ -5,6 +5,7 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <stdint.h>
 
 #include "basec_string.h"
 
@@ -25,6 +26,33 @@ void test_string_create() {
     // Check string contents and length
     assert(strcmp(str->data, "Hello, World!") == 0);
     assert(str->length == 13);
+
+    // Destroy the string
+    string_destroy(str);
+}
+
+/**
+ * @brief Test the string_set function
+ * 
+ * @return void
+ */
+void test_string_set() {
+    // Create a empty new string
+    String* str = NULL;
+    StringResult result_create = string_create("", &str);
+
+    // Set the string
+    StringResult result_set = string_set(str, "Hello, World!");
+    assert(result_create == STRING_SUCCESS);
+    assert(result_set == STRING_SUCCESS);
+    assert(strcmp(str->data, "Hello, World!") == 0);
+    assert(str->length == 13);
+    
+    // Set the string to a different value
+    StringResult result_set_different = string_set(str, "Goodbye, World!");
+    assert(result_set_different == STRING_SUCCESS);
+    assert(strcmp(str->data, "Goodbye, World!") == 0);
+    assert(str->length == 15);
 
     // Destroy the string
     string_destroy(str);
@@ -112,6 +140,31 @@ void test_string_concat() {
 }
 
 /**
+ * @brief Test the string_contains function
+ * 
+ * @return void
+ */
+void test_string_contains() {
+    // Create two strings
+    String* str1 = NULL;
+    String* str2 = NULL;
+    StringResult result_create1 = string_create("Hello, World!", &str1);
+    StringResult result_create2 = string_create("World!", &str2);
+    
+    // Check if the substring is contained in the string
+    bool contains = false;
+    StringResult result_contains = string_contains(str1, str2, &contains);
+    assert(result_create1 == STRING_SUCCESS);
+    assert(result_create2 == STRING_SUCCESS);
+    assert(result_contains == STRING_SUCCESS);
+    assert(contains == true);
+
+    // Destroy the strings
+    string_destroy(str1);
+    string_destroy(str2);
+}
+
+/**
  * @brief Test the string_destroy function
  * 
  * @return void
@@ -137,9 +190,11 @@ int main() {
 
     // Run tests
     test_string_create();
+    test_string_set();
     test_string_length();
     test_string_copy();
     test_string_concat();
+    test_string_contains();
     test_string_destroy();
 
     printf("[basec_string] All tests passed!\n");

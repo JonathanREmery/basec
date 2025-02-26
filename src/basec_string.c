@@ -18,6 +18,10 @@ const char* string_result_to_string(StringResult result) {
             return "STRING_ERROR_NULL_POINTER";
         case STRING_ERROR_MALLOC:
             return "STRING_ERROR_MALLOC";
+        case STRING_ERROR_REALLOC:
+            return "STRING_ERROR_REALLOC";
+        case STRING_ERROR_EMPTY:
+            return "STRING_ERROR_EMPTY";
         default:
             return "UNKNOWN_STRING_RESULT";
     }
@@ -31,7 +35,7 @@ const char* string_result_to_string(StringResult result) {
  * @return A StringResult
  */
 StringResult string_create(const char* str, String** str_out) {
-    // Check if the string is NULL
+    // Check for NULL pointers
     if (str == NULL || str_out == NULL) {
         return STRING_ERROR_NULL_POINTER;
     }
@@ -64,6 +68,45 @@ StringResult string_create(const char* str, String** str_out) {
 }
 
 /**
+ * @brief Set the value of a string
+ * 
+ * @param str The string to set
+ * @param value The value to set the string to
+ * @return A StringResult
+ */
+StringResult string_set(String* str, const char* value) {
+    // Check for NULL pointers
+    if (str == NULL || value == NULL) {
+        return STRING_ERROR_NULL_POINTER;
+    }
+
+    // Check if the strings are the same
+    if (strcmp(str->data, value) == 0) {
+        return STRING_SUCCESS;
+    }
+
+    // Set the length of the string
+    size_t new_length = strlen(value);
+
+    // Reallocate memory for the string
+    char* new_data = (char*)realloc(str->data, new_length + 1);
+    if (new_data == NULL) {
+        return STRING_ERROR_REALLOC;
+    }
+
+    // Set the new data and length
+    str->data = new_data;
+    str->length = new_length;
+
+    // Copy the value to the string and null-terminate it
+    memcpy(str->data, value, str->length);
+    str->data[str->length] = '\0';
+
+    // Return the success result
+    return STRING_SUCCESS;
+}
+
+/**
  * @brief Get the length of a string
  * 
  * @param str The string to get the length of
@@ -71,7 +114,7 @@ StringResult string_create(const char* str, String** str_out) {
  * @return A StringResult
  */
 StringResult string_length(const String* str, size_t* length_out) {
-    // Check if the string is NULL
+    // Check for NULL pointers
     if (str == NULL || length_out == NULL) {
         return STRING_ERROR_NULL_POINTER;
     }
@@ -129,7 +172,7 @@ StringResult string_copy(String* str, String** str_out) {
  * @return A StringResult
  */
 StringResult string_concat(String* str1, String* str2, String** str_out) {
-    // Check if the strings are NULL
+    // Check for NULL pointers
     if (str1 == NULL || str2 == NULL || str_out == NULL) {
         return STRING_ERROR_NULL_POINTER;
     }
@@ -157,6 +200,32 @@ StringResult string_concat(String* str1, String* str2, String** str_out) {
 
     // Set the output string
     *str_out = concat_str;
+
+    // Return the success result
+    return STRING_SUCCESS;
+}
+
+/**
+ * @brief Check if a string contains another string
+ * 
+ * @param str The string to check
+ * @param substr The substring to check for
+ * @param contains_out The output contains
+ * @return A StringResult
+ */
+StringResult string_contains(String* str, String* substr, bool* contains_out) {
+    // Check for NULL pointers
+    if (str == NULL || substr == NULL || contains_out == NULL) {
+        return STRING_ERROR_NULL_POINTER;
+    }
+
+    // Check if the substring is empty
+    if (substr->length == 0) {
+        return STRING_ERROR_EMPTY;
+    }
+
+    // Check if the substring is contained in the string
+    *contains_out = strstr(str->data, substr->data) != NULL;
 
     // Return the success result
     return STRING_SUCCESS;
