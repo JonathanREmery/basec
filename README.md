@@ -5,6 +5,13 @@
 ## Roadmap
 
 - [ ] String
+  - [x] Create
+  - [x] Destroy
+  - [ ] Length
+  - [ ] Copy
+  - [ ] Concatenate
+  - [ ] Substring
+  - [ ] IndexOf
 - [ ] Array
 - [ ] DynamicArray
 - [ ] Queue
