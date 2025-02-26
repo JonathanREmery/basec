@@ -61,8 +61,8 @@ make run
   - [x] Size
   - [x] Capacity
   - [x] Add
-  - [ ] Remove
-  - [ ] Get
+  - [x] Remove
+  - [x] Get
   - [ ] Set
   - [ ] Contains
 - [ ] DynamicArray

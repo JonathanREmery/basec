@@ -90,6 +90,51 @@ int main() {
     // Print the capacity of the array
     printf("[INFO] Array Capacity: %zu\n", capacity);
 
+    // Set an element in the array
+    int new_element = 20;
+    ArrayResult result_array_set = array_set(array, 0, &new_element);
+
+    // Check if the element was set successfully
+    if (result_array_set != ARRAY_SUCCESS) {
+        printf("[ERROR] %s\n", array_result_to_string(result_array_set));
+        return 1;
+    }
+
+    // Get the element from the array
+    int element_out = 0;
+    ArrayResult result_array_get = array_get(array, 0, &element_out);
+
+    // Check if the element was retrieved successfully
+    if (result_array_get != ARRAY_SUCCESS) {
+        printf("[ERROR] %s\n", array_result_to_string(result_array_get));
+        return 1;
+    }
+
+    // Print the element from the array
+    printf("[INFO] Array Element: %d\n", element_out);
+
+    // Remove an element from the array
+    ArrayResult result_array_remove = array_remove(array, 0);
+
+    // Check if the element was removed successfully
+    if (result_array_remove != ARRAY_SUCCESS) {
+        printf("[ERROR] %s\n", array_result_to_string(result_array_remove));
+        return 1;
+    }
+
+    // Get the size of the array
+    size_t size_after_remove = 0;
+    ArrayResult result_array_size_after_remove = array_size(array, &size_after_remove);
+
+    // Check if the size was retrieved successfully
+    if (result_array_size_after_remove != ARRAY_SUCCESS) {
+        printf("[ERROR] %s\n", array_result_to_string(result_array_size_after_remove));
+        return 1;
+    }
+
+    // Print the size of the array after removal
+    printf("[INFO] Array Size After Removal: %zu\n", size_after_remove);
+
     // Destroy the array
     ArrayResult result_array_destroy = array_destroy(&array);
 

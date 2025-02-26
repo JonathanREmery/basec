@@ -28,7 +28,9 @@ typedef enum {
     ARRAY_ERROR_INVALID_CAPACITY,      //< The capacity is invalid
     ARRAY_ERROR_INVALID_ELEMENT_SIZE,  //< The element size is invalid
     ARRAY_ERROR_MALLOC,                //< The memory allocation failed
-    ARRAY_ERROR_FULL                   //< The array is full
+    ARRAY_ERROR_FULL,                  //< The array is full
+    ARRAY_ERROR_OUT_OF_BOUNDS,         //< The index is out of bounds
+    ARRAY_ERROR_MEMMOVE                //< The memory move failed
 } ArrayResult;
 
 /**
@@ -75,6 +77,34 @@ ArrayResult array_capacity(Array* array, size_t* capacity_out);
  * @return The result of the operation
  */
 ArrayResult array_add(Array* array, void* element);
+
+/**
+ * @brief Remove an element from the array
+ * 
+ * @param array The array to remove the element from
+ * @param index The index of the element to remove
+ * @return The result of the operation
+ */
+ArrayResult array_remove(Array* array, size_t index);
+
+/**
+ * @brief Get an element from the array
+ * 
+ * @param array The array to get the element from
+ * @param index The index of the element to get
+ * @param element_out The output element
+ * @return The result of the operation
+ */
+ArrayResult array_get(Array* array, size_t index, void* element_out);
+
+/**
+ * @brief Set an element in the array
+ * 
+ * @param array The array to set the element in
+ * @param index The index of the element to set
+ * @param element The element to set
+ */
+ArrayResult array_set(Array* array, size_t index, void* element);
 
 /**
  * @brief Destroy an array

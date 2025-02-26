@@ -243,6 +243,174 @@ void test_array_add() {
 }
 
 /**
+ * @brief Test the array_remove function
+ * 
+ * @return void
+ */
+void test_array_remove() {
+    printf("  Testing array_remove...\n");
+
+    // Create a new array for integers
+    Array* arr_int = NULL;
+    array_create(5, sizeof(int), &arr_int);
+
+    // Add elements to the array
+    int values[] = {10, 20, 30, 40, 50};
+    for (int i = 0; i < 5; i++) {
+        array_add(arr_int, &values[i]);
+    }
+
+    // Remove elements from the array
+    ArrayResult result = array_remove(arr_int, 2);
+    assert(result == ARRAY_SUCCESS);
+
+    // Check if the size was updated correctly
+    size_t size = 0;
+    array_size(arr_int, &size);
+    assert(size == 4);
+
+    // Check if the elements were shifted correctly
+    int expected[] = {10, 20, 40, 50};
+    for (int i = 0; i < 4; i++) {
+        int value = 0;
+        ArrayResult result = array_get(arr_int, i, &value);
+        assert(result == ARRAY_SUCCESS);
+        assert(value == expected[i]);
+    }
+
+    // Test removing elements from the end of the array
+    result = array_remove(arr_int, 3);
+    assert(result == ARRAY_SUCCESS);
+
+    // Check if the size was updated correctly
+    array_size(arr_int, &size);
+    assert(size == 3);
+    
+    // Test removing elements from the middle of the array
+    result = array_remove(arr_int, 1);
+    assert(result == ARRAY_SUCCESS);
+
+    // Check if the size was updated correctly
+    array_size(arr_int, &size);
+    assert(size == 2);
+
+    // Test removing elements from the beginning of the array
+    result = array_remove(arr_int, 0);
+    assert(result == ARRAY_SUCCESS);
+
+    // Check if the size was updated correctly
+    array_size(arr_int, &size);
+    assert(size == 1);
+
+    // Test removing the last element from the array
+    result = array_remove(arr_int, 0);
+    assert(result == ARRAY_SUCCESS);
+
+    // Check if the size was updated correctly
+    array_size(arr_int, &size);
+    assert(size == 0);
+
+    // Test removing elements from an empty array
+    result = array_remove(arr_int, 0);
+    assert(result == ARRAY_ERROR_OUT_OF_BOUNDS);
+    
+    // Test removing elements from an invalid index
+    result = array_remove(arr_int, 100);
+    assert(result == ARRAY_ERROR_OUT_OF_BOUNDS);
+    
+    // Test removing elements from a NULL array
+    result = array_remove(NULL, 0);
+    assert(result == ARRAY_ERROR_NULL_POINTER);
+    
+    // Clean up
+    array_destroy(&arr_int);
+}
+
+/**
+ * @brief Test the array_get function
+ * 
+ * @return void
+ */
+void test_array_get() {
+    printf("  Testing array_get...\n");
+
+    // Create a new array for integers
+    Array* arr_int = NULL;
+    array_create(5, sizeof(int), &arr_int);
+    
+    // Add elements to the array
+    int values[] = {10, 20, 30, 40, 50};
+    for (int i = 0; i < 5; i++) {
+        array_add(arr_int, &values[i]);
+    }
+    
+    // Test getting elements from the array
+    for (int i = 0; i < 5; i++) {
+        int value = 0;
+        ArrayResult result = array_get(arr_int, i, &value);
+        assert(result == ARRAY_SUCCESS);
+        assert(value == values[i]);
+    }
+
+    // Test getting elements from an invalid index
+    int invalid_value = 0;
+    ArrayResult result_invalid = array_get(arr_int, 100, &invalid_value);
+    assert(result_invalid == ARRAY_ERROR_OUT_OF_BOUNDS);
+    
+    // Test getting elements from a NULL array
+    ArrayResult result_null_array = array_get(NULL, 0, &invalid_value);
+    assert(result_null_array == ARRAY_ERROR_NULL_POINTER);
+    
+    // Test getting elements from a NULL element
+    ArrayResult result_null_element = array_get(arr_int, 0, NULL);
+    assert(result_null_element == ARRAY_ERROR_NULL_POINTER);
+    
+    // Clean up
+    array_destroy(&arr_int);
+}
+
+/**
+ * @brief Test the array_set function
+ * 
+ * @return void
+ */
+void test_array_set() {
+    printf("  Testing array_set...\n");
+
+    // Create a new array for integers
+    Array* arr_int = NULL;
+    array_create(5, sizeof(int), &arr_int);
+    
+    // Add elements to the array
+    int values[] = {10, 20, 30, 40, 50};
+    for (int i = 0; i < 5; i++) {
+        array_add(arr_int, &values[i]);
+    }
+    
+    // Test setting elements in the array
+    int new_values[] = {100, 200, 300, 400, 500};
+    for (int i = 0; i < 5; i++) {
+        ArrayResult result = array_set(arr_int, i, &new_values[i]);
+        assert(result == ARRAY_SUCCESS);
+    }
+    
+    // Test setting elements in an invalid index
+    ArrayResult result_invalid = array_set(arr_int, 100, &new_values[0]);
+    assert(result_invalid == ARRAY_ERROR_OUT_OF_BOUNDS);
+    
+    // Test setting elements in a NULL array
+    ArrayResult result_null_array = array_set(NULL, 0, &new_values[0]);
+    assert(result_null_array == ARRAY_ERROR_NULL_POINTER);
+
+    // Test setting elements in a NULL element
+    ArrayResult result_null_element = array_set(arr_int, 0, NULL);
+    assert(result_null_element == ARRAY_ERROR_NULL_POINTER);
+
+    // Clean up
+    array_destroy(&arr_int);
+}
+
+/**
  * @brief Test the array implementation
  * 
  * @return int
@@ -255,6 +423,8 @@ int main() {
     test_array_size();
     test_array_capacity();
     test_array_add();
+    test_array_remove();
+    test_array_get();
     test_array_destroy();
 
     printf("[basec_array] All tests passed!\n");
