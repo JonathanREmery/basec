@@ -7,9 +7,9 @@
 - [ ] String
   - [x] Create
   - [x] Destroy
-  - [ ] Length
-  - [ ] Copy
-  - [ ] Concatenate
+  - [x] Length
+  - [x] Copy
+  - [x] Concatenate
   - [ ] Substring
   - [ ] IndexOf
 - [ ] Array

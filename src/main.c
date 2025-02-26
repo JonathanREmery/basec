@@ -9,11 +9,30 @@
  */
 int main() {
     // Create a new string
-    String* str = string_create("Hello, World!");
+    String* str = NULL;
+    StringResult result_create = string_create("Hello, World!", &str);
 
-    // Print the string and its length
+    // Check if the string was created successfully
+    if (result_create != STRING_SUCCESS) {
+        printf("Error: %s\n", string_result_to_string(result_create));
+        return 1;
+    }
+
+    // Print the string
     printf("String: %s\n", str->data);
-    printf("Length: %zu\n", string_length(str));
+
+    // Get the length of the string
+    size_t length = 0;
+    StringResult result_length = string_length(str, &length);
+
+    // Check if the length was retrieved successfully
+    if (result_length != STRING_SUCCESS) {
+        printf("Error: %s\n", string_result_to_string(result_length));
+        return 1;
+    }
+
+    // Print the length of the string
+    printf("Length: %zu\n", length);
 
     // Destroy the string
     string_destroy(str);
