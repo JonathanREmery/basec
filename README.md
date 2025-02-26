@@ -1,4 +1,5 @@
-# basec is a C Base Layer, with a focus on memory safety and efficiency.
+# basec
+basec is a C Base Layer, with a focus on memory safety and efficiency.
 
 ## Project Structure
 ```
@@ -45,6 +46,12 @@ basec/                     # Root directory
 - `array_contains`  - Check if an Array contains an element
 - `array_index_of`  - Get the index of an element in an Array
 
+## Generating Documentation
+
+```bash
+doxygen
+```
+
 ## Building
 
 ```bash
@@ -65,28 +72,7 @@ make run
 
 ## Roadmap
 
-- [x] String
-  - [x] Create
-  - [x] Destroy
-  - [x] Set
-  - [x] Length
-  - [x] Capacity
-  - [x] Copy
-  - [x] Append
-  - [x] Concatenate
-  - [x] Contains
-  - [x] IndexOf
-- [x] Array
-  - [x] Create
-  - [x] Destroy
-  - [x] Size
-  - [x] Capacity
-  - [x] Add
-  - [x] Remove
-  - [x] Get
-  - [x] Set
-  - [x] Contains
-  - [x] IndexOf
-- [ ] DynamicArray
 - [ ] Queue
 - [ ] Stack
+- [ ] Deque
+- [ ] Linked List

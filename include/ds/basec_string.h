@@ -1,6 +1,6 @@
 /**
- * @file string.h
- * @brief Implementation of a String type and functions
+ * @file basec_string.h
+ * @brief Declaration of a String type and functions
  */
 #ifndef BASEC_STRING_H
 #define BASEC_STRING_H

@@ -1,7 +1,8 @@
 /**
- * @file string.c
- * @brief A simple string implementation
+ * @file basec_string.c
+ * @brief Implementation of a String type and functions
  */
+
 #include "ds/basec_string.h"
 
 /**

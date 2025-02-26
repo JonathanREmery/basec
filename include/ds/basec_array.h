@@ -1,6 +1,6 @@
 /**
  * @file basec_array.h
- * @brief Implementation of an Array type and functions
+ * @brief Declaration of an Array type and functions
  */
 #ifndef BASEC_ARRAY_H
 #define BASEC_ARRAY_H
