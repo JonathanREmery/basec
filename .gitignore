@@ -1,2 +1,7 @@
 bin/
 docs/
+
+compile_commands.json
+.ccls-cache/
+
+.aider*

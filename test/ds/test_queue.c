@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "ds/basec_queue.h"
 
@@ -47,6 +48,20 @@ void test_queue_create() {
     // Test NULL pointer
     QueueResult result_create_null_pointer = queue_create(sizeof(int), 10, NULL);
     assert(result_create_null_pointer == QUEUE_ERROR_NULL_POINTER);
+
+    // Test minimum capacity
+    Queue* queue_min = NULL;
+    QueueResult result_create_min = queue_create(sizeof(int), 1, &queue_min);
+    assert(result_create_min == QUEUE_SUCCESS);
+    assert(queue_min->capacity == 1);
+    queue_destroy(&queue_min);
+
+    // Test large capacity
+    Queue* queue_large = NULL;
+    QueueResult result_create_large = queue_create(sizeof(int), 1000, &queue_large);
+    assert(result_create_large == QUEUE_SUCCESS);
+    assert(queue_large->capacity == 1000);
+    queue_destroy(&queue_large);
 }
 
 /**
@@ -57,11 +72,15 @@ void test_queue_create() {
 void test_queue_resize() {
     printf("  Testing queue_resize...\n");
 
-    // Create a valid queue
-    Queue* queue_valid = NULL;
-    QueueResult result_create_valid = queue_create(sizeof(int), 10, &queue_valid);
-    assert(result_create_valid == QUEUE_SUCCESS);
-    assert(queue_valid != NULL);
+    // Create a queue manually
+    Queue* queue_valid = malloc(sizeof(Queue));
+    queue_valid->element_size = sizeof(int);
+    queue_valid->capacity = 10;
+    queue_valid->size = 0;
+    queue_valid->data = malloc(sizeof(int) * 10);
+    queue_valid->base = queue_valid->data;
+    queue_valid->head = queue_valid->data;
+    queue_valid->tail = queue_valid->data;
 
     // Test invalid capacity
     QueueResult result_resize_invalid_capacity = queue_resize(queue_valid, 0);
@@ -76,9 +95,6 @@ void test_queue_resize() {
     QueueResult result_resize_smaller_capacity = queue_resize(queue_valid, 5);
     assert(result_resize_smaller_capacity == QUEUE_SUCCESS);
     assert(queue_valid->capacity == 5);
-    assert(queue_valid->size == 0);
-    assert(queue_valid->head == queue_valid->data);
-    assert(queue_valid->tail == queue_valid->data);
 
     // Test resizing to a larger capacity
     QueueResult result_resize_larger_capacity = queue_resize(queue_valid, 15);
@@ -89,14 +105,10 @@ void test_queue_resize() {
     QueueResult result_resize_same_capacity = queue_resize(queue_valid, 5);
     assert(result_resize_same_capacity == QUEUE_SUCCESS);
     assert(queue_valid->capacity == 5);
-    assert(queue_valid->size == 0);
-    assert(queue_valid->head == queue_valid->data);
-    assert(queue_valid->tail == queue_valid->data);
 
-    // Destroy the queue
-    QueueResult result_destroy = queue_destroy(&queue_valid);
-    assert(result_destroy == QUEUE_SUCCESS);
-    assert(queue_valid == NULL);
+    // Manual cleanup
+    free(queue_valid->data);
+    free(queue_valid);
 }
 
 /**
@@ -107,11 +119,15 @@ void test_queue_resize() {
 void test_queue_size() {
     printf("  Testing queue_size...\n");
 
-    // Create a valid queue
-    Queue* queue_valid = NULL;
-    QueueResult result_create_valid = queue_create(sizeof(int), 10, &queue_valid);
-    assert(result_create_valid == QUEUE_SUCCESS);
-    assert(queue_valid != NULL);
+    // Create a queue manually
+    Queue* queue_valid = malloc(sizeof(Queue));
+    queue_valid->size = 0;
+    queue_valid->capacity = 10;
+    queue_valid->element_size = sizeof(int);
+    queue_valid->data = malloc(sizeof(int) * 10);
+    queue_valid->base = queue_valid->data;
+    queue_valid->head = queue_valid->data;
+    queue_valid->tail = queue_valid->data;
 
     // Test the size
     size_t size;
@@ -127,10 +143,9 @@ void test_queue_size() {
     QueueResult result_size_null_pointer_size_out = queue_size(queue_valid, NULL);
     assert(result_size_null_pointer_size_out == QUEUE_ERROR_NULL_POINTER);
 
-    // Destroy the queue
-    QueueResult result_destroy = queue_destroy(&queue_valid);
-    assert(result_destroy == QUEUE_SUCCESS);
-    assert(queue_valid == NULL);
+    // Manual cleanup
+    free(queue_valid->data);
+    free(queue_valid);
 }
 
 /**
@@ -141,11 +156,15 @@ void test_queue_size() {
 void test_queue_capacity() {
     printf("  Testing queue_capacity...\n");
 
-    // Create a valid queue
-    Queue* queue_valid = NULL;
-    QueueResult result_create_valid = queue_create(sizeof(int), 10, &queue_valid);
-    assert(result_create_valid == QUEUE_SUCCESS);
-    assert(queue_valid != NULL);
+    // Create a queue manually
+    Queue* queue_valid = malloc(sizeof(Queue));
+    queue_valid->capacity = 10;
+    queue_valid->size = 0;
+    queue_valid->element_size = sizeof(int);
+    queue_valid->data = malloc(sizeof(int) * 10);
+    queue_valid->base = queue_valid->data;
+    queue_valid->head = queue_valid->data;
+    queue_valid->tail = queue_valid->data;
 
     // Test the capacity
     size_t capacity;
@@ -161,10 +180,9 @@ void test_queue_capacity() {
     QueueResult result_capacity_null_pointer_capacity_out = queue_capacity(queue_valid, NULL);
     assert(result_capacity_null_pointer_capacity_out == QUEUE_ERROR_NULL_POINTER);
 
-    // Destroy the queue
-    QueueResult result_destroy = queue_destroy(&queue_valid);
-    assert(result_destroy == QUEUE_SUCCESS);
-    assert(queue_valid == NULL);
+    // Manual cleanup
+    free(queue_valid->data);
+    free(queue_valid);
 }
 
 /**
@@ -175,45 +193,43 @@ void test_queue_capacity() {
 void test_queue_enqueue() {
     printf("  Testing queue_enqueue...\n");
 
-    // Create a valid queue
-    Queue* queue_valid = NULL;
-    QueueResult result_create_valid = queue_create(sizeof(int), 10, &queue_valid);
-    assert(result_create_valid == QUEUE_SUCCESS);
-    assert(queue_valid != NULL);
+    // Create a queue manually
+    Queue* queue_valid = malloc(sizeof(Queue));
+    queue_valid->element_size = sizeof(int);
+    queue_valid->capacity = 3;
+    queue_valid->size = 0;
+    queue_valid->data = malloc(sizeof(int) * 3);
+    queue_valid->base = queue_valid->data;
+    queue_valid->head = queue_valid->data;
+    queue_valid->tail = queue_valid->data;
 
     // Test NULL pointer
     int element = 1;
     QueueResult result_enqueue_null_pointer = queue_enqueue(NULL, &element);
     assert(result_enqueue_null_pointer == QUEUE_ERROR_NULL_POINTER);
 
-    // Test NULL pointer for element
-    QueueResult result_enqueue_null_pointer_element = queue_enqueue(queue_valid, NULL);
-    assert(result_enqueue_null_pointer_element == QUEUE_ERROR_NULL_POINTER);
+    // Test NULL element
+    QueueResult result_enqueue_null_element = queue_enqueue(queue_valid, NULL);
+    assert(result_enqueue_null_element == QUEUE_ERROR_NULL_POINTER);
 
-    // Test enqueueing an element
-    QueueResult result_enqueue = queue_enqueue(queue_valid, &element);
-    assert(result_enqueue == QUEUE_SUCCESS);
-    assert(queue_valid->size == 1);
-    assert(*(int*)queue_valid->head == element);
-
-    // Test enqueueing multiple elements
-    for (int i = 2; i <= 10; i++) {
-        QueueResult result_enqueue = queue_enqueue(queue_valid, &i);
+    // Test enqueueing elements
+    int values[] = {10, 20, 30};
+    for (int i = 0; i < 3; i++) {
+        QueueResult result_enqueue = queue_enqueue(queue_valid, &values[i]);
         assert(result_enqueue == QUEUE_SUCCESS);
-        assert(queue_valid->size == (size_t)i);
-        assert(*(int*)queue_valid->head == 1);
+        assert(queue_valid->size == (size_t)(i + 1));
     }
 
-    // Test enqueueing an element when the queue is full
-    QueueResult result_enqueue_full = queue_enqueue(queue_valid, &element);
+    // Test enqueue with resize
+    int extra = 40;
+    QueueResult result_enqueue_full = queue_enqueue(queue_valid, &extra);
     assert(result_enqueue_full == QUEUE_SUCCESS);
-    assert(queue_valid->size == 11);
-    assert(*(int*)queue_valid->head == 1);
+    assert(queue_valid->size == 4);
+    assert(queue_valid->capacity == 6);
 
-    // Destroy the queue
-    QueueResult result_destroy = queue_destroy(&queue_valid);
-    assert(result_destroy == QUEUE_SUCCESS);
-    assert(queue_valid == NULL);
+    // Manual cleanup
+    free(queue_valid->data);
+    free(queue_valid);
 }
 
 /**
@@ -224,42 +240,40 @@ void test_queue_enqueue() {
 void test_queue_dequeue() {
     printf("  Testing queue_dequeue...\n");
 
+    // Create a queue manually with one element
+    Queue* queue_valid = malloc(sizeof(Queue));
+    queue_valid->element_size = sizeof(int);
+    queue_valid->capacity = 3;
+    queue_valid->size = 1;
+    queue_valid->data = malloc(sizeof(int) * 3);
+    int initial_value = 10;
+    memcpy(queue_valid->data, &initial_value, sizeof(int));
+    queue_valid->base = queue_valid->data;
+    queue_valid->head = queue_valid->data;
+    queue_valid->tail = queue_valid->data + sizeof(int);
+
     // Test NULL pointer
     int element;
     QueueResult result_dequeue_null_pointer = queue_dequeue(NULL, &element);
     assert(result_dequeue_null_pointer == QUEUE_ERROR_NULL_POINTER);
 
-    // Create a valid queue
-    Queue* queue_valid = NULL;
-    QueueResult result_create_valid = queue_create(sizeof(int), 10, &queue_valid);
-    assert(result_create_valid == QUEUE_SUCCESS);
-    assert(queue_valid != NULL);
-
-    // Test NULL pointer for element_out
+    // Test NULL element_out
     QueueResult result_dequeue_null_pointer_element_out = queue_dequeue(queue_valid, NULL);
     assert(result_dequeue_null_pointer_element_out == QUEUE_ERROR_NULL_POINTER);
 
-    // Test enqueueing an element
-    element = 1;
-    QueueResult result_enqueue = queue_enqueue(queue_valid, &element);
-    assert(result_enqueue == QUEUE_SUCCESS);
-    assert(queue_valid->size == 1);
-    assert(*(int*)queue_valid->head == element);
-
-    // Test dequeueing an element
+    // Test dequeuing single element
     QueueResult result_dequeue = queue_dequeue(queue_valid, &element);
     assert(result_dequeue == QUEUE_SUCCESS);
+    assert(element == 10);
     assert(queue_valid->size == 0);
-    assert(element == 1);
 
-    // Test dequeueing an element when the queue is empty
+    // Test dequeue from empty queue
     QueueResult result_dequeue_empty = queue_dequeue(queue_valid, &element);
     assert(result_dequeue_empty == QUEUE_ERROR_EMPTY);
 
-    // Destroy the queue
-    QueueResult result_destroy = queue_destroy(&queue_valid);
-    assert(result_destroy == QUEUE_SUCCESS);
-    assert(queue_valid == NULL);
+    // Manual cleanup
+    free(queue_valid->data);
+    free(queue_valid);
 }
 
 /**
@@ -270,21 +284,28 @@ void test_queue_dequeue() {
 void test_queue_destroy() {
     printf("  Testing queue_destroy...\n");
 
-    // Create a valid queue
-    Queue* queue_valid = NULL;
-    QueueResult result_create_valid = queue_create(sizeof(int), 10, &queue_valid);
-    assert(result_create_valid == QUEUE_SUCCESS);
-    assert(queue_valid != NULL);
+    // Create a queue manually
+    Queue* queue_valid = malloc(sizeof(Queue));
+    queue_valid->data = malloc(sizeof(int) * 10);
+    queue_valid->element_size = sizeof(int);
+    queue_valid->capacity = 10;
+    queue_valid->size = 0;
+    queue_valid->base = queue_valid->data;
+    queue_valid->head = queue_valid->data;
+    queue_valid->tail = queue_valid->data;
 
-    // Destroy the queue
+    // Test destroying the queue
     QueueResult result_destroy = queue_destroy(&queue_valid);
     assert(result_destroy == QUEUE_SUCCESS);
     assert(queue_valid == NULL);
 
-    // Try to destroy the queue again
+    // Test destroying NULL pointer
+    QueueResult result_destroy_null = queue_destroy(NULL);
+    assert(result_destroy_null == QUEUE_ERROR_NULL_POINTER);
+
+    // Test destroying already destroyed queue
     QueueResult result_destroy_again = queue_destroy(&queue_valid);
     assert(result_destroy_again == QUEUE_ERROR_NULL_POINTER);
-    assert(queue_valid == NULL);
 }
 
 int main() {

@@ -70,6 +70,9 @@ StringResult string_create(const char* str, size_t capacity, String** str_out) {
         return STRING_ERROR_MALLOC;
     }
 
+    // Set the capacity
+    string->capacity = capacity;
+
     // Get the length of the string
     string->length = strlen(str);
 

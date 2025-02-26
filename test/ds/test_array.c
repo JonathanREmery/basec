@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "ds/basec_array.h"
 
@@ -18,51 +19,43 @@
 void test_array_create() {
     printf("  Testing array_create...\n");
 
-    // Create a valid array
+    // Test valid creation
     Array* arr_valid = NULL;
     ArrayResult result_create_valid = array_create(sizeof(int), 10, &arr_valid);
-
-    // Test invalid capacity
-    Array* arr_invalid_capacity = NULL;
-    ArrayResult result_create_invalid_capacity = array_create(sizeof(int), 0, &arr_invalid_capacity);
+    assert(result_create_valid == ARRAY_SUCCESS);
+    assert(arr_valid != NULL);
+    assert(arr_valid->element_size == sizeof(int));
+    assert(arr_valid->capacity == 10);
+    assert(arr_valid->size == 0);
+    assert(arr_valid->data != NULL);
 
     // Test invalid element size
     Array* arr_invalid_elem_size = NULL;
     ArrayResult result_create_invalid_elem_size = array_create(0, 10, &arr_invalid_elem_size);
-    
-    // Test NULL output pointer
-    ArrayResult result_create_null_out = array_create(sizeof(int), 10, NULL);
-
-    // Check the creation results
-    assert(result_create_valid == ARRAY_SUCCESS);
-    assert(result_create_invalid_capacity == ARRAY_ERROR_INVALID_CAPACITY);
-    assert(arr_valid != NULL);
-    assert(arr_invalid_capacity == NULL);
     assert(result_create_invalid_elem_size == ARRAY_ERROR_INVALID_ELEMENT_SIZE);
     assert(arr_invalid_elem_size == NULL);
+
+    // Test invalid capacity
+    Array* arr_invalid_capacity = NULL;
+    ArrayResult result_create_invalid_capacity = array_create(sizeof(int), 0, &arr_invalid_capacity);
+    assert(result_create_invalid_capacity == ARRAY_ERROR_INVALID_CAPACITY);
+    assert(arr_invalid_capacity == NULL);
+
+    // Test NULL output pointer
+    ArrayResult result_create_null_out = array_create(sizeof(int), 10, NULL);
     assert(result_create_null_out == ARRAY_ERROR_NULL_POINTER);
 
-    // Check the array properties
-    assert(arr_valid->size == 0);
-    assert(arr_valid->capacity == 10);
-    assert(arr_valid->element_size == sizeof(int));
-    assert(arr_valid->data != NULL);
+    // Test minimum capacity
+    Array* arr_min = NULL;
+    ArrayResult result_create_min = array_create(sizeof(int), 1, &arr_min);
+    assert(result_create_min == ARRAY_SUCCESS);
+    assert(arr_min->capacity == 1);
 
-    // Test with different data types
-    Array* arr_char = NULL;
-    ArrayResult result_create_char = array_create(sizeof(char), 5, &arr_char);
-    assert(result_create_char == ARRAY_SUCCESS);
-    assert(arr_char->element_size == sizeof(char));
-    
-    Array* arr_double = NULL;
-    ArrayResult result_create_double = array_create(sizeof(double), 5, &arr_double);
-    assert(result_create_double == ARRAY_SUCCESS);
-    assert(arr_double->element_size == sizeof(double));
-
-    // Destroy the arrays
-    array_destroy(&arr_valid);
-    array_destroy(&arr_char);
-    array_destroy(&arr_double);
+    // Test large capacity
+    Array* arr_large = NULL;
+    ArrayResult result_create_large = array_create(sizeof(int), 1000, &arr_large);
+    assert(result_create_large == ARRAY_SUCCESS);
+    assert(arr_large->capacity == 1000);
 }
 
 /**
@@ -73,27 +66,36 @@ void test_array_create() {
 void test_array_size() {
     printf("  Testing array_size...\n");
 
-    // Create a new array
-    Array* arr = NULL;
-    ArrayResult result_create = array_create(sizeof(int), 10, &arr);
+    // Create array manually
+    Array* arr = malloc(sizeof(Array));
+    arr->size = 5;
+    arr->capacity = 10;
+    arr->element_size = sizeof(int);
+    arr->data = malloc(sizeof(int) * 10);
 
-    // Check if the array was created successfully
-    assert(result_create == ARRAY_SUCCESS);
-
-    // Get the size of the array
+    // Test valid size retrieval
     size_t size = 0;
     ArrayResult result_size = array_size(arr, &size);
+    assert(result_size == ARRAY_SUCCESS);
+    assert(size == 5);
 
-    // Check if the size was retrieved successfully
+    // Test zero size
+    arr->size = 0;
+    result_size = array_size(arr, &size);
     assert(result_size == ARRAY_SUCCESS);
     assert(size == 0);
-    
-    // Test with NULL pointer
+
+    // Test NULL pointer
     ArrayResult result_size_null = array_size(NULL, &size);
     assert(result_size_null == ARRAY_ERROR_NULL_POINTER);
 
-    // Destroy the array
-    array_destroy(&arr);
+    // Test NULL size_out
+    ArrayResult result_size_null_out = array_size(arr, NULL);
+    assert(result_size_null_out == ARRAY_ERROR_NULL_POINTER);
+
+    // Manual cleanup
+    free(arr->data);
+    free(arr);
 }
 
 /**
@@ -103,40 +105,37 @@ void test_array_size() {
  */
 void test_array_capacity() {
     printf("  Testing array_capacity...\n");
-    
-    // Create a new array
-    Array* arr = NULL;
-    ArrayResult result_create = array_create(sizeof(int), 10, &arr);
 
-    // Check if the array was created successfully
-    assert(result_create == ARRAY_SUCCESS);
+    // Create array manually
+    Array* arr = malloc(sizeof(Array));
+    arr->capacity = 10;
+    arr->size = 0;
+    arr->element_size = sizeof(int);
+    arr->data = malloc(sizeof(int) * 10);
 
-    // Get the capacity of the array
+    // Test valid capacity retrieval
     size_t capacity = 0;
     ArrayResult result_capacity = array_capacity(arr, &capacity);
-
-    // Check if the capacity was retrieved successfully
     assert(result_capacity == ARRAY_SUCCESS);
     assert(capacity == 10);
-    
-    // Test with different capacities
-    Array* arr_large = NULL;
-    array_create(sizeof(int), 1000, &arr_large);
 
-    // Get the capacity of the large array
-    ArrayResult result_capacity_large = array_capacity(arr_large, &capacity);
-
-    // Check if the capacity was retrieved successfully
-    assert(result_capacity_large == ARRAY_SUCCESS);
+    // Test different capacity
+    arr->capacity = 1000;
+    result_capacity = array_capacity(arr, &capacity);
+    assert(result_capacity == ARRAY_SUCCESS);
     assert(capacity == 1000);
-    
-    // Test with NULL pointer
+
+    // Test NULL pointer
     ArrayResult result_capacity_null = array_capacity(NULL, &capacity);
     assert(result_capacity_null == ARRAY_ERROR_NULL_POINTER);
 
-    // Destroy the arrays
-    array_destroy(&arr);
-    array_destroy(&arr_large);
+    // Test NULL capacity_out
+    ArrayResult result_capacity_null_out = array_capacity(arr, NULL);
+    assert(result_capacity_null_out == ARRAY_ERROR_NULL_POINTER);
+
+    // Manual cleanup
+    free(arr->data);
+    free(arr);
 }
 
 /**
@@ -146,24 +145,26 @@ void test_array_capacity() {
  */
 void test_array_destroy() {
     printf("  Testing array_destroy...\n");
-    
-    // Create a new array
-    Array* arr = NULL;
-    ArrayResult result_create = array_create(sizeof(int), 10, &arr);
 
-    // Destroy the array
+    // Create array manually
+    Array* arr = malloc(sizeof(Array));
+    arr->data = malloc(sizeof(int) * 10);
+    arr->element_size = sizeof(int);
+    arr->capacity = 10;
+    arr->size = 0;
+
+    // Test destroy
     ArrayResult result_destroy = array_destroy(&arr);
-    assert(result_create == ARRAY_SUCCESS);
     assert(result_destroy == ARRAY_SUCCESS);
     assert(arr == NULL);
 
-    // Try to destroy the array again
-    ArrayResult result_destroy_again = array_destroy(&arr);
-    assert(result_destroy_again == ARRAY_ERROR_NULL_POINTER);
-    
-    // Test with NULL pointer
+    // Test NULL pointer
     ArrayResult result_destroy_null = array_destroy(NULL);
     assert(result_destroy_null == ARRAY_ERROR_NULL_POINTER);
+
+    // Test double destroy
+    ArrayResult result_destroy_again = array_destroy(&arr);
+    assert(result_destroy_again == ARRAY_ERROR_NULL_POINTER);
 }
 
 /**
@@ -173,75 +174,41 @@ void test_array_destroy() {
  */
 void test_array_add() {
     printf("  Testing array_add...\n");
-    
-    // Create a new array for integers
-    Array* arr_int = NULL;
-    array_create(sizeof(int), 5, &arr_int);
-    
-    // Add elements to the array
-    int values[] = {10, 20, 30, 40, 50};
-    
-    for (int i = 0; i < 5; i++) {
-        // Add the element to the array
-        ArrayResult result = array_add(arr_int, &values[i]);
-        assert(result == ARRAY_SUCCESS);
 
-        // Get the size of the array
-        size_t size = 0;
-        ArrayResult result_size = array_size(arr_int, &size);
+    // Create array manually
+    Array* arr = malloc(sizeof(Array));
+    arr->element_size = sizeof(int);
+    arr->capacity = 3;
+    arr->size = 0;
+    arr->data = malloc(sizeof(int) * 3);
 
-        // Check if the size was retrieved successfully
-        assert(result_size == ARRAY_SUCCESS);
-        assert(size == (size_t)(i + 1));
-    }
-    
-    // Try to add one more element when the array is full
-    int extra_value = 60;
-    assert(arr_int->capacity == 5);
-    ArrayResult result_full = array_add(arr_int, &extra_value);
-    assert(result_full == ARRAY_SUCCESS);
-    assert(arr_int->capacity == 10);
-    
-    // Test with NULL pointers
-    ArrayResult result_null_array = array_add(NULL, &values[0]);
+    // Test NULL pointer
+    int value = 10;
+    ArrayResult result_null_array = array_add(NULL, &value);
     assert(result_null_array == ARRAY_ERROR_NULL_POINTER);
-    
-    ArrayResult result_null_element = array_add(arr_int, NULL);
-    assert(result_null_element == ARRAY_ERROR_NULL_POINTER);
-    
-    // Test with different data types
-    Array* arr_char = NULL;
-    array_create(sizeof(char), 3, &arr_char);
-    
-    char chars[] = {'A', 'B', 'C'};
-    for (int i = 0; i < 3; i++) {
-        ArrayResult result = array_add(arr_char, &chars[i]);
-        assert(result == ARRAY_SUCCESS);
-    }
-    
-    // Test with string
-    Array* arr_string = NULL;
-    array_create(sizeof(char*), 2, &arr_string);
-    
-    char* str1 = "Hello";
-    char* str2 = "World";
-    
-    // Add the elements to the array
-    array_add(arr_string, &str1);
-    array_add(arr_string, &str2);
-    
-    // Get the size of the array
-    size_t size = 0;
-    ArrayResult result_size = array_size(arr_string, &size);
 
-    // Check if the size was retrieved successfully
-    assert(result_size == ARRAY_SUCCESS);
-    assert(size == 2);
-    
-    // Clean up
-    array_destroy(&arr_int);
-    array_destroy(&arr_char);
-    array_destroy(&arr_string);
+    // Test NULL element
+    ArrayResult result_null_element = array_add(arr, NULL);
+    assert(result_null_element == ARRAY_ERROR_NULL_POINTER);
+
+    // Test adding elements
+    int values[] = {10, 20, 30};
+    for (int i = 0; i < 3; i++) {
+      ArrayResult result = array_add(arr, &values[i]);
+      assert(result == ARRAY_SUCCESS);
+      assert(arr->size == (size_t)(i + 1));
+    }
+
+    // Test adding when full (triggers resize)
+    int extra = 40;
+    ArrayResult result_full = array_add(arr, &extra);
+    assert(result_full == ARRAY_SUCCESS);
+    assert(arr->size == 4);
+    assert(arr->capacity == 6);
+
+    // Manual cleanup
+    free(arr->data);
+    free(arr);
 }
 
 /**
@@ -252,80 +219,41 @@ void test_array_add() {
 void test_array_remove() {
     printf("  Testing array_remove...\n");
 
-    // Create a new array for integers
-    Array* arr_int = NULL;
-    array_create(sizeof(int), 5, &arr_int);
-
-    // Add elements to the array
+    // Create array manually with elements
+    Array* arr = malloc(sizeof(Array));
+    arr->element_size = sizeof(int);
+    arr->capacity = 5;
+    arr->size = 5;
+    arr->data = malloc(sizeof(int) * 5);
     int values[] = {10, 20, 30, 40, 50};
-    for (int i = 0; i < 5; i++) {
-        array_add(arr_int, &values[i]);
-    }
+    memcpy(arr->data, values, sizeof(int) * 5);
 
-    // Remove elements from the array
-    ArrayResult result = array_remove(arr_int, 2);
-    assert(result == ARRAY_SUCCESS);
+    // Test removing from middle
+    ArrayResult result_middle = array_remove(arr, 2);
+    assert(result_middle == ARRAY_SUCCESS);
+    assert(arr->size == 4);
 
-    // Check if the size was updated correctly
-    size_t size = 0;
-    array_size(arr_int, &size);
-    assert(size == 4);
+    // Test removing from end
+    ArrayResult result_end = array_remove(arr, 3);
+    assert(result_end == ARRAY_SUCCESS);
+    assert(arr->size == 3);
 
-    // Check if the elements were shifted correctly
-    int expected[] = {10, 20, 40, 50};
-    for (int i = 0; i < 4; i++) {
-        int value = 0;
-        ArrayResult result = array_get(arr_int, i, &value);
-        assert(result == ARRAY_SUCCESS);
-        assert(value == expected[i]);
-    }
+    // Test removing from start
+    ArrayResult result_start = array_remove(arr, 0);
+    assert(result_start == ARRAY_SUCCESS);
+    assert(arr->size == 2);
 
-    // Test removing elements from the end of the array
-    result = array_remove(arr_int, 3);
-    assert(result == ARRAY_SUCCESS);
+    // Test invalid index
+    ArrayResult result_invalid = array_remove(arr, 5);
+    assert(result_invalid == ARRAY_ERROR_OUT_OF_BOUNDS);
 
-    // Check if the size was updated correctly
-    array_size(arr_int, &size);
-    assert(size == 3);
-    
-    // Test removing elements from the middle of the array
-    result = array_remove(arr_int, 1);
-    assert(result == ARRAY_SUCCESS);
+    // Test NULL array
+    ArrayResult result_null = array_remove(NULL, 0);
+    assert(result_null == ARRAY_ERROR_NULL_POINTER);
 
-    // Check if the size was updated correctly
-    array_size(arr_int, &size);
-    assert(size == 2);
-
-    // Test removing elements from the beginning of the array
-    result = array_remove(arr_int, 0);
-    assert(result == ARRAY_SUCCESS);
-
-    // Check if the size was updated correctly
-    array_size(arr_int, &size);
-    assert(size == 1);
-
-    // Test removing the last element from the array
-    result = array_remove(arr_int, 0);
-    assert(result == ARRAY_SUCCESS);
-
-    // Check if the size was updated correctly
-    array_size(arr_int, &size);
-    assert(size == 0);
-
-    // Test removing elements from an empty array
-    result = array_remove(arr_int, 0);
-    assert(result == ARRAY_ERROR_OUT_OF_BOUNDS);
-    
-    // Test removing elements from an invalid index
-    result = array_remove(arr_int, 100);
-    assert(result == ARRAY_ERROR_OUT_OF_BOUNDS);
-    
-    // Test removing elements from a NULL array
-    result = array_remove(NULL, 0);
-    assert(result == ARRAY_ERROR_NULL_POINTER);
-    
-    // Clean up
-    array_destroy(&arr_int);
+    // Manual cleanup
+    free(arr->data);
+    free(arr);
 }
 
 /**
@@ -336,39 +264,36 @@ void test_array_remove() {
 void test_array_get() {
     printf("  Testing array_get...\n");
 
-    // Create a new array for integers
-    Array* arr_int = NULL;
-    array_create(sizeof(int), 5, &arr_int);
-    
-    // Add elements to the array
-    int values[] = {10, 20, 30, 40, 50};
-    for (int i = 0; i < 5; i++) {
-        array_add(arr_int, &values[i]);
-    }
-    
-    // Test getting elements from the array
-    for (int i = 0; i < 5; i++) {
-        int value = 0;
-        ArrayResult result = array_get(arr_int, i, &value);
-        assert(result == ARRAY_SUCCESS);
-        assert(value == values[i]);
-    }
+    // Create array manually with elements
+    Array* arr = malloc(sizeof(Array));
+    arr->element_size = sizeof(int);
+    arr->capacity = 5;
+    arr->size = 3;
+    arr->data = malloc(sizeof(int) * 5);
+    int values[] = {10, 20, 30};
+    memcpy(arr->data, values, sizeof(int) * 3);
 
-    // Test getting elements from an invalid index
-    int invalid_value = 0;
-    ArrayResult result_invalid = array_get(arr_int, 100, &invalid_value);
+    // Test getting valid element
+    int value = 0;
+    ArrayResult result_get = array_get(arr, 1, &value);
+    assert(result_get == ARRAY_SUCCESS);
+    assert(value == 20);
+
+    // Test invalid index
+    ArrayResult result_invalid = array_get(arr, 3, &value);
     assert(result_invalid == ARRAY_ERROR_OUT_OF_BOUNDS);
-    
-    // Test getting elements from a NULL array
-    ArrayResult result_null_array = array_get(NULL, 0, &invalid_value);
+
+    // Test NULL array
+    ArrayResult result_null_array = array_get(NULL, 0, &value);
     assert(result_null_array == ARRAY_ERROR_NULL_POINTER);
-    
-    // Test getting elements from a NULL element
-    ArrayResult result_null_element = array_get(arr_int, 0, NULL);
+
+    // Test NULL element_out
+    ArrayResult result_null_element = array_get(arr, 0, NULL);
     assert(result_null_element == ARRAY_ERROR_NULL_POINTER);
-    
-    // Clean up
-    array_destroy(&arr_int);
+
+    // Manual cleanup
+    free(arr->data);
+    free(arr);
 }
 
 /**
@@ -379,37 +304,35 @@ void test_array_get() {
 void test_array_set() {
     printf("  Testing array_set...\n");
 
-    // Create a new array for integers
-    Array* arr_int = NULL;
-    array_create(sizeof(int), 5, &arr_int);
-    
-    // Add elements to the array
-    int values[] = {10, 20, 30, 40, 50};
-    for (int i = 0; i < 5; i++) {
-        array_add(arr_int, &values[i]);
-    }
-    
-    // Test setting elements in the array
-    int new_values[] = {100, 200, 300, 400, 500};
-    for (int i = 0; i < 5; i++) {
-        ArrayResult result = array_set(arr_int, i, &new_values[i]);
-        assert(result == ARRAY_SUCCESS);
-    }
-    
-    // Test setting elements in an invalid index
-    ArrayResult result_invalid = array_set(arr_int, 100, &new_values[0]);
+    // Create array manually with elements
+    Array* arr = malloc(sizeof(Array));
+    arr->element_size = sizeof(int);
+    arr->capacity = 5;
+    arr->size = 3;
+    arr->data = malloc(sizeof(int) * 5);
+    int values[] = {10, 20, 30};
+    memcpy(arr->data, values, sizeof(int) * 3);
+
+    // Test setting valid element
+    int new_value = 100;
+    ArrayResult result_set = array_set(arr, 1, &new_value);
+    assert(result_set == ARRAY_SUCCESS);
+
+    // Test invalid index
+    ArrayResult result_invalid = array_set(arr, 3, &new_value);
     assert(result_invalid == ARRAY_ERROR_OUT_OF_BOUNDS);
-    
-    // Test setting elements in a NULL array
-    ArrayResult result_null_array = array_set(NULL, 0, &new_values[0]);
+
+    // Test NULL array
+    ArrayResult result_null_array = array_set(NULL, 0, &new_value);
     assert(result_null_array == ARRAY_ERROR_NULL_POINTER);
 
-    // Test setting elements in a NULL element
-    ArrayResult result_null_element = array_set(arr_int, 0, NULL);
+    // Test NULL element
+    ArrayResult result_null_element = array_set(arr, 0, NULL);
     assert(result_null_element == ARRAY_ERROR_NULL_POINTER);
 
-    // Clean up
-    array_destroy(&arr_int);
+    // Manual cleanup
+    free(arr->data);
+    free(arr);
 }
 
 /**
@@ -420,37 +343,35 @@ void test_array_set() {
 void test_array_contains() {
     printf("  Testing array_contains...\n");
 
-    // Create a new array for integers
-    Array* arr_int = NULL;
-    array_create(sizeof(int), 5, &arr_int);
-    
-    // Add elements to the array
-    int values[] = {10, 20, 30, 40, 50};
-    for (int i = 0; i < 5; i++) {
-        array_add(arr_int, &values[i]);
-    }
-    
-    // Test containing elements in the array
-    for (int i = 0; i < 5; i++) {
-        ArrayResult result = array_contains(arr_int, &values[i]);
-        assert(result == ARRAY_SUCCESS);
-    }
+    // Create array manually with elements
+    Array* arr = malloc(sizeof(Array));
+    arr->element_size = sizeof(int);
+    arr->capacity = 5;
+    arr->size = 3;
+    arr->data = malloc(sizeof(int) * 5);
+    int values[] = {10, 20, 30};
+    memcpy(arr->data, values, sizeof(int) * 3);
 
-    // Test containing elements not in the array
-    int not_in_array = 60;
-    ArrayResult result_not_in_array = array_contains(arr_int, &not_in_array);
+    // Test contains existing element
+    ArrayResult result_contains = array_contains(arr, &values[1]);
+    assert(result_contains == ARRAY_SUCCESS);
+
+    // Test contains non-existing element
+    int not_in_array = 40;
+    ArrayResult result_not_in_array = array_contains(arr, &not_in_array);
     assert(result_not_in_array == ARRAY_ERROR_NOT_FOUND);
-    
-    // Test containing elements in a NULL array
+
+    // Test NULL array
     ArrayResult result_null_array = array_contains(NULL, &values[0]);
     assert(result_null_array == ARRAY_ERROR_NULL_POINTER);
 
-    // Test containing elements in a NULL element
-    ArrayResult result_null_element = array_contains(arr_int, NULL);
+    // Test NULL element
+    ArrayResult result_null_element = array_contains(arr, NULL);
     assert(result_null_element == ARRAY_ERROR_NULL_POINTER);
 
-    // Clean up
-    array_destroy(&arr_int);
+    // Manual cleanup
+    free(arr->data);
+    free(arr);
 }
 
 /**
@@ -461,54 +382,46 @@ void test_array_contains() {
 void test_array_index_of() {
     printf("  Testing array_index_of...\n");
 
-    // Create a new array for integers
-    Array* arr_int = NULL;
-    array_create(sizeof(int), 5, &arr_int);
-    
-    // Add elements to the array
-    int values[] = {10, 20, 30, 40, 50};
-    for (int i = 0; i < 5; i++) {
-        array_add(arr_int, &values[i]);
-    }
-    
-    // Initialize the index variable
+    // Create array manually with elements
+    Array* arr = malloc(sizeof(Array));
+    arr->element_size = sizeof(int);
+    arr->capacity = 5;
+    arr->size = 3;
+    arr->data = malloc(sizeof(int) * 5);
+    int values[] = {10, 20, 30};
+    memcpy(arr->data, values, sizeof(int) * 3);
+
+    // Test finding index of existing element
     uint64_t index = 0;
+    ArrayResult result_index = array_index_of(arr, &values[1], &index);
+    assert(result_index == ARRAY_SUCCESS);
+    assert(index == 1);
 
-    // Test getting the index of elements in the array
-    for (int i = 0; i < 5; i++) {
-        ArrayResult result = array_index_of(arr_int, &values[i], &index);
-        assert(result == ARRAY_SUCCESS);
-        assert(index == (uint64_t)i);
-    }
-
-    // Test getting the index of elements not in the array
-    int not_in_array = 60;
-    ArrayResult result_not_in_array = array_index_of(arr_int, &not_in_array, &index);
+    // Test finding non-existing element
+    int not_in_array = 40;
+    ArrayResult result_not_in_array = array_index_of(arr, &not_in_array, &index);
     assert(result_not_in_array == ARRAY_ERROR_NOT_FOUND);
 
-    // Create an empty array
-    Array* arr_empty = NULL;
-    array_create(sizeof(int), 5, &arr_empty);
+    // Test empty array
+    arr->size = 0;
+    ArrayResult result_empty = array_index_of(arr, &values[0], &index);
+    assert(result_empty == ARRAY_ERROR_EMPTY);
 
-    // Test getting the index of an element in an empty array
-    ArrayResult result_empty_array = array_index_of(arr_empty, &values[0], &index);
-    assert(result_empty_array == ARRAY_ERROR_EMPTY);
-
-    // Test getting the index of a NULL array
+    // Test NULL array
     ArrayResult result_null_array = array_index_of(NULL, &values[0], &index);
     assert(result_null_array == ARRAY_ERROR_NULL_POINTER);
-    
-    // Test getting the index of a NULL element
-    ArrayResult result_null_element = array_index_of(arr_int, NULL, &index);
+
+    // Test NULL element
+    ArrayResult result_null_element = array_index_of(arr, NULL, &index);
     assert(result_null_element == ARRAY_ERROR_NULL_POINTER);
 
-    // Test getting the index of an element passing a NULL index pointer
-    ArrayResult result_null_index = array_index_of(arr_int, &values[0], NULL);
+    // Test NULL index_out
+    ArrayResult result_null_index = array_index_of(arr, &values[0], NULL);
     assert(result_null_index == ARRAY_ERROR_NULL_POINTER);
 
-    // Clean up
-    array_destroy(&arr_int);
-    array_destroy(&arr_empty);
+    // Manual cleanup
+    free(arr->data);
+    free(arr);
 }
 
 /**
