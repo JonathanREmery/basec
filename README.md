@@ -8,11 +8,12 @@
 - `string_copy`     - Copy a String
 - `string_concat`   - Concatenate two Strings
 - `string_contains` - Check if a String contains another String
+- `string_index_of` - Get the index of a substring in a String
 - `string_destroy`  - Destroy a String
 
 ## Roadmap
 
-- [ ] String
+- [x] String
   - [x] Create
   - [x] Set
   - [x] Destroy
@@ -20,7 +21,7 @@
   - [x] Copy
   - [x] Concatenate
   - [x] Contains
-  - [ ] IndexOf
+  - [x] IndexOf
 - [ ] Array
 - [ ] DynamicArray
 - [ ] Queue

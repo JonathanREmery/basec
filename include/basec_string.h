@@ -18,7 +18,8 @@ typedef enum {
     STRING_ERROR_NULL_POINTER, //< The string is NULL
     STRING_ERROR_MALLOC,       //< The memory allocation failed
     STRING_ERROR_REALLOC,      //< The memory reallocation failed
-    STRING_ERROR_EMPTY         //< The string is empty
+    STRING_ERROR_EMPTY,        //< The string is empty
+    STRING_ERROR_NOT_FOUND     //< The substring is not found
 } StringResult;
 
 /**
@@ -92,6 +93,16 @@ StringResult string_concat(String* str1, String* str2, String** str_out);
  * @return A StringResult
  */
 StringResult string_contains(String* str, String* substr, bool* contains_out);
+
+/**
+ * @brief Get the index of a substring in a string
+ * 
+ * @param str The string to check
+ * @param substr The substring to check for
+ * @param index_out The output index
+ * @return A StringResult
+ */
+StringResult string_index_of(String* str, String* substr, size_t* index_out);
 
 /**
  * @brief Destroy a string

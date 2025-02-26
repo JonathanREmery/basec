@@ -22,6 +22,8 @@ const char* string_result_to_string(StringResult result) {
             return "STRING_ERROR_REALLOC";
         case STRING_ERROR_EMPTY:
             return "STRING_ERROR_EMPTY";
+        case STRING_ERROR_NOT_FOUND:
+            return "STRING_ERROR_NOT_FOUND";
         default:
             return "UNKNOWN_STRING_RESULT";
     }
@@ -232,11 +234,37 @@ StringResult string_contains(String* str, String* substr, bool* contains_out) {
 }
 
 /**
- * @brief Destroy a string
+ * @brief Get the index of a substring in a string
  * 
- * @param str The string to destroy
+ * @param str The string to check
+ * @param substr The substring to check for
+ * @param index_out The output index
  * @return A StringResult
  */
+StringResult string_index_of(String* str, String* substr, size_t* index_out) {
+    // Check for NULL pointers
+    if (str == NULL || substr == NULL || index_out == NULL) {
+        return STRING_ERROR_NULL_POINTER;
+    }
+
+    // Check if the substring is empty
+    if (substr->length == 0) {
+        return STRING_ERROR_EMPTY;
+    }
+
+    // Check if the substring is contained in the string
+    char* result = strstr(str->data, substr->data);
+    if (result == NULL) {
+        return STRING_ERROR_NOT_FOUND;
+    }
+
+    // Set the output index
+    *index_out = result - str->data;
+
+    // Return the success result
+    return STRING_SUCCESS;
+}
+
 StringResult string_destroy(String* str) {
     // Check if the string is NULL
     if (str == NULL) {

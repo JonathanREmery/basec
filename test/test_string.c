@@ -165,6 +165,41 @@ void test_string_contains() {
 }
 
 /**
+ * @brief Test the string_index_of function
+ * 
+ * @return void
+ */
+void test_string_index_of() {
+    // Create three strings
+    String* str1 = NULL;
+    String* str2 = NULL;
+    String* str3 = NULL;
+    StringResult result_create1 = string_create("Hello, World!", &str1);
+    StringResult result_create2 = string_create("World!", &str2);
+    StringResult result_create3 = string_create("Goodbye", &str3);
+
+    // Check if the strings were created successfully
+    assert(result_create1 == STRING_SUCCESS);
+    assert(result_create2 == STRING_SUCCESS);
+    assert(result_create3 == STRING_SUCCESS);
+
+    // Check if the substring is contained in the string
+    size_t index = 0;
+    StringResult result_index_of = string_index_of(str1, str2, &index);
+    assert(result_index_of == STRING_SUCCESS);
+    assert(index == 7);
+
+    // Check if the substring is not contained in the string
+    StringResult result_index_of_not_found = string_index_of(str1, str3, &index);
+    assert(result_index_of_not_found == STRING_ERROR_NOT_FOUND);
+
+    // Destroy the strings
+    string_destroy(str1);
+    string_destroy(str2);
+    string_destroy(str3);
+}
+
+/**
  * @brief Test the string_destroy function
  * 
  * @return void
@@ -195,6 +230,7 @@ int main() {
     test_string_copy();
     test_string_concat();
     test_string_contains();
+    test_string_index_of();
     test_string_destroy();
 
     printf("[basec_string] All tests passed!\n");
