@@ -183,6 +183,18 @@ StringResult string_concat(String* str1, String* str2, String** str_out) {
         return STRING_ERROR_NULL_POINTER;
     }
 
+    // Check if str1 is empty
+    if (str1->length == 0) {
+        // Copy str2 to str_out
+        return string_copy(str2, str_out);
+    }
+
+    // Check if str2 is empty
+    if (str2->length == 0) {
+        // Copy str1 to str_out
+        return string_copy(str1, str_out);
+    }
+
     // Allocate memory for the concatenated string structure
     String* concat_str = (String*)malloc(sizeof(String));
     if (concat_str == NULL) {

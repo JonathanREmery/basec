@@ -411,6 +411,105 @@ void test_array_set() {
 }
 
 /**
+ * @brief Test the array_contains function
+ * 
+ * @return void
+ */
+void test_array_contains() {
+    printf("  Testing array_contains...\n");
+
+    // Create a new array for integers
+    Array* arr_int = NULL;
+    array_create(5, sizeof(int), &arr_int);
+    
+    // Add elements to the array
+    int values[] = {10, 20, 30, 40, 50};
+    for (int i = 0; i < 5; i++) {
+        array_add(arr_int, &values[i]);
+    }
+    
+    // Test containing elements in the array
+    for (int i = 0; i < 5; i++) {
+        ArrayResult result = array_contains(arr_int, &values[i]);
+        assert(result == ARRAY_SUCCESS);
+    }
+
+    // Test containing elements not in the array
+    int not_in_array = 60;
+    ArrayResult result_not_in_array = array_contains(arr_int, &not_in_array);
+    assert(result_not_in_array == ARRAY_ERROR_NOT_FOUND);
+    
+    // Test containing elements in a NULL array
+    ArrayResult result_null_array = array_contains(NULL, &values[0]);
+    assert(result_null_array == ARRAY_ERROR_NULL_POINTER);
+
+    // Test containing elements in a NULL element
+    ArrayResult result_null_element = array_contains(arr_int, NULL);
+    assert(result_null_element == ARRAY_ERROR_NULL_POINTER);
+
+    // Clean up
+    array_destroy(&arr_int);
+}
+
+/**
+ * @brief Test the array_index_of function
+ * 
+ * @return void
+ */
+void test_array_index_of() {
+    printf("  Testing array_index_of...\n");
+
+    // Create a new array for integers
+    Array* arr_int = NULL;
+    array_create(5, sizeof(int), &arr_int);
+    
+    // Add elements to the array
+    int values[] = {10, 20, 30, 40, 50};
+    for (int i = 0; i < 5; i++) {
+        array_add(arr_int, &values[i]);
+    }
+    
+    // Initialize the index variable
+    uint64_t index = 0;
+
+    // Test getting the index of elements in the array
+    for (int i = 0; i < 5; i++) {
+        ArrayResult result = array_index_of(arr_int, &values[i], &index);
+        assert(result == ARRAY_SUCCESS);
+        assert(index == (uint64_t)i);
+    }
+
+    // Test getting the index of elements not in the array
+    int not_in_array = 60;
+    ArrayResult result_not_in_array = array_index_of(arr_int, &not_in_array, &index);
+    assert(result_not_in_array == ARRAY_ERROR_NOT_FOUND);
+
+    // Create an empty array
+    Array* arr_empty = NULL;
+    array_create(5, sizeof(int), &arr_empty);
+
+    // Test getting the index of an element in an empty array
+    ArrayResult result_empty_array = array_index_of(arr_empty, &values[0], &index);
+    assert(result_empty_array == ARRAY_ERROR_EMPTY);
+
+    // Test getting the index of a NULL array
+    ArrayResult result_null_array = array_index_of(NULL, &values[0], &index);
+    assert(result_null_array == ARRAY_ERROR_NULL_POINTER);
+    
+    // Test getting the index of a NULL element
+    ArrayResult result_null_element = array_index_of(arr_int, NULL, &index);
+    assert(result_null_element == ARRAY_ERROR_NULL_POINTER);
+
+    // Test getting the index of an element passing a NULL index pointer
+    ArrayResult result_null_index = array_index_of(arr_int, &values[0], NULL);
+    assert(result_null_index == ARRAY_ERROR_NULL_POINTER);
+
+    // Clean up
+    array_destroy(&arr_int);
+    array_destroy(&arr_empty);
+}
+
+/**
  * @brief Test the array implementation
  * 
  * @return int
@@ -425,6 +524,9 @@ int main() {
     test_array_add();
     test_array_remove();
     test_array_get();
+    test_array_set();
+    test_array_contains();
+    test_array_index_of();
     test_array_destroy();
 
     printf("[basec_array] All tests passed!\n");

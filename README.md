@@ -1,4 +1,4 @@
-# basec is a simple C Base Layer
+# basec is a C Base Layer, with a focus on memory safety and efficiency.
 
 ## Project Structure
 ```
@@ -8,9 +8,11 @@ basec/
 ├── include/           # Header files
 │   └── ds/            # Data structures headers
 │       └── string/    # String headers
+│       └── array/     # Array headers
 ├── src/               # Source code
 │   └── ds/            # Data structures implementation
 │       └── string/    # String implementation
+│       └── array/     # Array implementation
 ├── test/              # Test files
 └── Makefile           # Build system
 ```
@@ -25,6 +27,19 @@ basec/
 - `string_contains` - Check if a String contains another String
 - `string_index_of` - Get the index of a substring in a String
 - `string_destroy`  - Destroy a String
+
+## Array
+
+- `array_create`    - Create a new Array
+- `array_destroy`   - Destroy an Array
+- `array_size`      - Get the size of an Array
+- `array_capacity`  - Get the capacity of an Array
+- `array_add`       - Add an element to an Array
+- `array_remove`    - Remove an element from an Array
+- `array_get`       - Get an element from an Array
+- `array_set`       - Set an element in an Array
+- `array_contains`  - Check if an Array contains an element
+- `array_index_of`  - Get the index of an element in an Array
 
 ## Building
 
@@ -63,8 +78,9 @@ make run
   - [x] Add
   - [x] Remove
   - [x] Get
-  - [ ] Set
-  - [ ] Contains
+  - [x] Set
+  - [x] Contains
+  - [x] IndexOf
 - [ ] DynamicArray
 - [ ] Queue
 - [ ] Stack

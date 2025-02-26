@@ -29,6 +29,10 @@ const char* array_result_to_string(ArrayResult result) {
             return "ARRAY_ERROR_OUT_OF_BOUNDS";
         case ARRAY_ERROR_MEMMOVE:
             return "ARRAY_ERROR_MEMMOVE";
+        case ARRAY_ERROR_EMPTY:
+            return "ARRAY_ERROR_EMPTY";
+        case ARRAY_ERROR_NOT_FOUND:
+            return "ARRAY_ERROR_NOT_FOUND";
         default:
             return "UNKNOWN_ARRAY_RESULT";
     }
@@ -156,7 +160,7 @@ ArrayResult array_add(Array* array, void* element) {
  * @param index The index of the element to remove
  * @return The result of the operation
  */
-ArrayResult array_remove(Array* array, size_t index) {
+ArrayResult array_remove(Array* array, uint64_t index) {
     // Check for NULL pointers
     if (array == NULL) {
         return ARRAY_ERROR_NULL_POINTER;
@@ -200,7 +204,7 @@ ArrayResult array_remove(Array* array, size_t index) {
  * @param element_out The output element
  * @return The result of the operation
  */
-ArrayResult array_get(Array* array, size_t index, void* element_out) {
+ArrayResult array_get(Array* array, uint64_t index, void* element_out) {
     // Check for NULL pointers
     if (array == NULL || element_out == NULL) {
         return ARRAY_ERROR_NULL_POINTER;
@@ -226,7 +230,7 @@ ArrayResult array_get(Array* array, size_t index, void* element_out) {
  * @param element The element to set
  * @return The result of the operation
  */
-ArrayResult array_set(Array* array, size_t index, void* element) {
+ArrayResult array_set(Array* array, uint64_t index, void* element) {
     // Check for NULL pointers
     if (array == NULL || element == NULL) {
         return ARRAY_ERROR_NULL_POINTER;
@@ -243,6 +247,61 @@ ArrayResult array_set(Array* array, size_t index, void* element) {
     // Return the result
     return ARRAY_SUCCESS;
 }   
+
+/**
+ * @brief Check if the array contains an element
+ * 
+ * @param array The array to check
+ * @param element The element to check for
+ * @return The result of the operation
+ */
+ArrayResult array_contains(Array* array, void* element) {
+    // Check for NULL pointers
+    if (array == NULL || element == NULL) {
+        return ARRAY_ERROR_NULL_POINTER;
+    }
+
+    // Check if the element is in the array
+    for (size_t i = 0; i < array->size; i++) {
+        if (memcmp(array->data + i * array->element_size, element, array->element_size) == 0) {
+            return ARRAY_SUCCESS;
+        }
+    }
+
+    // Return the result
+    return ARRAY_ERROR_NOT_FOUND;
+}
+
+/**
+ * @brief Get the index of an element in the array
+ * 
+ * @param array The array to get the index of
+ * @param element The element to get the index of
+ * @param index_out The output index
+ * @return The result of the operation
+ */
+ArrayResult array_index_of(Array* array, void* element, uint64_t* index_out) {
+    // Check for NULL pointers
+    if (array == NULL || element == NULL || index_out == NULL) {
+        return ARRAY_ERROR_NULL_POINTER;
+    }
+
+    // Check if the array is empty
+    if (array->size == 0) {
+        return ARRAY_ERROR_EMPTY;
+    }
+
+    // Check if the element is in the array
+    for (uint64_t i = 0; i < array->size; i++) {
+        if (memcmp(array->data + i * array->element_size, element, array->element_size) == 0) {
+            *index_out = i;
+            return ARRAY_SUCCESS;
+        }
+    }
+
+    // Return the result
+    return ARRAY_ERROR_NOT_FOUND;
+}
 
 /**
  * @brief Destroy an array

@@ -8,6 +8,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 /**
  * @brief Array structure
@@ -30,7 +31,9 @@ typedef enum {
     ARRAY_ERROR_MALLOC,                //< The memory allocation failed
     ARRAY_ERROR_FULL,                  //< The array is full
     ARRAY_ERROR_OUT_OF_BOUNDS,         //< The index is out of bounds
-    ARRAY_ERROR_MEMMOVE                //< The memory move failed
+    ARRAY_ERROR_MEMMOVE,               //< The memory move failed
+    ARRAY_ERROR_EMPTY,                 //< The array is empty
+    ARRAY_ERROR_NOT_FOUND              //< The element was not found in the array
 } ArrayResult;
 
 /**
@@ -85,7 +88,7 @@ ArrayResult array_add(Array* array, void* element);
  * @param index The index of the element to remove
  * @return The result of the operation
  */
-ArrayResult array_remove(Array* array, size_t index);
+ArrayResult array_remove(Array* array, uint64_t index);
 
 /**
  * @brief Get an element from the array
@@ -95,7 +98,7 @@ ArrayResult array_remove(Array* array, size_t index);
  * @param element_out The output element
  * @return The result of the operation
  */
-ArrayResult array_get(Array* array, size_t index, void* element_out);
+ArrayResult array_get(Array* array, uint64_t index, void* element_out);
 
 /**
  * @brief Set an element in the array
@@ -104,7 +107,26 @@ ArrayResult array_get(Array* array, size_t index, void* element_out);
  * @param index The index of the element to set
  * @param element The element to set
  */
-ArrayResult array_set(Array* array, size_t index, void* element);
+ArrayResult array_set(Array* array, uint64_t index, void* element);
+
+/**
+ * @brief Check if the array contains an element
+ * 
+ * @param array The array to check
+ * @param element The element to check for
+ * @return The result of the operation
+ */
+ArrayResult array_contains(Array* array, void* element);
+
+/**
+ * @brief Get the index of an element in the array
+ * 
+ * @param array The array to get the index of
+ * @param element The element to get the index of
+ * @param index_out The output index
+ * @return The result of the operation
+ */
+ArrayResult array_index_of(Array* array, void* element, uint64_t* index_out);
 
 /**
  * @brief Destroy an array
