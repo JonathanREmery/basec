@@ -28,7 +28,7 @@ void test_string_create() {
     assert(str->length == 13);
 
     // Destroy the string
-    string_destroy(str);
+    string_destroy(&str);
 }
 
 /**
@@ -55,7 +55,7 @@ void test_string_set() {
     assert(str->length == 15);
 
     // Destroy the string
-    string_destroy(str);
+    string_destroy(&str);
 }
 
 /**
@@ -76,7 +76,7 @@ void test_string_length() {
     assert(length == 13);
 
     // Destroy the string
-    string_destroy(str);
+    string_destroy(&str);
 }
 
 /**
@@ -102,10 +102,10 @@ void test_string_copy() {
     assert(strcmp(str_copy->data, str->data) == 0);
 
     // Destroy the original string
-    string_destroy(str);
+    string_destroy(&str);
 
     // Destroy the copy
-    string_destroy(str_copy);
+    string_destroy(&str_copy);
 }
 
 /**
@@ -134,9 +134,9 @@ void test_string_concat() {
     assert(str_concat->length == 13);
 
     // Destroy the strings
-    string_destroy(str1);
-    string_destroy(str2);
-    string_destroy(str_concat);
+    string_destroy(&str1);
+    string_destroy(&str2);
+    string_destroy(&str_concat);
 }
 
 /**
@@ -160,8 +160,8 @@ void test_string_contains() {
     assert(contains == true);
 
     // Destroy the strings
-    string_destroy(str1);
-    string_destroy(str2);
+    string_destroy(&str1);
+    string_destroy(&str2);
 }
 
 /**
@@ -194,9 +194,9 @@ void test_string_index_of() {
     assert(result_index_of_not_found == STRING_ERROR_NOT_FOUND);
 
     // Destroy the strings
-    string_destroy(str1);
-    string_destroy(str2);
-    string_destroy(str3);
+    string_destroy(&str1);
+    string_destroy(&str2);
+    string_destroy(&str3);
 }
 
 /**
@@ -210,9 +210,13 @@ void test_string_destroy() {
     StringResult result_create = string_create("Hello, World!", &str);
 
     // Destroy the string
-    StringResult result_destroy = string_destroy(str);
+    StringResult result_destroy = string_destroy(&str);
     assert(result_create == STRING_SUCCESS);
     assert(result_destroy == STRING_SUCCESS);
+
+    // Try to destroy the string again
+    StringResult result_destroy_again = string_destroy(&str);
+    assert(result_destroy_again == STRING_ERROR_NULL_POINTER);
 }
 
 /**

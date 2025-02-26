@@ -52,6 +52,8 @@ StringResult string_create(const char* str, String** str_out) {
     string->data = (char*)malloc(strlen(str) + 1);
     if (string->data == NULL) {
         free(string);
+        string = NULL;
+
         return STRING_ERROR_MALLOC;
     }
 
@@ -151,6 +153,8 @@ StringResult string_copy(String* str, String** str_out) {
     (*str_out)->data = (char*)malloc(str->length + 1);
     if ((*str_out)->data == NULL) {
         free(*str_out);
+        *str_out = NULL;
+
         return STRING_ERROR_MALLOC;
     }
 
@@ -189,6 +193,8 @@ StringResult string_concat(String* str1, String* str2, String** str_out) {
     concat_str->data = (char*)malloc(str1->length + str2->length + 1);
     if (concat_str->data == NULL) {
         free(concat_str);
+        concat_str = NULL;
+
         return STRING_ERROR_MALLOC;
     }
 
@@ -265,15 +271,25 @@ StringResult string_index_of(String* str, String* substr, size_t* index_out) {
     return STRING_SUCCESS;
 }
 
-StringResult string_destroy(String* str) {
+/**
+ * @brief Destroy a string
+ * 
+ * @param str_ptr A pointer to the string to destroy
+ * @return A StringResult
+ */
+StringResult string_destroy(String** str_ptr) {
     // Check if the string is NULL
-    if (str == NULL) {
+    if (str_ptr == NULL || *str_ptr == NULL) {
         return STRING_ERROR_NULL_POINTER;
     }
 
-    // Free the string data and structure
-    free(str->data);
-    free(str);
+    // Free the string data
+    free((*str_ptr)->data);
+    (*str_ptr)->data = NULL;
+
+    // Free the string structure
+    free(*str_ptr);
+    *str_ptr = NULL;
 
     // Return the success result
     return STRING_SUCCESS;

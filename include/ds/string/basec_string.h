@@ -15,7 +15,7 @@
  */
 typedef enum {
     STRING_SUCCESS,            //< The operation was successful
-    STRING_ERROR_NULL_POINTER, //< The string is NULL
+    STRING_ERROR_NULL_POINTER, //< A NULL pointer was passed to the function
     STRING_ERROR_MALLOC,       //< The memory allocation failed
     STRING_ERROR_REALLOC,      //< The memory reallocation failed
     STRING_ERROR_EMPTY,        //< The string is empty
@@ -107,9 +107,9 @@ StringResult string_index_of(String* str, String* substr, size_t* index_out);
 /**
  * @brief Destroy a string
  * 
- * @param str The string to destroy
+ * @param str_ptr A pointer to the string to destroy
  * @return A StringResult
  */
-StringResult string_destroy(String* str);
+StringResult string_destroy(String** str_ptr);
 
 #endif

@@ -48,14 +48,23 @@ make run
 
 - [x] String
   - [x] Create
-  - [x] Set
   - [x] Destroy
+  - [x] Set
   - [x] Length
   - [x] Copy
   - [x] Concatenate
   - [x] Contains
   - [x] IndexOf
 - [ ] Array
+  - [ ] Create
+  - [ ] Destroy
+  - [ ] Size
+  - [ ] Capacity
+  - [ ] Add
+  - [ ] Remove
+  - [ ] Get
+  - [ ] Set
+  - [ ] Contains
 - [ ] DynamicArray
 - [ ] Queue
 - [ ] Stack
