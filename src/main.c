@@ -20,7 +20,7 @@ int main() {
     }
 
     // Print the string
-    printf("[INFO] String: %s\n", str->data);
+    printf("[INFO] String Data: %s\n", str->data);
 
     // Get the length of the string
     size_t length = 0;
@@ -33,7 +33,7 @@ int main() {
     }
 
     // Print the length of the string
-    printf("[INFO] Length: %zu\n", length);
+    printf("[INFO] String Length: %zu\n", length);
 
     // Destroy the string
     StringResult result_string_destroy = string_destroy(&str);
@@ -46,13 +46,49 @@ int main() {
 
     // Create a new array
     Array* array = NULL;
-    ArrayResult result_array_create = array_create(10, &array);
+    ArrayResult result_array_create = array_create(10, sizeof(int), &array);
 
     // Check if the array was created successfully
     if (result_array_create != ARRAY_SUCCESS) {
         printf("[ERROR] %s\n", array_result_to_string(result_array_create));
         return 1;
     }
+
+    // Add an element to the array
+    int element = 10;
+    ArrayResult result_array_add = array_add(array, &element);
+
+    // Check if the element was added successfully
+    if (result_array_add != ARRAY_SUCCESS) {
+        printf("[ERROR] %s\n", array_result_to_string(result_array_add));
+        return 1;
+    }
+
+    // Get the size of the array
+    size_t size = 0;
+    ArrayResult result_array_size = array_size(array, &size);
+
+    // Check if the size was retrieved successfully
+    if (result_array_size != ARRAY_SUCCESS) {
+        printf("[ERROR] %s\n", array_result_to_string(result_array_size));
+        return 1;
+    }
+
+    // Print the size of the array
+    printf("[INFO] Array Size: %zu\n", size);
+
+    // Get the capacity of the array
+    size_t capacity = 0;
+    ArrayResult result_array_capacity = array_capacity(array, &capacity);
+
+    // Check if the capacity was retrieved successfully
+    if (result_array_capacity != ARRAY_SUCCESS) {
+        printf("[ERROR] %s\n", array_result_to_string(result_array_capacity));
+        return 1;
+    }
+
+    // Print the capacity of the array
+    printf("[INFO] Array Capacity: %zu\n", capacity);
 
     // Destroy the array
     ArrayResult result_array_destroy = array_destroy(&array);
@@ -62,5 +98,6 @@ int main() {
         printf("[ERROR] %s\n", array_result_to_string(result_array_destroy));
         return 1;
     }
+
     return 0;
 }

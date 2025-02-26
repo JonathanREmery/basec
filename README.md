@@ -55,12 +55,12 @@ make run
   - [x] Concatenate
   - [x] Contains
   - [x] IndexOf
-- [ ] Array
-  - [ ] Create
-  - [ ] Destroy
-  - [ ] Size
-  - [ ] Capacity
-  - [ ] Add
+- [x] Array
+  - [x] Create
+  - [x] Destroy
+  - [x] Size
+  - [x] Capacity
+  - [x] Add
   - [ ] Remove
   - [ ] Get
   - [ ] Set

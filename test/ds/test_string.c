@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "ds/string/basec_string.h"
 
@@ -15,6 +16,8 @@
  * @return void
  */
 void test_string_create() {
+    printf("  Testing string_create...\n");
+    
     // Create a new string
     String* str = NULL;
     StringResult result_create = string_create("Hello, World!", &str);
@@ -27,8 +30,38 @@ void test_string_create() {
     assert(strcmp(str->data, "Hello, World!") == 0);
     assert(str->length == 13);
 
-    // Destroy the string
+    // Test with empty string
+    String* empty_str = NULL;
+    StringResult result_create_empty = string_create("", &empty_str);
+    assert(result_create_empty == STRING_SUCCESS);
+    assert(empty_str != NULL);
+    assert(empty_str->length == 0);
+    assert(strcmp(empty_str->data, "") == 0);
+
+    // Test with NULL parameters
+    String* null_str = NULL;
+    StringResult result_create_null_str = string_create(NULL, &null_str);
+    assert(result_create_null_str == STRING_ERROR_NULL_POINTER);
+    assert(null_str == NULL);
+
+    StringResult result_create_null_out = string_create("Hello", NULL);
+    assert(result_create_null_out == STRING_ERROR_NULL_POINTER);
+
+    // Test with very long string
+    char long_str_data[1024];
+    memset(long_str_data, 'a', 1023);
+    long_str_data[1023] = '\0';
+    
+    String* long_str = NULL;
+    StringResult result_create_long = string_create(long_str_data, &long_str);
+    assert(result_create_long == STRING_SUCCESS);
+    assert(long_str != NULL);
+    assert(long_str->length == 1023);
+
+    // Destroy the strings
     string_destroy(&str);
+    string_destroy(&empty_str);
+    string_destroy(&long_str);
 }
 
 /**
@@ -37,7 +70,9 @@ void test_string_create() {
  * @return void
  */
 void test_string_set() {
-    // Create a empty new string
+    printf("  Testing string_set...\n");
+    
+    // Create a new string
     String* str = NULL;
     StringResult result_create = string_create("", &str);
 
@@ -54,6 +89,24 @@ void test_string_set() {
     assert(strcmp(str->data, "Goodbye, World!") == 0);
     assert(str->length == 15);
 
+    // Test setting to the same value
+    StringResult result_set_same = string_set(str, "Goodbye, World!");
+    assert(result_set_same == STRING_SUCCESS);
+    assert(strcmp(str->data, "Goodbye, World!") == 0);
+    
+    // Test setting to empty string
+    StringResult result_set_empty = string_set(str, "");
+    assert(result_set_empty == STRING_SUCCESS);
+    assert(strcmp(str->data, "") == 0);
+    assert(str->length == 0);
+    
+    // Test with NULL parameters
+    StringResult result_null_str = string_set(NULL, "Hello");
+    assert(result_null_str == STRING_ERROR_NULL_POINTER);
+    
+    StringResult result_null_value = string_set(str, NULL);
+    assert(result_null_value == STRING_ERROR_NULL_POINTER);
+
     // Destroy the string
     string_destroy(&str);
 }
@@ -64,19 +117,39 @@ void test_string_set() {
  * @return void
  */
 void test_string_length() {
-    // Create a new string
-    String* str = NULL;
-    StringResult result_create = string_create("Hello, World!", &str);
+    printf("  Testing string_length...\n");
+    
+    // Create strings of different lengths
+    String* str_normal = NULL;
+    String* str_empty = NULL;
+    StringResult result_create_normal = string_create("Hello, World!", &str_normal);
+    StringResult result_create_empty = string_create("", &str_empty);
 
-    // Check the length of the string
-    size_t length = 0;
-    StringResult result_length = string_length(str, &length);
-    assert(result_create == STRING_SUCCESS);
-    assert(result_length == STRING_SUCCESS);
-    assert(length == 13);
+    // Check the length of the normal string
+    size_t length_normal = 0;
+    StringResult result_length_normal = string_length(str_normal, &length_normal);
+    assert(result_create_normal == STRING_SUCCESS);
+    assert(result_length_normal == STRING_SUCCESS);
+    assert(length_normal == 13);
 
-    // Destroy the string
-    string_destroy(&str);
+    // Check the length of the empty string
+    size_t length_empty = 0;
+    StringResult result_length_empty = string_length(str_empty, &length_empty);
+    assert(result_create_empty == STRING_SUCCESS);
+    assert(result_length_empty == STRING_SUCCESS);
+    assert(length_empty == 0);
+    
+    // Test with NULL parameters
+    size_t length_null = 0;
+    StringResult result_null_str = string_length(NULL, &length_null);
+    assert(result_null_str == STRING_ERROR_NULL_POINTER);
+    
+    StringResult result_null_out = string_length(str_normal, NULL);
+    assert(result_null_out == STRING_ERROR_NULL_POINTER);
+
+    // Destroy the strings
+    string_destroy(&str_normal);
+    string_destroy(&str_empty);
 }
 
 /**
@@ -85,27 +158,56 @@ void test_string_length() {
  * @return void
  */
 void test_string_copy() {
-    // Create a new string
-    String* str = NULL;
-    StringResult result_create = string_create("Hello, World!", &str);
+    printf("  Testing string_copy...\n");
+    
+    // Create strings to copy
+    String* str_normal = NULL;
+    String* str_empty = NULL;
+    StringResult result_create_normal = string_create("Hello, World!", &str_normal);
+    StringResult result_create_empty = string_create("", &str_empty);
 
-    // Copy the string
-    String* str_copy = NULL;
-    StringResult result_copy = string_copy(str, &str_copy);
+    // Check creation results
+    assert(result_create_normal == STRING_SUCCESS);
+    assert(result_create_empty == STRING_SUCCESS);
+
+    // Copy the normal string
+    String* str_normal_copy = NULL;
+    StringResult result_copy_normal = string_copy(str_normal, &str_normal_copy);
 
     // Check if the copy was created successfully
-    assert(result_create == STRING_SUCCESS);
-    assert(result_copy == STRING_SUCCESS);
-    assert(str_copy != NULL);
+    assert(result_copy_normal == STRING_SUCCESS);
+    assert(str_normal_copy != NULL);
 
     // Check if the copy is the same as the original
-    assert(strcmp(str_copy->data, str->data) == 0);
+    assert(strcmp(str_normal_copy->data, str_normal->data) == 0);
+    assert(str_normal_copy->length == str_normal->length);
+    
+    // Test that the strings are independent
+    string_set(str_normal, "Modified");
+    assert(strcmp(str_normal_copy->data, "Hello, World!") == 0);
 
-    // Destroy the original string
-    string_destroy(&str);
+    // Copy the empty string
+    String* str_empty_copy = NULL;
+    StringResult result_copy_empty = string_copy(str_empty, &str_empty_copy);
+    assert(result_copy_empty == STRING_SUCCESS);
+    assert(str_empty_copy != NULL);
+    assert(str_empty_copy->length == 0);
+    assert(strcmp(str_empty_copy->data, "") == 0);
+    
+    // Test with NULL parameters
+    String* str_null_copy = NULL;
+    StringResult result_null_str = string_copy(NULL, &str_null_copy);
+    assert(result_null_str == STRING_ERROR_NULL_POINTER);
+    assert(str_null_copy == NULL);
+    
+    StringResult result_null_out = string_copy(str_normal, NULL);
+    assert(result_null_out == STRING_ERROR_NULL_POINTER);
 
-    // Destroy the copy
-    string_destroy(&str_copy);
+    // Destroy all strings
+    string_destroy(&str_normal);
+    string_destroy(&str_normal_copy);
+    string_destroy(&str_empty);
+    string_destroy(&str_empty_copy);
 }
 
 /**
@@ -114,29 +216,58 @@ void test_string_copy() {
  * @return void
  */
 void test_string_concat() {
-    // Create two strings
+    printf("  Testing string_concat...\n");
+    
+    // Create strings to concatenate
     String* str1 = NULL;
     String* str2 = NULL;
+    String* str_empty = NULL;
     StringResult result_create1 = string_create("Hello, ", &str1);
     StringResult result_create2 = string_create("World!", &str2);
+    StringResult result_create_empty = string_create("", &str_empty);
 
-    // Concatenate the strings
+    // Check creation results
+    assert(result_create1 == STRING_SUCCESS);
+    assert(result_create2 == STRING_SUCCESS);
+    assert(result_create_empty == STRING_SUCCESS);
+
+    // Concatenate two non-empty strings
     String* str_concat = NULL;
     StringResult result_concat = string_concat(str1, str2, &str_concat);
 
     // Check if the concatenation was created successfully
-    assert(result_create1 == STRING_SUCCESS);
-    assert(result_create2 == STRING_SUCCESS);
     assert(result_concat == STRING_SUCCESS);
     assert(str_concat != NULL);
 
-    // Check if the concatenation is the correct length
+    // Check concatenation result
     assert(str_concat->length == 13);
+    assert(strcmp(str_concat->data, "Hello, World!") == 0);
+    
+    // Test concatenation with empty string
+    String* str_concat_empty = NULL;
+    StringResult result_concat_empty = string_concat(str1, str_empty, &str_concat_empty);
+    assert(result_concat_empty == STRING_SUCCESS);
+    assert(str_concat_empty != NULL);
+    assert(str_concat_empty->length == str1->length);
+    assert(strcmp(str_concat_empty->data, str1->data) == 0);
+    
+    // Test with NULL parameters
+    String* str_concat_null = NULL;
+    StringResult result_null_str1 = string_concat(NULL, str2, &str_concat_null);
+    assert(result_null_str1 == STRING_ERROR_NULL_POINTER);
+    
+    StringResult result_null_str2 = string_concat(str1, NULL, &str_concat_null);
+    assert(result_null_str2 == STRING_ERROR_NULL_POINTER);
+    
+    StringResult result_null_out = string_concat(str1, str2, NULL);
+    assert(result_null_out == STRING_ERROR_NULL_POINTER);
 
     // Destroy the strings
     string_destroy(&str1);
     string_destroy(&str2);
+    string_destroy(&str_empty);
     string_destroy(&str_concat);
+    string_destroy(&str_concat_empty);
 }
 
 /**
@@ -145,23 +276,52 @@ void test_string_concat() {
  * @return void
  */
 void test_string_contains() {
-    // Create two strings
-    String* str1 = NULL;
-    String* str2 = NULL;
-    StringResult result_create1 = string_create("Hello, World!", &str1);
-    StringResult result_create2 = string_create("World!", &str2);
+    printf("  Testing string_contains...\n");
     
-    // Check if the substring is contained in the string
+    // Create test strings
+    String* str_haystack = NULL;
+    String* str_needle = NULL;
+    String* str_missing = NULL;
+    String* str_empty = NULL;
+    
+    string_create("Hello, World!", &str_haystack);
+    string_create("World", &str_needle);
+    string_create("Goodbye", &str_missing);
+    string_create("", &str_empty);
+    
+    // Test substring is contained
     bool contains = false;
-    StringResult result_contains = string_contains(str1, str2, &contains);
-    assert(result_create1 == STRING_SUCCESS);
-    assert(result_create2 == STRING_SUCCESS);
+    StringResult result_contains = string_contains(str_haystack, str_needle, &contains);
     assert(result_contains == STRING_SUCCESS);
     assert(contains == true);
+    
+    // Test substring is not contained
+    bool contains_missing = true;
+    StringResult result_missing = string_contains(str_haystack, str_missing, &contains_missing);
+    assert(result_missing == STRING_SUCCESS);
+    assert(contains_missing == false);
+    
+    // Test with empty substring
+    bool contains_empty = false;
+    StringResult result_empty = string_contains(str_haystack, str_empty, &contains_empty);
+    assert(result_empty == STRING_ERROR_EMPTY);
+    
+    // Test with NULL parameters
+    bool contains_null = false;
+    StringResult result_null_haystack = string_contains(NULL, str_needle, &contains_null);
+    assert(result_null_haystack == STRING_ERROR_NULL_POINTER);
+    
+    StringResult result_null_needle = string_contains(str_haystack, NULL, &contains_null);
+    assert(result_null_needle == STRING_ERROR_NULL_POINTER);
+    
+    StringResult result_null_out = string_contains(str_haystack, str_needle, NULL);
+    assert(result_null_out == STRING_ERROR_NULL_POINTER);
 
     // Destroy the strings
-    string_destroy(&str1);
-    string_destroy(&str2);
+    string_destroy(&str_haystack);
+    string_destroy(&str_needle);
+    string_destroy(&str_missing);
+    string_destroy(&str_empty);
 }
 
 /**
@@ -170,33 +330,64 @@ void test_string_contains() {
  * @return void
  */
 void test_string_index_of() {
-    // Create three strings
-    String* str1 = NULL;
-    String* str2 = NULL;
-    String* str3 = NULL;
-    StringResult result_create1 = string_create("Hello, World!", &str1);
-    StringResult result_create2 = string_create("World!", &str2);
-    StringResult result_create3 = string_create("Goodbye", &str3);
+    printf("  Testing string_index_of...\n");
+    
+    // Create test strings
+    String* str_haystack = NULL;
+    String* str_needle = NULL;
+    String* str_missing = NULL;
+    String* str_empty = NULL;
+    String* str_multiple = NULL;
+    
+    string_create("Hello, World!", &str_haystack);
+    string_create("World", &str_needle);
+    string_create("Goodbye", &str_missing);
+    string_create("", &str_empty);
+    string_create("Hello, Hello, Hello!", &str_multiple);
 
-    // Check if the strings were created successfully
-    assert(result_create1 == STRING_SUCCESS);
-    assert(result_create2 == STRING_SUCCESS);
-    assert(result_create3 == STRING_SUCCESS);
-
-    // Check if the substring is contained in the string
+    // Test substring is found
     size_t index = 0;
-    StringResult result_index_of = string_index_of(str1, str2, &index);
+    StringResult result_index_of = string_index_of(str_haystack, str_needle, &index);
     assert(result_index_of == STRING_SUCCESS);
     assert(index == 7);
 
-    // Check if the substring is not contained in the string
-    StringResult result_index_of_not_found = string_index_of(str1, str3, &index);
-    assert(result_index_of_not_found == STRING_ERROR_NOT_FOUND);
+    // Test substring is not found
+    size_t index_missing = 0;
+    StringResult result_index_missing = string_index_of(str_haystack, str_missing, &index_missing);
+    assert(result_index_missing == STRING_ERROR_NOT_FOUND);
+    
+    // Test with empty substring
+    size_t index_empty = 0;
+    StringResult result_empty = string_index_of(str_haystack, str_empty, &index_empty);
+    assert(result_empty == STRING_ERROR_EMPTY);
+    
+    // Test finding first occurrence of multiple matches
+    size_t index_multiple = 0;
+    String* str_hello = NULL;
+    string_create("Hello", &str_hello);
+    
+    StringResult result_multiple = string_index_of(str_multiple, str_hello, &index_multiple);
+    assert(result_multiple == STRING_SUCCESS);
+    assert(index_multiple == 0);  // Should find first occurrence
+    
+    // Test with NULL parameters
+    size_t index_null = 0;
+    StringResult result_null_haystack = string_index_of(NULL, str_needle, &index_null);
+    assert(result_null_haystack == STRING_ERROR_NULL_POINTER);
+    
+    StringResult result_null_needle = string_index_of(str_haystack, NULL, &index_null);
+    assert(result_null_needle == STRING_ERROR_NULL_POINTER);
+    
+    StringResult result_null_out = string_index_of(str_haystack, str_needle, NULL);
+    assert(result_null_out == STRING_ERROR_NULL_POINTER);
 
     // Destroy the strings
-    string_destroy(&str1);
-    string_destroy(&str2);
-    string_destroy(&str3);
+    string_destroy(&str_haystack);
+    string_destroy(&str_needle);
+    string_destroy(&str_missing);
+    string_destroy(&str_empty);
+    string_destroy(&str_multiple);
+    string_destroy(&str_hello);
 }
 
 /**
@@ -205,6 +396,8 @@ void test_string_index_of() {
  * @return void
  */
 void test_string_destroy() {
+    printf("  Testing string_destroy...\n");
+    
     // Create a new string
     String* str = NULL;
     StringResult result_create = string_create("Hello, World!", &str);
@@ -213,10 +406,35 @@ void test_string_destroy() {
     StringResult result_destroy = string_destroy(&str);
     assert(result_create == STRING_SUCCESS);
     assert(result_destroy == STRING_SUCCESS);
+    assert(str == NULL);
 
     // Try to destroy the string again
     StringResult result_destroy_again = string_destroy(&str);
     assert(result_destroy_again == STRING_ERROR_NULL_POINTER);
+    
+    // Test with NULL pointer
+    StringResult result_destroy_null = string_destroy(NULL);
+    assert(result_destroy_null == STRING_ERROR_NULL_POINTER);
+}
+
+/**
+ * @brief Test the string_result_to_string function
+ * 
+ * @return void
+ */
+void test_string_result_to_string() {
+    printf("  Testing string_result_to_string...\n");
+    
+    // Test all result codes
+    assert(strcmp(string_result_to_string(STRING_SUCCESS), "STRING_SUCCESS") == 0);
+    assert(strcmp(string_result_to_string(STRING_ERROR_NULL_POINTER), "STRING_ERROR_NULL_POINTER") == 0);
+    assert(strcmp(string_result_to_string(STRING_ERROR_MALLOC), "STRING_ERROR_MALLOC") == 0);
+    assert(strcmp(string_result_to_string(STRING_ERROR_REALLOC), "STRING_ERROR_REALLOC") == 0);
+    assert(strcmp(string_result_to_string(STRING_ERROR_EMPTY), "STRING_ERROR_EMPTY") == 0);
+    assert(strcmp(string_result_to_string(STRING_ERROR_NOT_FOUND), "STRING_ERROR_NOT_FOUND") == 0);
+    
+    // Test an unknown result code
+    assert(strcmp(string_result_to_string(999), "UNKNOWN_STRING_RESULT") == 0);
 }
 
 /**
@@ -236,6 +454,7 @@ int main() {
     test_string_contains();
     test_string_index_of();
     test_string_destroy();
+    test_string_result_to_string();
 
     printf("[basec_string] All tests passed!\n");
 
