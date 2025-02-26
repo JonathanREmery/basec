@@ -2,19 +2,19 @@
 
 ## Project Structure
 ```
-basec/
-├── bin/               # Compiled binary outputs
-│   └── test/          # Test binary outputs
-├── include/           # Header files
-│   └── ds/            # Data structures headers
-│       └── string/    # String headers
-│       └── array/     # Array headers
-├── src/               # Source code
-│   └── ds/            # Data structures implementation
-│       └── string/    # String implementation
-│       └── array/     # Array implementation
-├── test/              # Test files
-└── Makefile           # Build system
+basec/                     # Root directory
+├── bin/                    # Compiled binary outputs
+│   └── test/                # Test binary outputs
+├── include/                # Header files
+│   └── ds/                  # Data structures headers
+│       └── basec_string.h    # String header
+│       └── basec_array.h     # Array header
+├── src/                    # Source code
+│   └── ds/                  # Data structures implementation
+│       └── basec_string.c    # String implementation
+│       └── basec_array.c     # Array implementation
+├── test/                   # Test files
+└── Makefile                # Build system
 ```
 
 ## String

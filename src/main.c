@@ -5,8 +5,8 @@
 
 #include <stdio.h>
 
-#include "ds/string/basec_string.h"
-#include "ds/array/basec_array.h"
+#include "ds/basec_string.h"
+#include "ds/basec_array.h"
 
 /**
  * @brief Check if a string operation failed

@@ -3,7 +3,7 @@
  * @brief Implementation of an Array type and functions
  */
 
-#include "ds/array/basec_array.h"
+#include "ds/basec_array.h"
 
 /**
  * @brief Convert an ArrayResult to a string

@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "ds/array/basec_array.h"
+#include "ds/basec_array.h"
 
 /**
  * @brief Test the array_create function

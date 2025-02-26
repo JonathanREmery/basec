@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "ds/string/basec_string.h"
+#include "ds/basec_string.h"
 
 /**
  * @brief Test the string_create function
