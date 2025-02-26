@@ -42,67 +42,57 @@ int main() {
     String* str1 = NULL;
     String* str2 = NULL;
     String* str3 = NULL;
-
-    // String results
-    StringResult result_string_create = STRING_SUCCESS;
-    StringResult result_string_concat = STRING_SUCCESS;
-    StringResult result_string_destroy = STRING_SUCCESS;
+    StringResult string_result = STRING_SUCCESS;
 
     // Array
     Array* arr = NULL;
-
-    // Array results
-    ArrayResult result_array_create = ARRAY_SUCCESS;
-    ArrayResult result_array_add = ARRAY_SUCCESS;
-    ArrayResult result_array_size = ARRAY_SUCCESS;
-    ArrayResult result_array_get = ARRAY_SUCCESS;
-    ArrayResult result_array_destroy = ARRAY_SUCCESS;
+    ArrayResult array_result = ARRAY_SUCCESS;
 
     // Create strings
-    result_string_create = string_create("Hello, ", &str1);
-    check_string_result(result_string_create);
-    result_string_create = string_create("World", &str2);
-    check_string_result(result_string_create);
-    result_string_create = string_create("!\n", &str3);
-    check_string_result(result_string_create);
+    string_result = string_create("Hello, ", 16, &str1);
+    check_string_result(string_result);
+    string_result = string_create("World", 16, &str2);
+    check_string_result(string_result);
+    string_result = string_create("!\n", 8, &str3);
+    check_string_result(string_result);
 
     // Create array
-    result_array_create = array_create(3, sizeof(String*), &arr);
-    check_array_result(result_array_create);
+    array_result = array_create(3, sizeof(String*), &arr);
+    check_array_result(array_result);
 
     // Add strings to array
-    result_array_add = array_add(arr, &str1);
-    check_array_result(result_array_add);
-    result_array_add = array_add(arr, &str2);
-    check_array_result(result_array_add);
-    result_array_add = array_add(arr, &str3);
-    check_array_result(result_array_add);
+    array_result = array_add(arr, &str1);
+    check_array_result(array_result);
+    array_result = array_add(arr, &str2);
+    check_array_result(array_result);
+    array_result = array_add(arr, &str3);
+    check_array_result(array_result);
 
     // Get array size
     size_t arr_size = 0;
-    result_array_size = array_size(arr, &arr_size);
-    check_array_result(result_array_size);
+    array_result = array_size(arr, &arr_size);
+    check_array_result(array_result);
 
     // Create concat string
     String* concat_str = NULL;
-    result_string_create = string_create("", &concat_str);
-    check_string_result(result_string_create);
+    string_result = string_create("", 64, &concat_str);
+    check_string_result(string_result);
 
     // Concatenate strings
     for (size_t i = 0; i < arr_size; i++) {
         // Get string from array
         String* str_i = NULL;
-        result_array_get = array_get(arr, i, &str_i);
-        check_array_result(result_array_get);
+        array_result = array_get(arr, i, &str_i);
+        check_array_result(array_result);
 
         // Concatenate strings
         String* tmp_str = NULL;
-        result_string_concat = string_concat(concat_str, str_i, &tmp_str);
-        check_string_result(result_string_concat);
+        string_result = string_concat(concat_str, str_i, &tmp_str);
+        check_string_result(string_result);
 
         // Destroy previous concat string
-        result_string_destroy = string_destroy(&concat_str);
-        check_string_result(result_string_destroy);
+        string_result = string_destroy(&concat_str);
+        check_string_result(string_result);
 
         // Set new concat string
         concat_str = tmp_str;
@@ -112,18 +102,18 @@ int main() {
     printf("%s", concat_str->data);
 
     // Destroy array
-    result_array_destroy = array_destroy(&arr);
-    check_array_result(result_array_destroy);
+    array_result = array_destroy(&arr);
+    check_array_result(array_result);
 
     // Destroy strings
-    result_string_destroy = string_destroy(&str1);
-    check_string_result(result_string_destroy);
-    result_string_destroy = string_destroy(&str2);
-    check_string_result(result_string_destroy);
-    result_string_destroy = string_destroy(&str3);
-    check_string_result(result_string_destroy);
-    result_string_destroy = string_destroy(&concat_str);
-    check_string_result(result_string_destroy);
+    string_result = string_destroy(&str1);
+    check_string_result(string_result);
+    string_result = string_destroy(&str2);
+    check_string_result(string_result);
+    string_result = string_destroy(&str3);
+    check_string_result(string_result);
+    string_result = string_destroy(&concat_str);
+    check_string_result(string_result);
 
     return 0;
 }

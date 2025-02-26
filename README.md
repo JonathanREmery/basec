@@ -22,7 +22,9 @@ basec/
 - `string_create`   - Create a new String
 - `string_set`      - Set the value of a String
 - `string_length`   - Get the length of a String
+- `string_capacity` - Get the capacity of a String
 - `string_copy`     - Copy a String
+- `string_append`   - Append a String to another String
 - `string_concat`   - Concatenate two Strings
 - `string_contains` - Check if a String contains another String
 - `string_index_of` - Get the index of a substring in a String
@@ -66,7 +68,9 @@ make run
   - [x] Destroy
   - [x] Set
   - [x] Length
+  - [x] Capacity
   - [x] Copy
+  - [x] Append
   - [x] Concatenate
   - [x] Contains
   - [x] IndexOf

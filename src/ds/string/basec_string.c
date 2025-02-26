@@ -16,10 +16,16 @@ const char* string_result_to_string(StringResult result) {
             return "STRING_SUCCESS";
         case STRING_ERROR_NULL_POINTER:
             return "STRING_ERROR_NULL_POINTER";
+        case STRING_ERROR_INVALID_CAPACITY:
+            return "STRING_ERROR_INVALID_CAPACITY";
+        case STRING_ERROR_CAPACITY_TOO_SMALL:
+            return "STRING_ERROR_CAPACITY_TOO_SMALL";
         case STRING_ERROR_MALLOC:
             return "STRING_ERROR_MALLOC";
         case STRING_ERROR_REALLOC:
             return "STRING_ERROR_REALLOC";
+        case STRING_ERROR_MEMCPY:
+            return "STRING_ERROR_MEMCPY";
         case STRING_ERROR_EMPTY:
             return "STRING_ERROR_EMPTY";
         case STRING_ERROR_NOT_FOUND:
@@ -33,13 +39,19 @@ const char* string_result_to_string(StringResult result) {
  * @brief Create a new string
  * 
  * @param str The string to create
+ * @param capacity The capacity of the string
  * @param str_out The output string
  * @return A StringResult
  */
-StringResult string_create(const char* str, String** str_out) {
+StringResult string_create(const char* str, size_t capacity, String** str_out) {
     // Check for NULL pointers
     if (str == NULL || str_out == NULL) {
         return STRING_ERROR_NULL_POINTER;
+    }
+
+    // Check if the capacity is valid
+    if (capacity < 1) {
+        return STRING_ERROR_INVALID_CAPACITY;
     }
 
     // Allocate memory for the string
@@ -49,7 +61,7 @@ StringResult string_create(const char* str, String** str_out) {
     }
 
     // Allocate memory for the string data
-    string->data = (char*)malloc(strlen(str) + 1);
+    string->data = (char*)malloc(capacity + 1);
     if (string->data == NULL) {
         free(string);
         string = NULL;
@@ -60,12 +72,65 @@ StringResult string_create(const char* str, String** str_out) {
     // Get the length of the string
     string->length = strlen(str);
 
-    // Copy the string data and null-terminate it
-    memcpy(string->data, str, string->length);
+    // Check if the length exceeds the capacity
+    if (string->length >= capacity) {
+        free(string);
+        string = NULL;
+
+        return STRING_ERROR_CAPACITY_TOO_SMALL;
+    }
+
+    // Copy the string data
+    void* memcpy_result = memcpy(string->data, str, string->length);
+    if (memcpy_result == NULL) {
+        free(string);
+        string = NULL;
+
+        return STRING_ERROR_MEMCPY;
+    }
+
+    // Null-terminate the string
     string->data[string->length] = '\0';
 
     // Set the output string
     *str_out = string;
+
+    // Return the success result
+    return STRING_SUCCESS;
+}
+
+/**
+ * @brief Grow the capacity of a string
+ * 
+ * @param str The string to grow
+ * @param new_capacity The new capacity
+ * @return A StringResult
+ */
+StringResult string_grow(String* str, size_t new_capacity) {
+    // Check for NULL pointers
+    if (str == NULL) {
+        return STRING_ERROR_NULL_POINTER;
+    }
+    
+    // Check if the new capacity is valid
+    if (new_capacity < 1 || new_capacity < str->length) {
+        return STRING_ERROR_INVALID_CAPACITY;
+    }
+    
+    // Check if the capacity is already large enough
+    if (new_capacity <= str->capacity) {
+        str->capacity = new_capacity;
+        return STRING_SUCCESS;
+    }
+
+    // Reallocate memory for the string
+    str->data = (char*)realloc(str->data, new_capacity + 1);
+    if (str->data == NULL) {
+        return STRING_ERROR_REALLOC;
+    }
+
+    // Update the capacity of the string
+    str->capacity = new_capacity;
 
     // Return the success result
     return STRING_SUCCESS;
@@ -89,21 +154,28 @@ StringResult string_set(String* str, const char* value) {
         return STRING_SUCCESS;
     }
 
-    // Set the length of the string
+    // Calculate the new length of the string
     size_t new_length = strlen(value);
 
-    // Reallocate memory for the string
-    char* new_data = (char*)realloc(str->data, new_length + 1);
-    if (new_data == NULL) {
-        return STRING_ERROR_REALLOC;
+    // Check if string needs to be grown
+    if (new_length >= str->capacity) {
+        // Grow the string to double the new length
+        StringResult grow_result = string_grow(str, new_length * 2);
+        if (grow_result != STRING_SUCCESS) {
+            return grow_result;
+        }
     }
 
-    // Set the new data and length
-    str->data = new_data;
+    // Set the length of the string
     str->length = new_length;
 
-    // Copy the value to the string and null-terminate it
-    memcpy(str->data, value, str->length);
+    // Copy the value to the string
+    void* memcpy_result = memcpy(str->data, value, str->length);
+    if (memcpy_result == NULL) {
+        return STRING_ERROR_MEMCPY;
+    }
+
+    // Null-terminate the string
     str->data[str->length] = '\0';
 
     // Return the success result
@@ -125,6 +197,26 @@ StringResult string_length(const String* str, size_t* length_out) {
 
     // Set the output length
     *length_out = str->length;
+
+    // Return the success result
+    return STRING_SUCCESS;
+}
+
+/**
+ * @brief Get the capacity of a string
+ * 
+ * @param str The string to get the capacity of
+ * @param capacity_out The output capacity
+ * @return A StringResult
+ */
+StringResult string_capacity(const String* str, size_t* capacity_out) {
+    // Check for NULL pointers
+    if (str == NULL || capacity_out == NULL) {
+        return STRING_ERROR_NULL_POINTER;
+    }
+
+    // Set the output capacity
+    *capacity_out = str->capacity;
 
     // Return the success result
     return STRING_SUCCESS;
@@ -158,12 +250,67 @@ StringResult string_copy(String* str, String** str_out) {
         return STRING_ERROR_MALLOC;
     }
 
-    // Set the length of the copied string
+    // Set the length and capacity of the copied string
     (*str_out)->length = str->length;
+    (*str_out)->capacity = str->capacity;
 
-    // Copy the string data and null-terminate it
-    memcpy((*str_out)->data, str->data, str->length);
+    // Copy the string data
+    void* memcpy_result = memcpy((*str_out)->data, str->data, str->length);
+    if (memcpy_result == NULL) {
+        free(*str_out);
+        *str_out = NULL;
+
+        return STRING_ERROR_MEMCPY;
+    }
+
+    // Null-terminate the string
     (*str_out)->data[str->length] = '\0';
+
+    // Return the success result
+    return STRING_SUCCESS;
+}
+
+/**
+ * @brief Append a string to another string
+ * 
+ * @param str The string to append to
+ * @param substr The string to append
+ * @return A StringResult
+ */
+StringResult string_append(String* str, String* substr) {
+    // Check for NULL pointers
+    if (str == NULL || substr == NULL) {
+        return STRING_ERROR_NULL_POINTER;
+    }
+
+    // Check if the substr is empty
+    if (substr->length == 0) {
+        return STRING_SUCCESS;
+    }
+
+    // Calculate the new length of the string
+    size_t new_length = str->length + substr->length;
+
+    // Check if the string needs to be grown
+    if (new_length >= str->capacity) {
+        // Grow the string to double the new length
+        StringResult grow_result = string_grow(str, new_length * 2);
+        if (grow_result != STRING_SUCCESS) {
+            return grow_result;
+        }
+    }
+
+    // Set the length of the string
+    str->length = new_length;
+
+    // Copy the substr to the end of the string
+    void* memcpy_result = memcpy(str->data + str->length - substr->length, substr->data, substr->length);
+    if (memcpy_result == NULL) {
+        return STRING_ERROR_MEMCPY;
+    }
+
+    // Null-terminate the string
+    str->data[str->length] = '\0';
 
     // Return the success result
     return STRING_SUCCESS;
@@ -201,8 +348,12 @@ StringResult string_concat(String* str1, String* str2, String** str_out) {
         return STRING_ERROR_MALLOC;
     }
 
+    // Calculate total length and capacity
+    size_t total_length = str1->length + str2->length;
+    size_t total_capacity = total_length * 2;
+
     // Allocate memory for the concatenated string data
-    concat_str->data = (char*)malloc(str1->length + str2->length + 1);
+    concat_str->data = (char*)malloc(total_capacity);
     if (concat_str->data == NULL) {
         free(concat_str);
         concat_str = NULL;
@@ -210,13 +361,30 @@ StringResult string_concat(String* str1, String* str2, String** str_out) {
         return STRING_ERROR_MALLOC;
     }
 
-    // Copy the strings and null-terminate the concatenated string
-    memcpy(concat_str->data, str1->data, str1->length);
-    memcpy(concat_str->data + str1->length, str2->data, str2->length);
-    concat_str->data[str1->length + str2->length] = '\0';
+    // Copy the first string
+    void* memcpy_result = memcpy(concat_str->data, str1->data, str1->length);
+    if (memcpy_result == NULL) {
+        free(concat_str);
+        concat_str = NULL;
 
-    // Set the length of the concatenated string
-    concat_str->length = str1->length + str2->length;
+        return STRING_ERROR_MEMCPY;
+    }
+
+    // Copy the second string
+    memcpy_result = memcpy(concat_str->data + str1->length, str2->data, str2->length);
+    if (memcpy_result == NULL) {
+        free(concat_str);
+        concat_str = NULL;
+
+        return STRING_ERROR_MEMCPY;
+    }
+
+    // Null-terminate the string
+    concat_str->data[total_length] = '\0';
+
+    // Set the length and capacity of the concatenated string
+    concat_str->length = total_length;
+    concat_str->capacity = total_capacity;
 
     // Set the output string
     *str_out = concat_str;
@@ -241,11 +409,19 @@ StringResult string_contains(String* str, String* substr, bool* contains_out) {
 
     // Check if the substring is empty
     if (substr->length == 0) {
+        *contains_out = true;
         return STRING_ERROR_EMPTY;
     }
 
     // Check if the substring is contained in the string
-    *contains_out = strstr(str->data, substr->data) != NULL;
+    char* strstr_result = strstr(str->data, substr->data);
+    if (strstr_result == NULL) {
+        *contains_out = false;
+        return STRING_ERROR_NOT_FOUND;
+    }
+
+    // Set the output contains
+    *contains_out = true;
 
     // Return the success result
     return STRING_SUCCESS;
@@ -271,13 +447,13 @@ StringResult string_index_of(String* str, String* substr, size_t* index_out) {
     }
 
     // Check if the substring is contained in the string
-    char* result = strstr(str->data, substr->data);
-    if (result == NULL) {
+    char* strstr_result = strstr(str->data, substr->data);
+    if (strstr_result == NULL) {
         return STRING_ERROR_NOT_FOUND;
     }
 
     // Set the output index
-    *index_out = result - str->data;
+    *index_out = strstr_result - str->data;
 
     // Return the success result
     return STRING_SUCCESS;

@@ -20,7 +20,7 @@ void test_string_create() {
     
     // Create a new string
     String* str = NULL;
-    StringResult result_create = string_create("Hello, World!", &str);
+    StringResult result_create = string_create("Hello, World!", 32, &str);
 
     // Check if the string was created successfully
     assert(result_create == STRING_SUCCESS);
@@ -32,7 +32,7 @@ void test_string_create() {
 
     // Test with empty string
     String* empty_str = NULL;
-    StringResult result_create_empty = string_create("", &empty_str);
+    StringResult result_create_empty = string_create("", 16, &empty_str);
     assert(result_create_empty == STRING_SUCCESS);
     assert(empty_str != NULL);
     assert(empty_str->length == 0);
@@ -40,11 +40,11 @@ void test_string_create() {
 
     // Test with NULL parameters
     String* null_str = NULL;
-    StringResult result_create_null_str = string_create(NULL, &null_str);
+    StringResult result_create_null_str = string_create(NULL, 0, &null_str);
     assert(result_create_null_str == STRING_ERROR_NULL_POINTER);
     assert(null_str == NULL);
 
-    StringResult result_create_null_out = string_create("Hello", NULL);
+    StringResult result_create_null_out = string_create("Hello", 16, NULL);
     assert(result_create_null_out == STRING_ERROR_NULL_POINTER);
 
     // Test with very long string
@@ -53,7 +53,7 @@ void test_string_create() {
     long_str_data[1023] = '\0';
     
     String* long_str = NULL;
-    StringResult result_create_long = string_create(long_str_data, &long_str);
+    StringResult result_create_long = string_create(long_str_data, 2048, &long_str);
     assert(result_create_long == STRING_SUCCESS);
     assert(long_str != NULL);
     assert(long_str->length == 1023);
@@ -74,7 +74,7 @@ void test_string_set() {
     
     // Create a new string
     String* str = NULL;
-    StringResult result_create = string_create("", &str);
+    StringResult result_create = string_create("", 32, &str);
 
     // Set the string
     StringResult result_set = string_set(str, "Hello, World!");
@@ -122,8 +122,8 @@ void test_string_length() {
     // Create strings of different lengths
     String* str_normal = NULL;
     String* str_empty = NULL;
-    StringResult result_create_normal = string_create("Hello, World!", &str_normal);
-    StringResult result_create_empty = string_create("", &str_empty);
+    StringResult result_create_normal = string_create("Hello, World!", 32, &str_normal);
+    StringResult result_create_empty = string_create("", 16, &str_empty);
 
     // Check the length of the normal string
     size_t length_normal = 0;
@@ -163,8 +163,8 @@ void test_string_copy() {
     // Create strings to copy
     String* str_normal = NULL;
     String* str_empty = NULL;
-    StringResult result_create_normal = string_create("Hello, World!", &str_normal);
-    StringResult result_create_empty = string_create("", &str_empty);
+    StringResult result_create_normal = string_create("Hello, World!", 32, &str_normal);
+    StringResult result_create_empty = string_create("", 16, &str_empty);
 
     // Check creation results
     assert(result_create_normal == STRING_SUCCESS);
@@ -222,9 +222,9 @@ void test_string_concat() {
     String* str1 = NULL;
     String* str2 = NULL;
     String* str_empty = NULL;
-    StringResult result_create1 = string_create("Hello, ", &str1);
-    StringResult result_create2 = string_create("World!", &str2);
-    StringResult result_create_empty = string_create("", &str_empty);
+    StringResult result_create1 = string_create("Hello, ", 16, &str1);
+    StringResult result_create2 = string_create("World!", 16, &str2);
+    StringResult result_create_empty = string_create("", 16, &str_empty);
 
     // Check creation results
     assert(result_create1 == STRING_SUCCESS);
@@ -284,10 +284,10 @@ void test_string_contains() {
     String* str_missing = NULL;
     String* str_empty = NULL;
     
-    string_create("Hello, World!", &str_haystack);
-    string_create("World", &str_needle);
-    string_create("Goodbye", &str_missing);
-    string_create("", &str_empty);
+    string_create("Hello, World!", 32, &str_haystack);
+    string_create("World", 16, &str_needle);
+    string_create("Goodbye", 16, &str_missing);
+    string_create("", 16, &str_empty);
     
     // Test substring is contained
     bool contains = false;
@@ -298,7 +298,7 @@ void test_string_contains() {
     // Test substring is not contained
     bool contains_missing = true;
     StringResult result_missing = string_contains(str_haystack, str_missing, &contains_missing);
-    assert(result_missing == STRING_SUCCESS);
+    assert(result_missing == STRING_ERROR_NOT_FOUND);
     assert(contains_missing == false);
     
     // Test with empty substring
@@ -339,11 +339,11 @@ void test_string_index_of() {
     String* str_empty = NULL;
     String* str_multiple = NULL;
     
-    string_create("Hello, World!", &str_haystack);
-    string_create("World", &str_needle);
-    string_create("Goodbye", &str_missing);
-    string_create("", &str_empty);
-    string_create("Hello, Hello, Hello!", &str_multiple);
+    string_create("Hello, World!", 32, &str_haystack);
+    string_create("World", 16, &str_needle);
+    string_create("Goodbye", 16, &str_missing);
+    string_create("", 16, &str_empty);
+    string_create("Hello, Hello, Hello!", 32, &str_multiple);
 
     // Test substring is found
     size_t index = 0;
@@ -364,7 +364,7 @@ void test_string_index_of() {
     // Test finding first occurrence of multiple matches
     size_t index_multiple = 0;
     String* str_hello = NULL;
-    string_create("Hello", &str_hello);
+    string_create("Hello", 16, &str_hello);
     
     StringResult result_multiple = string_index_of(str_multiple, str_hello, &index_multiple);
     assert(result_multiple == STRING_SUCCESS);
@@ -400,7 +400,7 @@ void test_string_destroy() {
     
     // Create a new string
     String* str = NULL;
-    StringResult result_create = string_create("Hello, World!", &str);
+    StringResult result_create = string_create("Hello, World!", 32, &str);
 
     // Destroy the string
     StringResult result_destroy = string_destroy(&str);

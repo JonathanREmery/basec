@@ -16,8 +16,11 @@
 typedef enum {
     STRING_SUCCESS,            //< The operation was successful
     STRING_ERROR_NULL_POINTER, //< A NULL pointer was passed to the function
+    STRING_ERROR_INVALID_CAPACITY, //< The capacity is invalid
+    STRING_ERROR_CAPACITY_TOO_SMALL, //< The capacity is too small
     STRING_ERROR_MALLOC,       //< The memory allocation failed
     STRING_ERROR_REALLOC,      //< The memory reallocation failed
+    STRING_ERROR_MEMCPY,       //< The memcpy failed
     STRING_ERROR_EMPTY,        //< The string is empty
     STRING_ERROR_NOT_FOUND     //< The substring is not found
 } StringResult;
@@ -26,8 +29,9 @@ typedef enum {
  * @brief String type
  */
 typedef struct {
-    char*  data;    //< The string data
-    size_t length;  //< The length of the string
+    char*  data;     //< The string data
+    size_t length;   //< The length of the string
+    size_t capacity; //< The capacity of the string
 } String;
 
 /**
@@ -42,10 +46,20 @@ const char* string_result_to_string(StringResult result);
  * @brief Create a new string
  * 
  * @param str The string to create
+ * @param capacity The capacity of the string
  * @param str_out The output string
  * @return A StringResult
  */
-StringResult string_create(const char* str, String** str_out);
+StringResult string_create(const char* str, size_t capacity, String** str_out);
+
+/**
+ * @brief Grow the capacity of a string
+ * 
+ * @param str The string to grow
+ * @param new_capacity The new capacity
+ * @return A StringResult
+ */
+StringResult string_grow(String* str, size_t new_capacity);
 
 /**
  * @brief Set the value of a string
@@ -66,6 +80,15 @@ StringResult string_set(String* str, const char* value);
 StringResult string_length(const String* str, size_t* length_out);
 
 /**
+ * @brief Get the capacity of a string
+ * 
+ * @param str The string to get the capacity of
+ * @param capacity_out The output capacity
+ * @return A StringResult
+ */
+StringResult string_capacity(const String* str, size_t* capacity_out);
+
+/**
  * @brief Copy a string
  * 
  * @param str The string to copy
@@ -73,6 +96,15 @@ StringResult string_length(const String* str, size_t* length_out);
  * @return A StringResult
  */
 StringResult string_copy(String* str, String** str_out);
+
+/**
+ * @brief Append a string to another string
+ * 
+ * @param str The string to append to
+ * @param substr The string to append
+ * @return A StringResult
+ */
+StringResult string_append(String* str, String* substr);
 
 /**
  * @brief Concatenate two strings
