@@ -1,36 +1,55 @@
+# Compiler
 CC=gcc
 CFLAGS=-Wall -Wextra -Werror -std=c2x
 
+# Directories
 SRC_DIR=src
 INC_DIR=include
-BIN_DIR=bin
-
 TEST_DIR=test
+
+# Output directories
+BIN_DIR=bin
 TEST_BIN_DIR=bin/test
 
-SRC=$(wildcard $(SRC_DIR)/*.c)
-SRC_INCLUDE=$(wildcard $(INC_DIR)/*.h)
+# Source files
+SRC=$(shell find $(SRC_DIR) -name "*.c")
+SRC_NO_MAIN=$(shell find $(SRC_DIR) -name "*.c" ! -name "main.c")
+INCLUDE=$(shell find $(INC_DIR) -name "*.h")
 
-TEST_SRC=$(wildcard $(TEST_DIR)/*.c)
-TEST_BINS=$(patsubst $(TEST_DIR)/%.c,$(TEST_BIN_DIR)/%,$(TEST_SRC))
+# Test files
+TEST_SRC=$(shell find $(TEST_DIR) -name "*.c")
+TEST_INCLUDE=$(shell find $(INC_DIR) -name "*.h")
 
-build: basec
+# Phony targets
+.PHONY: build run test clean
 
-basec: $(SRC) $(SRC_INCLUDE)
+# Build target
+build: $(SRC) $(INCLUDE)
+	@# Create the bin directory if it doesn't exist
 	@mkdir -p $(BIN_DIR)
-	$(CC) $(CFLAGS) -I$(INC_DIR) -o $(BIN_DIR)/basec $(SRC)
 
-run: basec
-	$(BIN_DIR)/basec
+	@# Compile the basec executable
+	@$(CC) $(CFLAGS) -I$(INC_DIR) -o $(BIN_DIR)/basec $(SRC)
 
-$(TEST_BIN_DIR)/%: $(TEST_DIR)/%.c $(SRC) $(SRC_INCLUDE)
+# Run target
+run: build
+	@# Run the basec executable
+	@$(BIN_DIR)/basec
+
+# Test target
+test:
+	@# Create the test bin directory if it doesn't exist
 	@mkdir -p $(TEST_BIN_DIR)
-	$(CC) $(CFLAGS) -I$(INC_DIR) -o $@ $< $(SRC_DIR)/basec_*.c
 
-test: $(TEST_BINS)
-	@for test in $(TEST_BINS); do \
-		$$test; \
+	@# Compile and run each test file
+	@for test_file in $(TEST_SRC); do \
+		base_name=$$(basename $$test_file .c); \
+		$(CC) $(CFLAGS) -I$(INC_DIR) -o $(TEST_BIN_DIR)/$$base_name $$test_file $(SRC_NO_MAIN); \
+		./$(TEST_BIN_DIR)/$$base_name; \
 	done
 
+# Clean target
 clean:
-	rm -rf $(BIN_DIR) $(TEST_BIN_DIR)
+	@# Remove the bin directories
+	@rm -rf $(BIN_DIR)
+	@rm -rf $(TEST_BIN_DIR)
