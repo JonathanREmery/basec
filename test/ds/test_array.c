@@ -20,18 +20,18 @@ void test_array_create() {
 
     // Create a valid array
     Array* arr_valid = NULL;
-    ArrayResult result_create_valid = array_create(10, sizeof(int), &arr_valid);
+    ArrayResult result_create_valid = array_create(sizeof(int), 10, &arr_valid);
 
     // Test invalid capacity
     Array* arr_invalid_capacity = NULL;
-    ArrayResult result_create_invalid_capacity = array_create(0, sizeof(int), &arr_invalid_capacity);
+    ArrayResult result_create_invalid_capacity = array_create(sizeof(int), 0, &arr_invalid_capacity);
 
     // Test invalid element size
     Array* arr_invalid_elem_size = NULL;
-    ArrayResult result_create_invalid_elem_size = array_create(10, 0, &arr_invalid_elem_size);
+    ArrayResult result_create_invalid_elem_size = array_create(0, 10, &arr_invalid_elem_size);
     
     // Test NULL output pointer
-    ArrayResult result_create_null_out = array_create(10, sizeof(int), NULL);
+    ArrayResult result_create_null_out = array_create(sizeof(int), 10, NULL);
 
     // Check the creation results
     assert(result_create_valid == ARRAY_SUCCESS);
@@ -50,12 +50,12 @@ void test_array_create() {
 
     // Test with different data types
     Array* arr_char = NULL;
-    ArrayResult result_create_char = array_create(5, sizeof(char), &arr_char);
+    ArrayResult result_create_char = array_create(sizeof(char), 5, &arr_char);
     assert(result_create_char == ARRAY_SUCCESS);
     assert(arr_char->element_size == sizeof(char));
     
     Array* arr_double = NULL;
-    ArrayResult result_create_double = array_create(5, sizeof(double), &arr_double);
+    ArrayResult result_create_double = array_create(sizeof(double), 5, &arr_double);
     assert(result_create_double == ARRAY_SUCCESS);
     assert(arr_double->element_size == sizeof(double));
 
@@ -75,7 +75,7 @@ void test_array_size() {
 
     // Create a new array
     Array* arr = NULL;
-    ArrayResult result_create = array_create(10, sizeof(int), &arr);
+    ArrayResult result_create = array_create(sizeof(int), 10, &arr);
 
     // Check if the array was created successfully
     assert(result_create == ARRAY_SUCCESS);
@@ -106,7 +106,7 @@ void test_array_capacity() {
     
     // Create a new array
     Array* arr = NULL;
-    ArrayResult result_create = array_create(10, sizeof(int), &arr);
+    ArrayResult result_create = array_create(sizeof(int), 10, &arr);
 
     // Check if the array was created successfully
     assert(result_create == ARRAY_SUCCESS);
@@ -121,7 +121,7 @@ void test_array_capacity() {
     
     // Test with different capacities
     Array* arr_large = NULL;
-    array_create(1000, sizeof(int), &arr_large);
+    array_create(sizeof(int), 1000, &arr_large);
 
     // Get the capacity of the large array
     ArrayResult result_capacity_large = array_capacity(arr_large, &capacity);
@@ -149,7 +149,7 @@ void test_array_destroy() {
     
     // Create a new array
     Array* arr = NULL;
-    ArrayResult result_create = array_create(10, sizeof(int), &arr);
+    ArrayResult result_create = array_create(sizeof(int), 10, &arr);
 
     // Destroy the array
     ArrayResult result_destroy = array_destroy(&arr);
@@ -176,7 +176,7 @@ void test_array_add() {
     
     // Create a new array for integers
     Array* arr_int = NULL;
-    array_create(5, sizeof(int), &arr_int);
+    array_create(sizeof(int), 5, &arr_int);
     
     // Add elements to the array
     int values[] = {10, 20, 30, 40, 50};
@@ -197,8 +197,10 @@ void test_array_add() {
     
     // Try to add one more element when the array is full
     int extra_value = 60;
+    assert(arr_int->capacity == 5);
     ArrayResult result_full = array_add(arr_int, &extra_value);
-    assert(result_full == ARRAY_ERROR_FULL);
+    assert(result_full == ARRAY_SUCCESS);
+    assert(arr_int->capacity == 10);
     
     // Test with NULL pointers
     ArrayResult result_null_array = array_add(NULL, &values[0]);
@@ -209,7 +211,7 @@ void test_array_add() {
     
     // Test with different data types
     Array* arr_char = NULL;
-    array_create(3, sizeof(char), &arr_char);
+    array_create(sizeof(char), 3, &arr_char);
     
     char chars[] = {'A', 'B', 'C'};
     for (int i = 0; i < 3; i++) {
@@ -219,7 +221,7 @@ void test_array_add() {
     
     // Test with string
     Array* arr_string = NULL;
-    array_create(2, sizeof(char*), &arr_string);
+    array_create(sizeof(char*), 2, &arr_string);
     
     char* str1 = "Hello";
     char* str2 = "World";
@@ -252,7 +254,7 @@ void test_array_remove() {
 
     // Create a new array for integers
     Array* arr_int = NULL;
-    array_create(5, sizeof(int), &arr_int);
+    array_create(sizeof(int), 5, &arr_int);
 
     // Add elements to the array
     int values[] = {10, 20, 30, 40, 50};
@@ -336,7 +338,7 @@ void test_array_get() {
 
     // Create a new array for integers
     Array* arr_int = NULL;
-    array_create(5, sizeof(int), &arr_int);
+    array_create(sizeof(int), 5, &arr_int);
     
     // Add elements to the array
     int values[] = {10, 20, 30, 40, 50};
@@ -379,7 +381,7 @@ void test_array_set() {
 
     // Create a new array for integers
     Array* arr_int = NULL;
-    array_create(5, sizeof(int), &arr_int);
+    array_create(sizeof(int), 5, &arr_int);
     
     // Add elements to the array
     int values[] = {10, 20, 30, 40, 50};
@@ -420,7 +422,7 @@ void test_array_contains() {
 
     // Create a new array for integers
     Array* arr_int = NULL;
-    array_create(5, sizeof(int), &arr_int);
+    array_create(sizeof(int), 5, &arr_int);
     
     // Add elements to the array
     int values[] = {10, 20, 30, 40, 50};
@@ -461,7 +463,7 @@ void test_array_index_of() {
 
     // Create a new array for integers
     Array* arr_int = NULL;
-    array_create(5, sizeof(int), &arr_int);
+    array_create(sizeof(int), 5, &arr_int);
     
     // Add elements to the array
     int values[] = {10, 20, 30, 40, 50};
@@ -486,7 +488,7 @@ void test_array_index_of() {
 
     // Create an empty array
     Array* arr_empty = NULL;
-    array_create(5, sizeof(int), &arr_empty);
+    array_create(sizeof(int), 5, &arr_empty);
 
     // Test getting the index of an element in an empty array
     ArrayResult result_empty_array = array_index_of(arr_empty, &values[0], &index);

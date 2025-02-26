@@ -57,7 +57,7 @@ int main() {
     check_string_result(string_result);
 
     // Create array
-    array_result = array_create(3, sizeof(String*), &arr);
+    array_result = array_create(sizeof(String*), 3, &arr);
     check_array_result(array_result);
 
     // Add strings to array

@@ -53,13 +53,13 @@ const char* string_result_to_string(StringResult result);
 StringResult string_create(const char* str, size_t capacity, String** str_out);
 
 /**
- * @brief Grow the capacity of a string
+ * @brief Resize the capacity of a string
  * 
- * @param str The string to grow
+ * @param str The string to resize
  * @param new_capacity The new capacity
  * @return A StringResult
  */
-StringResult string_grow(String* str, size_t new_capacity);
+StringResult string_resize(String* str, size_t new_capacity);
 
 /**
  * @brief Set the value of a string

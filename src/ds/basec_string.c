@@ -100,13 +100,13 @@ StringResult string_create(const char* str, size_t capacity, String** str_out) {
 }
 
 /**
- * @brief Grow the capacity of a string
+ * @brief Resize the capacity of a string
  * 
- * @param str The string to grow
+ * @param str The string to resize
  * @param new_capacity The new capacity
  * @return A StringResult
  */
-StringResult string_grow(String* str, size_t new_capacity) {
+StringResult string_resize(String* str, size_t new_capacity) {
     // Check for NULL pointers
     if (str == NULL) {
         return STRING_ERROR_NULL_POINTER;
@@ -159,10 +159,10 @@ StringResult string_set(String* str, const char* value) {
 
     // Check if string needs to be grown
     if (new_length >= str->capacity) {
-        // Grow the string to double the new length
-        StringResult grow_result = string_grow(str, new_length * 2);
-        if (grow_result != STRING_SUCCESS) {
-            return grow_result;
+        // Resize the string to double the new length
+        StringResult resize_result = string_resize(str, new_length * 2);
+        if (resize_result != STRING_SUCCESS) {
+            return resize_result;
         }
     }
 
@@ -293,10 +293,10 @@ StringResult string_append(String* str, String* substr) {
 
     // Check if the string needs to be grown
     if (new_length >= str->capacity) {
-        // Grow the string to double the new length
-        StringResult grow_result = string_grow(str, new_length * 2);
-        if (grow_result != STRING_SUCCESS) {
-            return grow_result;
+        // Resize the string to double the new length
+        StringResult resize_result = string_resize(str, new_length * 2);
+        if (resize_result != STRING_SUCCESS) {
+            return resize_result;
         }
     }
 

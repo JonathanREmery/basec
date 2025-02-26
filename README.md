@@ -20,6 +20,7 @@ basec/                     # Root directory
 ## String
 
 - `string_create`   - Create a new String
+- `string_resize`   - Resize the capacity of a String
 - `string_set`      - Set the value of a String
 - `string_length`   - Get the length of a String
 - `string_capacity` - Get the capacity of a String
@@ -33,6 +34,7 @@ basec/                     # Root directory
 ## Array
 
 - `array_create`    - Create a new Array
+- `array_resize`    - Resize the capacity of an Array
 - `array_destroy`   - Destroy an Array
 - `array_size`      - Get the size of an Array
 - `array_capacity`  - Get the capacity of an Array

@@ -14,9 +14,9 @@
  * @brief Array structure
  */
 typedef struct {
-    size_t size;         //< The size of the array
     size_t element_size; //< The size of the elements in the array
     size_t capacity;     //< The capacity of the array
+    size_t size;         //< The size of the array
     void* data;          //< The data of the array
 } Array;
 
@@ -29,9 +29,9 @@ typedef enum {
     ARRAY_ERROR_INVALID_CAPACITY,      //< The capacity is invalid
     ARRAY_ERROR_INVALID_ELEMENT_SIZE,  //< The element size is invalid
     ARRAY_ERROR_MALLOC,                //< The memory allocation failed
-    ARRAY_ERROR_FULL,                  //< The array is full
-    ARRAY_ERROR_OUT_OF_BOUNDS,         //< The index is out of bounds
+    ARRAY_ERROR_REALLOC,               //< The memory reallocation failed
     ARRAY_ERROR_MEMMOVE,               //< The memory move failed
+    ARRAY_ERROR_OUT_OF_BOUNDS,         //< The index is out of bounds
     ARRAY_ERROR_EMPTY,                 //< The array is empty
     ARRAY_ERROR_NOT_FOUND              //< The element was not found in the array
 } ArrayResult;
@@ -47,12 +47,21 @@ const char* array_result_to_string(ArrayResult result);
 /**
  * @brief Create an array
  * 
- * @param capacity The capacity of the array
  * @param element_size The size of the elements in the array
+ * @param capacity The capacity of the array
  * @param array_out The output array
  * @return The result of the operation
  */
-ArrayResult array_create(size_t capacity, size_t element_size, Array** array_out);
+ArrayResult array_create(size_t element_size, size_t capacity, Array** array_out);
+
+/**
+ * @brief Resize the capacity of an array
+ * 
+ * @param array The array to resize
+ * @param new_capacity The new capacity
+ * @return The result of the operation
+ */
+ArrayResult array_resize(Array* array, size_t new_capacity);
 
 /**
  * @brief Get the size of an array

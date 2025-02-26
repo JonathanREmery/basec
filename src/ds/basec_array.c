@@ -23,12 +23,12 @@ const char* array_result_to_string(ArrayResult result) {
             return "ARRAY_ERROR_INVALID_ELEMENT_SIZE";
         case ARRAY_ERROR_MALLOC:
             return "ARRAY_ERROR_MALLOC";
-        case ARRAY_ERROR_FULL:
-            return "ARRAY_ERROR_FULL";
-        case ARRAY_ERROR_OUT_OF_BOUNDS:
-            return "ARRAY_ERROR_OUT_OF_BOUNDS";
+        case ARRAY_ERROR_REALLOC:
+            return "ARRAY_ERROR_REALLOC";
         case ARRAY_ERROR_MEMMOVE:
             return "ARRAY_ERROR_MEMMOVE";
+        case ARRAY_ERROR_OUT_OF_BOUNDS:
+            return "ARRAY_ERROR_OUT_OF_BOUNDS";
         case ARRAY_ERROR_EMPTY:
             return "ARRAY_ERROR_EMPTY";
         case ARRAY_ERROR_NOT_FOUND:
@@ -41,23 +41,23 @@ const char* array_result_to_string(ArrayResult result) {
 /**
  * @brief Create an array
  * 
- * @param capacity The capacity of the array
  * @param element_size The size of the elements in the array
+ * @param capacity The capacity of the array
  * @param array_out The output array
  * @return The result of the operation
  */
-ArrayResult array_create(size_t capacity, size_t element_size, Array** array_out) {
-    // Check if the capacity is valid
-    if (capacity < 1) {
-        return ARRAY_ERROR_INVALID_CAPACITY;
-    }
-
+ArrayResult array_create(size_t element_size, size_t capacity, Array** array_out) {
     // Check if the element size is valid
     if (element_size < 1) {
         return ARRAY_ERROR_INVALID_ELEMENT_SIZE;
     }
 
-    // Check for NULL pointers
+    // Check if the capacity is valid
+    if (capacity < 1) {
+        return ARRAY_ERROR_INVALID_CAPACITY;
+    }
+
+    // Check for NULL pointer
     if (array_out == NULL) {
         return ARRAY_ERROR_NULL_POINTER;
     }
@@ -82,8 +82,47 @@ ArrayResult array_create(size_t capacity, size_t element_size, Array** array_out
         return ARRAY_ERROR_MALLOC;
     }
 
-    // Return the result
+    // Set the output array
     *array_out = array;
+
+    // Return the success result
+    return ARRAY_SUCCESS;
+}
+
+/**
+ * @brief Resize the capacity of an array
+ * 
+ * @param array The array to resize
+ * @param new_capacity The new capacity
+ * @return The result of the operation
+ */
+ArrayResult array_resize(Array* array, size_t new_capacity) {
+    // Check for NULL pointer
+    if (array == NULL) {
+        return ARRAY_ERROR_NULL_POINTER;
+    }
+
+    // Check if the new capacity is valid
+    if (new_capacity < 1) {
+        return ARRAY_ERROR_INVALID_CAPACITY;
+    }
+    
+    // Check if capacity is already large enough
+    if (new_capacity <= array->capacity) {
+        array->capacity = new_capacity;
+        return ARRAY_SUCCESS;
+    }
+
+    // Reallocate memory for the array
+    array->data = (void*)realloc(array->data, new_capacity * array->element_size);
+    if (array->data == NULL) {
+        return ARRAY_ERROR_REALLOC;
+    }
+
+    // Update the capacity of the array
+    array->capacity = new_capacity;
+
+    // Return the success result
     return ARRAY_SUCCESS;
 }
 
@@ -100,10 +139,10 @@ ArrayResult array_size(Array* array, size_t* size_out) {
         return ARRAY_ERROR_NULL_POINTER;
     }
 
-    // Return the size of the array
+    // Set the output size
     *size_out = array->size;
 
-    // Return the result
+    // Return the success result
     return ARRAY_SUCCESS;
 }
 
@@ -120,10 +159,10 @@ ArrayResult array_capacity(Array* array, size_t* capacity_out) {
         return ARRAY_ERROR_NULL_POINTER;
     }
 
-    // Return the capacity of the array
+    // Set the output capacity
     *capacity_out = array->capacity;
 
-    // Return the result
+    // Return the success result
     return ARRAY_SUCCESS;
 }
 
@@ -142,14 +181,18 @@ ArrayResult array_add(Array* array, void* element) {
 
     // Check if the array is full
     if (array->size >= array->capacity) {
-        return ARRAY_ERROR_FULL;
+        // Resize the array to double the capacity
+        ArrayResult resize_result = array_resize(array, array->capacity * 2);
+        if (resize_result != ARRAY_SUCCESS) {
+            return resize_result;
+        }
     }
 
     // Add the element to the array
     memcpy(array->data + array->element_size * array->size, element, array->element_size);
     array->size++;
 
-    // Return the result
+    // Return the success result
     return ARRAY_SUCCESS;
 }
 
@@ -161,7 +204,7 @@ ArrayResult array_add(Array* array, void* element) {
  * @return The result of the operation
  */
 ArrayResult array_remove(Array* array, uint64_t index) {
-    // Check for NULL pointers
+    // Check for NULL pointer
     if (array == NULL) {
         return ARRAY_ERROR_NULL_POINTER;
     }
@@ -192,7 +235,7 @@ ArrayResult array_remove(Array* array, uint64_t index) {
     // Decrement the size of the array
     array->size--;
 
-    // Return the result
+    // Return the success result
     return ARRAY_SUCCESS;
 }
 
@@ -218,7 +261,7 @@ ArrayResult array_get(Array* array, uint64_t index, void* element_out) {
     // Get the element from the array
     memcpy(element_out, array->data + index * array->element_size, array->element_size);
 
-    // Return the result
+    // Return the success result
     return ARRAY_SUCCESS;
 }
 
@@ -244,7 +287,7 @@ ArrayResult array_set(Array* array, uint64_t index, void* element) {
     // Set the element in the array
     memcpy(array->data + index * array->element_size, element, array->element_size);
 
-    // Return the result
+    // Return the success result
     return ARRAY_SUCCESS;
 }   
 
@@ -264,11 +307,12 @@ ArrayResult array_contains(Array* array, void* element) {
     // Check if the element is in the array
     for (size_t i = 0; i < array->size; i++) {
         if (memcmp(array->data + i * array->element_size, element, array->element_size) == 0) {
+            // Return the success result
             return ARRAY_SUCCESS;
         }
     }
 
-    // Return the result
+    // Return the not found result
     return ARRAY_ERROR_NOT_FOUND;
 }
 
@@ -294,7 +338,10 @@ ArrayResult array_index_of(Array* array, void* element, uint64_t* index_out) {
     // Check if the element is in the array
     for (uint64_t i = 0; i < array->size; i++) {
         if (memcmp(array->data + i * array->element_size, element, array->element_size) == 0) {
+            // Set the output index
             *index_out = i;
+
+            // Return the success result
             return ARRAY_SUCCESS;
         }
     }
@@ -323,6 +370,6 @@ ArrayResult array_destroy(Array** array_ptr) {
     free(*array_ptr);
     *array_ptr = NULL;
 
-    // Return the result
+    // Return the success result
     return ARRAY_SUCCESS;
 }
