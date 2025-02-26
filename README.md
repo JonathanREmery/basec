@@ -46,6 +46,16 @@ basec/                     # Root directory
 - `array_contains`  - Check if an Array contains an element
 - `array_index_of`  - Get the index of an element in an Array
 
+## Queue
+
+- `queue_create`    - Create a new Queue
+- `queue_resize`    - Resize the capacity of a Queue
+- `queue_size`      - Get the size of a Queue
+- `queue_capacity`  - Get the capacity of a Queue
+- `queue_enqueue`   - Enqueue an element to a Queue
+- `queue_dequeue`   - Dequeue an element from a Queue
+- `queue_destroy`   - Destroy a Queue
+
 ## Generating Documentation
 
 ```bash
@@ -72,7 +82,14 @@ make run
 
 ## Roadmap
 
-- [ ] Queue
+- [x] Queue
+  - [x] queue_create
+  - [x] queue_resize
+  - [x] queue_size
+  - [x] queue_capacity
+  - [x] queue_enqueue
+  - [x] queue_dequeue
+  - [x] queue_destroy
 - [ ] Stack
 - [ ] Deque
 - [ ] Linked List
