@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 /**
  * @brief File modes
@@ -21,24 +22,36 @@
  * @brief Result of a file operation
  */
 typedef enum {
-    FILE_SUCCESS,
-    FILE_ERROR_NULL_POINTER,
-    FILE_ERROR_MALLOC,
-    FILE_ERROR_OPEN,
-    FILE_ERROR_CLOSE
+    FILE_SUCCESS,               //< Success
+    FILE_ERROR_NULL_POINTER,    //< Null pointer
+    FILE_ERROR_MALLOC,          //< Memory allocation failed
+    FILE_ERROR_OPEN,            //< File could not be opened
+    FILE_ERROR_DOES_NOT_EXIST,  //< File does not exist
+    FILE_ERROR_ALREADY_EXISTS,  //< File already exists
+    FILE_ERROR_CLOSE,           //< File could not be closed
+    FILE_ERROR_REMOVE           //< File could not be removed
 } FileResult;
 
 /**
  * @brief File type
  */
 typedef struct {
-    char* path;
-    char* mode;
-    FILE* file;
+    char* path; //< Path to the file
+    char* mode; //< Mode to open the file in
+    FILE* file; //< File handle
 } File;
 
 /**
- * @brief Create a file handle
+ * @brief Check if a file exists
+ * 
+ * @param path The path to the file
+ * @param exists_out Pointer to store the result (true if exists, false otherwise)
+ * @return The result of the operation
+ */
+FileResult file_exists(const char* path, bool* exists_out);
+
+/**
+ * @brief Create a File struct
  * 
  * @param path The path to the file
  * @param mode The mode to open the file in
@@ -48,7 +61,7 @@ typedef struct {
 FileResult file_create(const char* path, const char* mode, File** file_out);
 
 /**
- * @brief Open a file
+ * @brief Open a File struct
  * 
  * @param path The path to the file
  * @param mode The mode to open the file in
@@ -58,7 +71,15 @@ FileResult file_create(const char* path, const char* mode, File** file_out);
 FileResult file_open(const char* path, const char* mode, File** file_out);
 
 /**
- * @brief Destroy a file
+ * @brief Remove a file
+ * 
+ * @param path The path to the file
+ * @return The result of the file operation
+ */
+FileResult file_remove(const char* path);
+
+/**
+ * @brief Destroy a File struct
  * 
  * @param file_ptr The file to be destroyed
  * @return The result of the file operation
