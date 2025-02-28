@@ -1,21 +1,31 @@
-# basec
-basec is a C Base Layer, with a focus on memory safety and efficiency.
+# basec - C Base Layer Library
+**basec** is a lightweight C library providing foundational data structures and utilities, emphasizing memory safety, efficiency, and ease of use.
 
 ## Project Structure
 ```
 basec/                     # Root directory
-├── bin/                    # Compiled binary outputs
-│   └── test/                # Test binary outputs
-├── include/                # Header files
-│   └── ds/                  # Data structures headers
-│       └── basec_string.h    # String header
-│       └── basec_array.h     # Array header
-├── src/                    # Source code
-│   └── ds/                  # Data structures implementation
-│       └── basec_string.c    # String implementation
-│       └── basec_array.c     # Array implementation
-├── test/                   # Test files
-└── Makefile                # Build system
+├── bin/                     # Compiled binary outputs
+│   └── test/                  # Test binary outputs
+├── include/                 # Header files
+│   ├── ds/                    # Data structure headers
+│   │   ├── basec_array.h        # Array header
+│   │   ├── basec_queue.h        # Queue header
+│   │   └── basec_string.h       # String header
+│   └── io/                    # I/O headers
+│       └── basec_file.h         # File operations header
+├── src/                     # Source code
+│   ├── ds/                    # Data structure implementations
+│   │   ├── basec_array.c        # Array implementation
+│   │   ├── basec_queue.c        # Queue implementation
+│   │   └── basec_string.c       # String implementation
+│   └── io/                    # I/O implementations
+│       └── basec_file.c         # File operations implementation
+├── test/                    # Test files
+│   ├── ds/                    # Data structure tests
+│   │   └── test_string.c        # String tests
+│   └── io/                    # I/O tests
+│       └── test_file.c          # File tests
+└── Makefile                 # Build system
 ```
 
 ## String
@@ -56,40 +66,52 @@ basec/                     # Root directory
 - `queue_dequeue`   - Dequeue an element from a Queue
 - `queue_destroy`   - Destroy a Queue
 
-## Generating Documentation
+## File Operations
 
+- `file_exists`   - Check if a file exists
+- `file_create`   - Create a new file
+- `file_open`     - Open an existing file
+- `file_remove`   - Remove a file
+- `file_destroy`  - Destroy a file handle
+
+## Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/basec.git
+   cd basec
+   ```
+2. Build the project:
+   ```bash
+   make build
+   ```
+3. (Optional) Run tests to verify:
+   ```bash
+   make test
+   ```
+
+## Usage
+
+### Generating Documentation
+Generate Doxygen documentation for the project:
 ```bash
 doxygen
 ```
 
-## Building
-
+### Building the Project
+Compile the library and tests:
 ```bash
 make build
 ```
 
-## Testing
-
+### Running Tests
+Execute the test suite:
 ```bash
 make test
 ```
 
-## Running
-
+### Running Examples
+Run example programs (if available):
 ```bash
 make run
 ```
-
-## Roadmap
-
-- [x] Queue
-  - [x] queue_create
-  - [x] queue_resize
-  - [x] queue_size
-  - [x] queue_capacity
-  - [x] queue_enqueue
-  - [x] queue_dequeue
-  - [x] queue_destroy
-- [ ] Stack
-- [ ] Deque
-- [ ] Linked List
