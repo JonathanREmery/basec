@@ -6,6 +6,35 @@
 #include "io/basec_file.h"
 
 /**
+ * @brief Convert a FileResult to a string
+ * 
+ * @param result The FileResult to convert
+ * @return The string representation of the FileResult
+ */
+const char* file_result_to_string(FileResult result) {
+    switch (result) {
+        case FILE_SUCCESS:
+            return "FILE_SUCCESS";
+        case FILE_ERROR_NULL_POINTER:
+            return "FILE_ERROR_NULL_POINTER";
+        case FILE_ERROR_MALLOC:
+            return "FILE_ERROR_MALLOC";
+        case FILE_ERROR_OPEN:
+            return "FILE_ERROR_OPEN";
+        case FILE_ERROR_DOES_NOT_EXIST:
+            return "FILE_ERROR_DOES_NOT_EXIST";
+        case FILE_ERROR_ALREADY_EXISTS:
+            return "FILE_ERROR_ALREADY_EXISTS";
+        case FILE_ERROR_CLOSE:
+            return "FILE_ERROR_CLOSE";
+        case FILE_ERROR_REMOVE:
+            return "FILE_ERROR_REMOVE";
+        default:
+            return "UNKNOWN_FILE_RESULT";
+    }
+}
+
+/**
  * @brief Check if a file exists
  * 
  * @param path The path to the file

@@ -33,6 +33,14 @@ typedef enum {
 } FileResult;
 
 /**
+ * @brief Convert a FileResult to a string
+ * 
+ * @param result The FileResult to convert
+ * @return The string representation of the FileResult
+ */
+const char* file_result_to_string(FileResult result);
+
+/**
  * @brief File type
  */
 typedef struct {
