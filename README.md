@@ -68,11 +68,12 @@ basec/                     # Root directory
 
 ## File Operations
 
-- `file_exists`   - Check if a file exists
-- `file_create`   - Create a new file
-- `file_open`     - Open an existing file
-- `file_remove`   - Remove a file
-- `file_destroy`  - Destroy a file handle
+- `file_exists`     - Check if a file exists
+- `file_valid_mode` - Check if a mode is valid
+- `file_create`     - Create a new file
+- `file_open`       - Open an existing file
+- `file_remove`     - Remove a file
+- `file_destroy`    - Destroy a file handle
 
 ## Installation
 

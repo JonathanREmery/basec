@@ -7,141 +7,148 @@
 
 #include <stddef.h>
 #include <stdlib.h>
-#include <string.h>
 #include <stdint.h>
+#include <string.h>
 
 /**
  * @brief Array structure
  */
 typedef struct {
-    size_t element_size; //< The size of the elements in the array
-    size_t capacity;     //< The capacity of the array
-    size_t size;         //< The size of the array
-    void* data;          //< The data of the array
+    size_t element_size; //< Size of the elements in the array
+    size_t capacity;     //< Capacity of the array
+    size_t size;         //< Size of the array
+    void*  data;         //< Data of the array
 } Array;
 
 /**
  * @brief Result of an array operation
  */
 typedef enum {
-    ARRAY_SUCCESS,                     //< The operation was successful
-    ARRAY_ERROR_NULL_POINTER,          //< A NULL pointer was passed to the function
-    ARRAY_ERROR_INVALID_CAPACITY,      //< The capacity is invalid
-    ARRAY_ERROR_INVALID_ELEMENT_SIZE,  //< The element size is invalid
-    ARRAY_ERROR_MALLOC,                //< The memory allocation failed
-    ARRAY_ERROR_REALLOC,               //< The memory reallocation failed
-    ARRAY_ERROR_MEMMOVE,               //< The memory move failed
-    ARRAY_ERROR_OUT_OF_BOUNDS,         //< The index is out of bounds
-    ARRAY_ERROR_EMPTY,                 //< The array is empty
-    ARRAY_ERROR_NOT_FOUND              //< The element was not found in the array
+    ARRAY_SUCCESS,                    //< Success
+    ARRAY_ERROR_NULL_POINTER,         //< NULL pointer
+    ARRAY_ERROR_INVALID_CAPACITY,     //< Invalid capacity
+    ARRAY_ERROR_INVALID_ELEMENT_SIZE, //< Invalid element size
+    ARRAY_ERROR_MALLOC,               //< Malloc failed
+    ARRAY_ERROR_REALLOC,              //< Realloc failed
+    ARRAY_ERROR_MEMCPY,               //< Memcpy failed
+    ARRAY_ERROR_MEMMOVE,              //< Memmove failed
+    ARRAY_ERROR_OUT_OF_BOUNDS,        //< Out of bounds
+    ARRAY_ERROR_EMPTY,                //< Empty
+    ARRAY_FOUND,                      //< Found
+    ARRAY_ERROR_NOT_FOUND             //< Not found
 } ArrayResult;
 
 /**
  * @brief Convert an ArrayResult to a string
  * 
- * @param result The ArrayResult to convert
- * @return A string representation of the ArrayResult
+ * @param result ArrayResult to convert
+ * @return       String representation of the ArrayResult
  */
 const char* array_result_to_string(ArrayResult result);
 
 /**
  * @brief Create an array
  * 
- * @param element_size The size of the elements in the array
- * @param capacity The capacity of the array
- * @param array_out The output array
- * @return The result of the operation
+ * @param element_size Size of the elements in the array
+ * @param capacity     Capacity of the array
+ * @param array_out    Output array
+ * @return             Result of the operation
  */
-ArrayResult array_create(size_t element_size, size_t capacity, Array** array_out);
+ArrayResult array_create(
+    size_t element_size,
+    size_t capacity,
+    Array** array_out
+);
 
 /**
  * @brief Resize the capacity of an array
  * 
- * @param array The array to resize
- * @param new_capacity The new capacity
- * @return The result of the operation
+ * @param array        Array to resize
+ * @param new_capacity New capacity
+ * @return             Result of the operation
  */
 ArrayResult array_resize(Array* array, size_t new_capacity);
 
 /**
  * @brief Get the size of an array
  * 
- * @param array The array to get the size of
- * @param size_out The output size
- * @return The result of the operation
+ * @param array    Array to get the size of
+ * @param size_out Output size
+ * @return         Result of the operation
  */
 ArrayResult array_size(Array* array, size_t* size_out);
 
 /**
  * @brief Get the capacity of an array
  * 
- * @param array The array to get the capacity of
- * @param capacity_out The output capacity
- * @return The result of the operation
+ * @param array        Array to get the capacity of
+ * @param capacity_out Output capacity
+ * @return             Result of the operation
  */
 ArrayResult array_capacity(Array* array, size_t* capacity_out);
 
 /**
  * @brief Add an element to the array
  * 
- * @param array The array to add the element to
- * @param element The element to add
- * @return The result of the operation
+ * @param array   Array to add the element to
+ * @param element Element to add
+ * @return        Result of the operation
  */
 ArrayResult array_add(Array* array, void* element);
 
 /**
  * @brief Remove an element from the array
  * 
- * @param array The array to remove the element from
- * @param index The index of the element to remove
- * @return The result of the operation
+ * @param array Array to remove the element from
+ * @param index Index of the element to remove
+ * @return      Result of the operation
  */
 ArrayResult array_remove(Array* array, uint64_t index);
 
 /**
  * @brief Get an element from the array
  * 
- * @param array The array to get the element from
- * @param index The index of the element to get
- * @param element_out The output element
- * @return The result of the operation
+ * @param array       Array to get the element from
+ * @param index       Index of the element to get
+ * @param element_out Output element
+ * @return            Result of the operation
  */
 ArrayResult array_get(Array* array, uint64_t index, void* element_out);
 
 /**
  * @brief Set an element in the array
  * 
- * @param array The array to set the element in
- * @param index The index of the element to set
- * @param element The element to set
+ * @param array   Array to set the element in
+ * @param index   Index of the element to set
+ * @param element Element to set
+ * @return        Result of the operation
  */
 ArrayResult array_set(Array* array, uint64_t index, void* element);
 
 /**
  * @brief Check if the array contains an element
  * 
- * @param array The array to check
- * @param element The element to check for
- * @return The result of the operation
+ * @param array   Array to check
+ * @param element Element to check for
+ * @return        Result of the operation
  */
 ArrayResult array_contains(Array* array, void* element);
 
 /**
  * @brief Get the index of an element in the array
  * 
- * @param array The array to get the index of
- * @param element The element to get the index of
- * @param index_out The output index
- * @return The result of the operation
+ * @param array     Array to get the index of
+ * @param element   Element to get the index of
+ * @param index_out Output index
+ * @return          Result of the operation
  */
 ArrayResult array_index_of(Array* array, void* element, uint64_t* index_out);
 
 /**
  * @brief Destroy an array
  * 
- * @param array_ptr A pointer to the array to destroy
- * @return The result of the operation
+ * @param array_ptr Pointer to the array to destroy
+ * @return          Result of the operation
  */
 ArrayResult array_destroy(Array** array_ptr);
 
