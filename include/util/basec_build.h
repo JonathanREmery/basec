@@ -58,8 +58,21 @@ typedef struct {
  */
 typedef enum {
     BASEC_BUILD_SUCCESS,
-    BASEC_BUILD_FAILURE,
+    BASEC_BUILD_NULL_POINTER,
+    BASEC_BUILD_ALLOCATION_FAILURE,
+    BASEC_BUILD_MAX_TARGETS_FAILURE,
+    BASEC_BUILD_MAX_SOURCES_FAILURE,
+    BASEC_BUILD_MAX_INCLUDES_FAILURE,
+    BASEC_BUILD_PROC_FAILURE,
+    BASEC_BUILD_COMPILE_FAILURE,
 } BasecBuildResult;
+
+/**
+ * @brief Handle the result of a build operation
+ * 
+ * @param result The result to handle
+ */
+void basec_build_handle_result(BasecBuildResult result);
 
 /**
  * @brief Create a new build system

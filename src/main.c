@@ -6,7 +6,7 @@
 
 static void _build(void) {
     BuildSystem* build_system = NULL;
-    basec_build_system_create(&build_system);
+    basec_build_handle_result(basec_build_system_create(&build_system));
 
     BuildTarget basec = {
         .name = "basec",
@@ -20,10 +20,10 @@ static void _build(void) {
         }
     };
 
-    basec_build_system_add_target(build_system, basec);
-    basec_build_system_build(build_system);
+    basec_build_handle_result(basec_build_system_add_target(build_system, basec));
+    basec_build_handle_result(basec_build_system_build(build_system));
 
-    basec_build_system_destroy(&build_system);
+    basec_build_handle_result(basec_build_system_destroy(&build_system));
 }
 
 int main(void) {
@@ -51,7 +51,6 @@ int main(void) {
     basec_string_handle_result(basec_string_length(&string, &length));
     basec_string_handle_result(basec_string_capacity(&string, &capacity));
 
-    printf("string: %s\n", str);
     printf("string: %s\n", str);
     printf("-> length: %zu\n", length);
     printf("-> capacity: %zu\n\n", capacity);
