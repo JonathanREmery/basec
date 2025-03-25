@@ -1,3 +1,2 @@
 #!/bin/bash
-
-gcc -Wall -Wextra -Werror -pedantic -o bin/build util/build/build.c -Iutil/build -Iinclude
+gcc -Wall -Wextra -pedantic -o bin/basec src/main.c src/util/basec_build.c src/ds/basec_string.c -Iinclude

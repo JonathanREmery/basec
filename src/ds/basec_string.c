@@ -58,8 +58,7 @@ BasecStringResult basec_string_create(BasecString** string, const c_str str, u64
         str,
         (*string)->length
     ) == NULL) return BASEC_STRING_MEMOP_FAILURE;
-
-    (*string)->data[(*string)->length + 1] = '\0';
+    (*string)->data[(*string)->length] = '\0';
 
     (*string)->capacity = capacity;
 
@@ -172,7 +171,7 @@ BasecStringResult basec_string_append(BasecString** string, const c_str append_s
     ) == NULL) return BASEC_STRING_MEMOP_FAILURE;
 
     (*string)->length = new_len;
-    (*string)->data[(*string)->length + 1] = '\0';
+    (*string)->data[(*string)->length] = '\0';
 
     return BASEC_STRING_SUCCESS;
 }
