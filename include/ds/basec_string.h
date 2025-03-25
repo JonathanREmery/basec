@@ -27,8 +27,16 @@ typedef struct {
  */
 typedef enum {
     BASEC_STRING_SUCCESS,
-    BASEC_STRING_FAILURE,
+    BASEC_STRING_NULL_POINTER,
+    BASEC_STRING_ALLOCATION_FAILURE,
+    BASEC_STRING_MEMOP_FAILURE,
 } BasecStringResult;
+
+/**
+ * @brief Handle a string result
+ * @param result The result to handle
+ */
+void basec_string_handle_result(BasecStringResult result);
 
 /**
  * @brief Create a new string
