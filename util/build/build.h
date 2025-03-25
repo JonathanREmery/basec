@@ -12,6 +12,7 @@
 typedef struct {
     const char*  name;
     const char** sources;
+    int          source_count;
     const char*  include_dir;
 } BuildTarget;
 
@@ -19,8 +20,36 @@ typedef struct {
  * @brief Build system
  */
 typedef struct {
-    BuildTarget* targets;
+    BuildTarget** targets;
+    int           target_count;
 } BuildSystem;
+
+/**
+ * @brief Create a new build target
+ * @param name The name of the target
+ * @return A pointer to the new build target
+ */
+BuildTarget* build_target_create(const char* name);
+
+/**
+ * @brief Add a source to the target
+ * @param target The target to add the source to
+ * @param source The source to add
+ */
+void build_target_add_source(BuildTarget* target, const char* source);
+
+/**
+ * @brief Add an include directory to the target
+ * @param target The target to add the include directory to
+ * @param include_dir The include directory to add
+ */
+void build_target_add_include(BuildTarget* target, const char* include_dir);
+
+/**
+ * @brief Destroy a build target
+ * @param target The target to destroy
+ */
+void build_target_destroy(BuildTarget* target);
 
 /**
  * @brief Create a new build system
@@ -31,11 +60,9 @@ BuildSystem* build_system_create(void);
 /**
  * @brief Add a target to the build system
  * @param build_system The build system to add the target to
- * @param name The name of the target
- * @param sources The sources to compile
- * @param include_dir The include directory
+ * @param target The target to add
  */
-void build_system_add_target(BuildSystem* build_system, const char* name, const char** sources, const char* include_dir);
+void build_system_add_target(BuildSystem* build_system, BuildTarget* target);
 
 /**
  * @brief Build the project
