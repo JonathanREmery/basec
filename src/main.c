@@ -4,21 +4,38 @@
 #include "ds/basec_string.h"
 
 int main(void) {
-    BasecString* string = basec_string_create(", ", 128);
-    printf("string: %s\n", basec_string_c_str(string));
-    printf("-> length: %zu\n", string->length);
-    printf("-> capacity: %zu\n\n", string->capacity);
+    BasecString* string = NULL;
+    (void)basec_string_create(&string, ", ", 128);
+
+    c_str str;
+    u64 length;
+    u64 capacity;
+    (void)basec_string_c_str(&string, &str);
+    (void)basec_string_length(&string, &length);
+    (void)basec_string_capacity(&string, &capacity);
+
+    printf("string: %s\n", str);
+    printf("-> length: %zu\n", length);
+    printf("-> capacity: %zu\n\n", capacity);
     
-    basec_string_prepend(string, "Hello");
-    printf("string: %s\n", basec_string_c_str(string));
-    printf("-> length: %zu\n", string->length);
-    printf("-> capacity: %zu\n\n", string->capacity);
+    (void)basec_string_prepend(&string, "Hello");
+    (void)basec_string_c_str(&string, &str);
+    (void)basec_string_length(&string, &length);
+    (void)basec_string_capacity(&string, &capacity);
 
-    basec_string_append(string, "World!");
-    printf("string: %s\n", basec_string_c_str(string));
-    printf("-> length: %zu\n", string->length);
-    printf("-> capacity: %zu\n", string->capacity);
+    printf("string: %s\n", str);
+    printf("-> length: %zu\n", length);
+    printf("-> capacity: %zu\n\n", capacity);
 
-    basec_string_destroy(string);
+    (void)basec_string_append(&string, "World!");
+    (void)basec_string_c_str(&string, &str);
+    (void)basec_string_length(&string, &length);
+    (void)basec_string_capacity(&string, &capacity);
+
+    printf("string: %s\n", str);
+    printf("-> length: %zu\n", length);
+    printf("-> capacity: %zu\n", capacity);
+
+    (void)basec_string_destroy(&string);
     return 0;
 }

@@ -23,38 +23,67 @@ typedef struct {
 } BasecString;
 
 /**
- * @brief Create a new string
- * @param str The string to create
- * @param capacity The capacity of the string
- * @return A pointer to the new string
+ * @brief A result for a string operation
  */
-BasecString* basec_string_create(const c_str str, u64 capacity);
+typedef enum {
+    BASEC_STRING_SUCCESS,
+    BASEC_STRING_FAILURE,
+} BasecStringResult;
+
+/**
+ * @brief Create a new string
+ * @param string The string to create
+ * @param str The c_str to create the string from
+ * @param capacity The capacity of the string
+ * @return The result of the operation
+ */
+BasecStringResult basec_string_create(BasecString** string, const c_str str, u64 capacity);
 
 /**
  * @brief Get the string as a c_str
  * @param string The string to get
- * @return The string as a c_str
+ * @param str_out The c_str to store the string in
+ * @return The result of the operation
  */
-c_str basec_string_c_str(BasecString* string);
+BasecStringResult basec_string_c_str(BasecString** string, c_str* str_out);
+
+/**
+ * @brief Get the length of the string
+ * @param string The string to get the length of
+ * @param length_out The length of the string
+ * @return The result of the operation
+ */
+BasecStringResult basec_string_length(BasecString** string, u64* length_out);
+
+/**
+ * @brief Get the capacity of the string
+ * @param string The string to get the capacity of
+ * @param capacity_out The capacity of the string
+ * @return The result of the operation
+ */
+BasecStringResult basec_string_capacity(BasecString** string, u64* capacity_out);
 
 /**
  * @brief Prepend a string to the string
  * @param string The string to prepend to
  * @param prepend The string to prepend
+ * @return The result of the operation
  */
-void basec_string_prepend(BasecString* string, const c_str prepend);
+BasecStringResult basec_string_prepend(BasecString** string, const c_str prepend);
 
 /**
  * @brief Append a string to the string
  * @param string The string to append to
  * @param append The string to append
+ * @return The result of the operation
  */
-void basec_string_append(BasecString* string, const c_str append);
+BasecStringResult basec_string_append(BasecString** string, const c_str append);
 
 /**
  * @brief Destroy a string
  * @param string The string to destroy
+ * @return The result of the operation
  */
-void basec_string_destroy(BasecString* string);
+BasecStringResult basec_string_destroy(BasecString** string);
 
 #endif
