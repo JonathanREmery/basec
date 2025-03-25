@@ -13,21 +13,22 @@
 
 #include "build.h"
 
-static const char* _BUILD_SOURCE  = "/util/build/build.c";
-static const char* _BUILD_INCLUDE = "/util/build";
-static const char* _BUILD_BINARY  = "/bin/build";
-static const char* _CC            = "gcc";
-static const char* _CFLAGS        = "-Wall -Wextra -Werror -pedantic";
-static const int   _MAX_TARGETS   = 1024;
-static const int   _MAX_SOURCES   = 1024;
+static const c_str _BUILD_SOURCE  = "/util/build/build.c";
+static const c_str _BUILD_INCLUDE = "/util/build";
+static const c_str _BASEC_INCLUDE = "/include";
+static const c_str _BUILD_BINARY  = "/bin/build";
+static const c_str _CC            = "gcc";
+static const c_str _CFLAGS        = "-Wall -Wextra -Werror -pedantic";
+static const u16   _MAX_TARGETS   = 1024;
+static const u16   _MAX_SOURCES   = 1024;
 
-static char basec_path[PATH_MAX];
-static char compile_command[1024];
+static c8 basec_path[PATH_MAX];
+static c8 compile_command[1024];
 
-static char* _get_basec_path(void) {
+static c_str _get_basec_path(void) {
     if (basec_path[0] != '\0') return basec_path;
 
-    char exe_path[PATH_MAX];
+    c8 exe_path[PATH_MAX];
     if (readlink("/proc/self/exe", exe_path, PATH_MAX) == -1) {
         (void)printf("[Error] Failed to get the executable path\n");
         exit(1);
@@ -42,13 +43,13 @@ static char* _get_basec_path(void) {
  * @return If needs to be rebuilt true, otherwise false
  */
 static bool _need_rebuild(void) {
-    const char* basec_path = _get_basec_path();
+    const c_str basec_path = _get_basec_path();
 
-    char exe_path[PATH_MAX];
+    c8 exe_path[PATH_MAX];
     (void)strncpy(exe_path, basec_path, PATH_MAX);
     (void)strncat(exe_path, _BUILD_BINARY, PATH_MAX - strlen(exe_path));
 
-    char source_path[PATH_MAX];
+    c8 source_path[PATH_MAX];
     (void)strncpy(source_path, basec_path, strlen(basec_path));
     (void)strncat(source_path, _BUILD_SOURCE, PATH_MAX - strlen(source_path));
 
@@ -66,7 +67,7 @@ static bool _need_rebuild(void) {
  * @brief Rebuild the build system
  */
 static void _rebuild(void) {
-    const char* basec_path = _get_basec_path();
+    const c_str basec_path = _get_basec_path();
 
     // gcc -Wall -Wextra -Werror -pedantic -o {basec_path}/bin/build {basec_path}/util/build/build.c -I{basec_path}/util/build
     compile_command[0] = '\0';
@@ -82,6 +83,9 @@ static void _rebuild(void) {
     (void)strncat(compile_command, " -I", sizeof(compile_command) - strlen(" -I"));
     (void)strncat(compile_command, basec_path, sizeof(compile_command) - strlen(basec_path));
     (void)strncat(compile_command, _BUILD_INCLUDE, sizeof(compile_command) - strlen(_BUILD_INCLUDE));
+    (void)strncat(compile_command, " -I", sizeof(compile_command) - strlen(" -I"));
+    (void)strncat(compile_command, basec_path, sizeof(compile_command) - strlen(basec_path));
+    (void)strncat(compile_command, _BASEC_INCLUDE, sizeof(compile_command) - strlen(_BASEC_INCLUDE));
 
     FILE* fp = popen(compile_command, "r");
     if (fp == NULL) {
@@ -89,7 +93,7 @@ static void _rebuild(void) {
         exit(1);
     }
 
-    char buffer[1024];
+    c8 buffer[1024];
     (void)fgets(buffer, sizeof(buffer), fp);
 
     if (pclose(fp) != 0) {
@@ -98,11 +102,11 @@ static void _rebuild(void) {
         exit(1);
     }
 
-    char exe_path[PATH_MAX];
+    c8 exe_path[PATH_MAX];
     (void)strncpy(exe_path, basec_path, PATH_MAX);
     (void)strncat(exe_path, _BUILD_BINARY, PATH_MAX - strlen(_BUILD_BINARY));
 
-    char* args[] = {exe_path, NULL};
+    c_str args[] = {exe_path, NULL};
     (void)execve(exe_path, args, __environ);
     
     (void)printf("[Error] Execution of the newly compiled build binary failed\n");
@@ -114,7 +118,7 @@ static void _rebuild(void) {
  * @param name The name of the target
  * @return A pointer to the newly created build target
  */
-BuildTarget* build_target_create(const char* name) {
+BuildTarget* build_target_create(const c_str name) {
     BuildTarget* target = malloc(sizeof(BuildTarget));
     if (target == NULL) {
         (void)printf("[Error] Memory allocation for the build target failed\n");
@@ -123,7 +127,7 @@ BuildTarget* build_target_create(const char* name) {
 
     target->name = name;
 
-    target->sources = malloc(sizeof(char*) * _MAX_SOURCES);
+    target->sources = malloc(sizeof(c_str) * _MAX_SOURCES);
     if (target->sources == NULL) {
         (void)printf("[Error] Memory allocation for the build target sources failed\n");
         exit(1);
@@ -140,7 +144,7 @@ BuildTarget* build_target_create(const char* name) {
  * @param target The target to add the source to
  * @param source The source to add
  */
-void build_target_add_source(BuildTarget* target, const char* source) {
+void build_target_add_source(BuildTarget* target, const c_str source) {
     if (target == NULL || source == NULL) return;
     target->sources[target->source_count++] = source;
 }
@@ -150,7 +154,7 @@ void build_target_add_source(BuildTarget* target, const char* source) {
  * @param target The target to add the include directory to
  * @param include_dir The include directory to add
  */
-void build_target_add_include(BuildTarget* target, const char* include_dir) {
+void build_target_add_include(BuildTarget* target, const c_str include_dir) {
     if (target == NULL || include_dir == NULL) return;
     target->include_dir = include_dir;
 }
@@ -217,13 +221,13 @@ void build_system_build(BuildSystem* build_system) {
 
     (void)printf("[Info] Building project...\n");
 
-    const char* basec_path = _get_basec_path();
-    for (int i = 0; i < build_system->target_count; i++) {
+    const c_str basec_path = _get_basec_path();
+    for (u16 i = 0; i < build_system->target_count; i++) {
         if (build_system->targets[i] == NULL) break;
         
         (void)printf("[Info] Building target: %s\n", build_system->targets[i]->name);
         
-        char bin_path[PATH_MAX];
+        c8 bin_path[PATH_MAX];
         (void)strncpy(bin_path, basec_path, PATH_MAX);
         (void)strncat(bin_path, "/bin/", PATH_MAX - strlen(bin_path));
         (void)strncat(bin_path, build_system->targets[i]->name, PATH_MAX - strlen(bin_path));
@@ -236,8 +240,8 @@ void build_system_build(BuildSystem* build_system) {
         (void)strncat(compile_command, bin_path, sizeof(compile_command) - strlen(bin_path));
         (void)strncat(compile_command, " ", sizeof(compile_command) - 1);
 
-        for (int j = 0; j < build_system->targets[i]->source_count; j++) {
-            char source_path[PATH_MAX];
+        for (u16 j = 0; j < build_system->targets[i]->source_count; j++) {
+            c8 source_path[PATH_MAX];
             (void)strncpy(source_path, basec_path, PATH_MAX);
             (void)strncat(source_path, "/", PATH_MAX - 1);
             (void)strncat(source_path, build_system->targets[i]->sources[j], PATH_MAX - strlen(source_path));
@@ -255,7 +259,7 @@ void build_system_build(BuildSystem* build_system) {
         }
 
         if (build_system->targets[i]->include_dir != NULL) {
-            char include_dir[PATH_MAX];
+            c8 include_dir[PATH_MAX];
             (void)strncpy(include_dir, basec_path, PATH_MAX);
             (void)strncat(include_dir, "/", PATH_MAX - 1);
             (void)strncat(include_dir, build_system->targets[i]->include_dir, PATH_MAX - strlen(build_system->targets[i]->include_dir));
@@ -281,7 +285,7 @@ void build_system_build(BuildSystem* build_system) {
 void build_system_destroy(BuildSystem* build_system) {
     if (build_system == NULL) return;
 
-    for (int i = 0; i < build_system->target_count; i++) {
+    for (u16 i = 0; i < build_system->target_count; i++) {
         if (build_system->targets[i] == NULL) continue;
         build_target_destroy(build_system->targets[i]);
     }
@@ -299,7 +303,7 @@ int main(void) {
     BuildTarget* target = build_target_create("basec");
     build_target_add_source(target, "src/main.c");
     build_target_add_source(target, "src/ds/basec_string.c");
-    build_target_add_include(target, "include/ds");
+    build_target_add_include(target, "include");
 
     BuildSystem* build_system = build_system_create();
     build_system_add_target(build_system, target);

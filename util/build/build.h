@@ -6,14 +6,16 @@
 #ifndef BASEC_BUILD_H
 #define BASEC_BUILD_H
 
+#include "basec_types.h"
+
 /**
  * @brief Target to build
  */
 typedef struct {
-    const char*  name;
-    const char** sources;
-    int          source_count;
-    const char*  include_dir;
+    c_str  name;
+    c_str* sources;
+    u16    source_count;
+    c_str  include_dir;
 } BuildTarget;
 
 /**
@@ -21,7 +23,7 @@ typedef struct {
  */
 typedef struct {
     BuildTarget** targets;
-    int           target_count;
+    u16           target_count;
 } BuildSystem;
 
 /**
@@ -29,21 +31,21 @@ typedef struct {
  * @param name The name of the target
  * @return A pointer to the new build target
  */
-BuildTarget* build_target_create(const char* name);
+BuildTarget* build_target_create(const c_str name);
 
 /**
  * @brief Add a source to the target
  * @param target The target to add the source to
  * @param source The source to add
  */
-void build_target_add_source(BuildTarget* target, const char* source);
+void build_target_add_source(BuildTarget* target, const c_str source);
 
 /**
  * @brief Add an include directory to the target
  * @param target The target to add the include directory to
  * @param include_dir The include directory to add
  */
-void build_target_add_include(BuildTarget* target, const char* include_dir);
+void build_target_add_include(BuildTarget* target, const c_str include_dir);
 
 /**
  * @brief Destroy a build target
