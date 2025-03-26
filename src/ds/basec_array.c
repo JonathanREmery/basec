@@ -7,7 +7,7 @@ static const u8 _GROWTH_FACTOR = 2;
  * @param array The array to grow
  * @return The result of the operation
  */
-static ArrayResult _basec_array_grow(Array* array) {
+static BasecArrayResult _basec_array_grow(BasecArray* array) {
     if (array == NULL) return BASEC_ARRAY_NULL_POINTER;
 
     array->capacity *= _GROWTH_FACTOR;
@@ -21,7 +21,7 @@ static ArrayResult _basec_array_grow(Array* array) {
  * @brief Handle the result of an array operation
  * @param result The result of the operation
  */
-void basec_array_handle_result(ArrayResult result) {
+void basec_array_handle_result(BasecArrayResult result) {
     switch (result) {
         case BASEC_ARRAY_SUCCESS:
             break;
@@ -59,12 +59,16 @@ void basec_array_handle_result(ArrayResult result) {
  * @param element_size The size of the elements in the array
  * @param capacity The capacity of the array
  */
-ArrayResult basec_array_create(Array** array, u64 element_size, u64 capacity) {
+BasecArrayResult basec_array_create(
+    BasecArray** array, 
+    u64 element_size, 
+    u64 capacity
+) {
     if (array == NULL) return BASEC_ARRAY_NULL_POINTER;
     if (element_size <= 0) return BASEC_ARRAY_INVALID_ELEMENT_SIZE;
     if (capacity <= 0) return BASEC_ARRAY_INVALID_CAPACITY;
 
-    *array = (Array*)malloc(sizeof(Array));
+    *array = (BasecArray*)malloc(sizeof(BasecArray));
     if (*array == NULL) return BASEC_ARRAY_ALLOCATION_FAILURE;
 
     (*array)->data = malloc(element_size * capacity);
@@ -83,12 +87,12 @@ ArrayResult basec_array_create(Array** array, u64 element_size, u64 capacity) {
  * @param element The element to push
  * @return The result of the operation
  */
-ArrayResult basec_array_push(Array* array, void* element) {
+BasecArrayResult basec_array_push(BasecArray* array, void* element) {
     if (array == NULL) return BASEC_ARRAY_NULL_POINTER;
     if (element == NULL) return BASEC_ARRAY_NULL_POINTER;
 
     if (array->length >= array->capacity) {
-        ArrayResult result = _basec_array_grow(array);
+        BasecArrayResult result = _basec_array_grow(array);
         if (result != BASEC_ARRAY_SUCCESS) return result;
     }
 
@@ -109,7 +113,7 @@ ArrayResult basec_array_push(Array* array, void* element) {
  * @param element_out The element to pop
  * @return The result of the operation
  */
-ArrayResult basec_array_pop(Array* array, void* element_out) {
+BasecArrayResult basec_array_pop(BasecArray* array, void* element_out) {
     if (array == NULL) return BASEC_ARRAY_NULL_POINTER;
     if (element_out == NULL) return BASEC_ARRAY_NULL_POINTER;
     if (array->length == 0) return BASEC_ARRAY_EMPTY;
@@ -130,7 +134,7 @@ ArrayResult basec_array_pop(Array* array, void* element_out) {
  * @param array The array to destroy
  * @return The result of the operation
  */
-ArrayResult basec_array_destroy(Array** array) {
+BasecArrayResult basec_array_destroy(BasecArray** array) {
     if (array == NULL) return BASEC_ARRAY_NULL_POINTER;
 
     free((*array)->data);

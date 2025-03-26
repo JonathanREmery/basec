@@ -69,7 +69,7 @@ int main(void) {
 
     basec_string_handle_result(basec_string_destroy(&string));
 
-    Array* arr;
+    BasecArray* arr;
     basec_array_handle_result(basec_array_create(&arr, sizeof(u8), 10));
     
     u8 x = 0;

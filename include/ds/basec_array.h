@@ -12,7 +12,7 @@
 #include "basec_types.h"
 
 /**
- * @struct Array
+ * @struct BasecArray
  * @brief A dynamic array implementation
  */
 typedef struct {
@@ -20,10 +20,10 @@ typedef struct {
     u64   element_size;
     u64   length;
     u64   capacity;
-} Array;
+} BasecArray;
 
 /**
- * @enum ArrayResult
+ * @enum BasecArrayResult
  * @brief The result of an array operation
  */
 typedef enum {
@@ -34,14 +34,14 @@ typedef enum {
     BASEC_ARRAY_ALLOCATION_FAILURE,
     BASEC_ARRAY_MEMOP_FAILURE,
     BASEC_ARRAY_EMPTY,
-} ArrayResult;
+} BasecArrayResult;
 
 /**
  * @brief Handle the result of an array operation
  * @param result The result of the operation
  * @return The result of the operation
  */
-void basec_array_handle_result(ArrayResult result);
+void basec_array_handle_result(BasecArrayResult result);
 
 /**
  * @brief Create an array
@@ -49,7 +49,11 @@ void basec_array_handle_result(ArrayResult result);
  * @param element_size The size of the elements in the array
  * @param capacity The capacity of the array
  */
-ArrayResult basec_array_create(Array** array, u64 element_size, u64 capacity);
+BasecArrayResult basec_array_create(
+    BasecArray** array, 
+    u64 element_size, 
+    u64 capacity
+);
 
 /**
  * @brief Push an element to the array
@@ -57,7 +61,7 @@ ArrayResult basec_array_create(Array** array, u64 element_size, u64 capacity);
  * @param element The element to push
  * @return The result of the operation
  */
-ArrayResult basec_array_push(Array* array, void* element);
+BasecArrayResult basec_array_push(BasecArray* array, void* element);
 
 /**
  * @brief Pop an element from the array
@@ -65,12 +69,12 @@ ArrayResult basec_array_push(Array* array, void* element);
  * @param element_out The element to pop
  * @return The result of the operation
  */
-ArrayResult basec_array_pop(Array* array, void* element_out);
+BasecArrayResult basec_array_pop(BasecArray* array, void* element_out);
 
 /**
  * @brief Destroy an array
  * @param array The array to destroy
  */
-ArrayResult basec_array_destroy(Array** array);
+BasecArrayResult basec_array_destroy(BasecArray** array);
 
 #endif
