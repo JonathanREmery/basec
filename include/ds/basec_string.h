@@ -30,6 +30,7 @@ typedef enum {
     BASEC_STRING_NULL_POINTER,
     BASEC_STRING_ALLOCATION_FAILURE,
     BASEC_STRING_MEMOP_FAILURE,
+    BASEC_STRING_NOT_FOUND,
 } BasecStringResult;
 
 /**
@@ -53,7 +54,7 @@ BasecStringResult basec_string_create(BasecString** string, const c_str str, u64
  * @param str_out The c_str to store the string in
  * @return The result of the operation
  */
-BasecStringResult basec_string_c_str(BasecString** string, c_str* str_out);
+BasecStringResult basec_string_c_str(BasecString* string, c_str* str_out);
 
 /**
  * @brief Get the length of the string
@@ -61,7 +62,7 @@ BasecStringResult basec_string_c_str(BasecString** string, c_str* str_out);
  * @param length_out The length of the string
  * @return The result of the operation
  */
-BasecStringResult basec_string_length(BasecString** string, u64* length_out);
+BasecStringResult basec_string_length(BasecString* string, u64* length_out);
 
 /**
  * @brief Get the capacity of the string
@@ -69,7 +70,7 @@ BasecStringResult basec_string_length(BasecString** string, u64* length_out);
  * @param capacity_out The capacity of the string
  * @return The result of the operation
  */
-BasecStringResult basec_string_capacity(BasecString** string, u64* capacity_out);
+BasecStringResult basec_string_capacity(BasecString* string, u64* capacity_out);
 
 /**
  * @brief Prepend a string to the string
@@ -77,7 +78,16 @@ BasecStringResult basec_string_capacity(BasecString** string, u64* capacity_out)
  * @param prepend The string to prepend
  * @return The result of the operation
  */
-BasecStringResult basec_string_prepend(BasecString** string, const c_str prepend);
+BasecStringResult basec_string_prepend(BasecString* string, const c_str prepend);
+
+/**
+ * @brief Find a substring in the string
+ * @param string The string to find the substring in
+ * @param substr The substring to find
+ * @param index_out The index of the substring
+ * @return The result of the operation
+ */
+BasecStringResult basec_string_find(BasecString* string, const c_str substr, u64* index_out);
 
 /**
  * @brief Append a string to the string
@@ -85,7 +95,7 @@ BasecStringResult basec_string_prepend(BasecString** string, const c_str prepend
  * @param append The string to append
  * @return The result of the operation
  */
-BasecStringResult basec_string_append(BasecString** string, const c_str append);
+BasecStringResult basec_string_append(BasecString* string, const c_str append);
 
 /**
  * @brief Destroy a string

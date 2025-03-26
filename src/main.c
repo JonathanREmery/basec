@@ -37,33 +37,40 @@ int main(void) {
 
     basec_string_handle_result(basec_string_create(&string, ", ", 128));
 
-    basec_string_handle_result(basec_string_c_str(&string, &str));
-    basec_string_handle_result(basec_string_length(&string, &length));
-    basec_string_handle_result(basec_string_capacity(&string, &capacity));
+    basec_string_handle_result(basec_string_c_str(string, &str));
+    basec_string_handle_result(basec_string_length(string, &length));
+    basec_string_handle_result(basec_string_capacity(string, &capacity));
 
-    printf("string: %s\n", str);
-    printf("-> length: %zu\n", length);
-    printf("-> capacity: %zu\n\n", capacity);
+    (void)printf("string: %s\n", str);
+    (void)printf("-> length: %zu\n", length);
+    (void)printf("-> capacity: %zu\n\n", capacity);
 
-    basec_string_handle_result(basec_string_prepend(&string, "Hello"));
+    basec_string_handle_result(basec_string_prepend(string, "Hello"));
 
-    basec_string_handle_result(basec_string_c_str(&string, &str));
-    basec_string_handle_result(basec_string_length(&string, &length));
-    basec_string_handle_result(basec_string_capacity(&string, &capacity));
+    basec_string_handle_result(basec_string_c_str(string, &str));
+    basec_string_handle_result(basec_string_length(string, &length));
+    basec_string_handle_result(basec_string_capacity(string, &capacity));
 
-    printf("string: %s\n", str);
-    printf("-> length: %zu\n", length);
-    printf("-> capacity: %zu\n\n", capacity);
+    (void)printf("string: %s\n", str);
+    (void)printf("-> length: %zu\n", length);
+    (void)printf("-> capacity: %zu\n\n", capacity);
 
-    basec_string_handle_result(basec_string_append(&string, "World!"));
+    basec_string_handle_result(basec_string_append(string, "World!"));
 
-    basec_string_handle_result(basec_string_c_str(&string, &str));
-    basec_string_handle_result(basec_string_length(&string, &length));
-    basec_string_handle_result(basec_string_capacity(&string, &capacity));
+    basec_string_handle_result(basec_string_c_str(string, &str));
+    basec_string_handle_result(basec_string_length(string, &length));
+    basec_string_handle_result(basec_string_capacity(string, &capacity));
 
-    printf("string: %s\n", str);
-    printf("-> length: %zu\n", length);
-    printf("-> capacity: %zu\n", capacity);
+    (void)printf("string: %s\n", str);
+    (void)printf("-> length: %zu\n", length);
+    (void)printf("-> capacity: %zu\n", capacity);
+
+    u64 index;
+    basec_string_handle_result(basec_string_find(string, ",", &index));
+    (void)printf("',' index: %zu\n", index);
+
+    basec_string_handle_result(basec_string_find(string, "!", &index));
+    (void)printf("'!' index: %zu\n", index);
 
     basec_string_handle_result(basec_string_destroy(&string));
 
