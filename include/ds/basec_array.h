@@ -34,6 +34,8 @@ typedef enum {
     BASEC_ARRAY_ALLOCATION_FAILURE,
     BASEC_ARRAY_MEMOP_FAILURE,
     BASEC_ARRAY_EMPTY,
+    BASEC_ARRAY_OUT_OF_BOUNDS,
+    BASEC_ARRAY_NOT_FOUND,
 } BasecArrayResult;
 
 /**
@@ -70,6 +72,42 @@ BasecArrayResult basec_array_push(BasecArray* array, void* element);
  * @return The result of the operation
  */
 BasecArrayResult basec_array_pop(BasecArray* array, void* element_out);
+
+/**
+ * @brief Get an element from the array
+ * @param array The array to get from
+ * @param index The index of the element to get
+ * @param element_out The element to get
+ * @return The result of the operation
+ */
+BasecArrayResult basec_array_get(BasecArray* array, u64 index, void* element_out);
+
+/**
+ * @brief Set an element in the array
+ * @param array The array to set in
+ * @param index The index of the element to set
+ * @param element The element to set
+ * @return The result of the operation
+ */
+BasecArrayResult basec_array_set(BasecArray* array, u64 index, void* element);
+
+/**
+ * @brief Check if the array contains an element
+ * @param array The array to check
+ * @param element The element to check
+ * @param contains_out The result of the operation
+ * @return The result of the operation
+ */
+BasecArrayResult basec_array_contains(BasecArray* array, void* element, bool* contains_out);
+
+/**
+ * @brief Find the index of an element in the array
+ * @param array The array to find from
+ * @param element The element to find
+ * @param index_out The index of the element to find
+ * @return The result of the operation
+ */
+BasecArrayResult basec_array_find(BasecArray* array, void* element, u64* index_out);
 
 /**
  * @brief Destroy an array

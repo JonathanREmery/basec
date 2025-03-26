@@ -45,6 +45,26 @@ void basec_array_handle_result(BasecArrayResult result) {
                 "[Error][Array] Operation failed due to an allocation failure.\n"
             );
             exit(1);
+        case BASEC_ARRAY_MEMOP_FAILURE:
+            (void)printf(
+                "[Error][Array] Operation failed due to a memory operation failure.\n"
+            );
+            exit(1);
+        case BASEC_ARRAY_EMPTY:
+            (void)printf(
+                "[Error][Array] Operation failed due to an empty array.\n"
+            );
+            exit(1);
+        case BASEC_ARRAY_OUT_OF_BOUNDS:
+            (void)printf(
+                "[Error][Array] Operation failed due to an out of bounds index.\n"
+            );
+            exit(1);
+        case BASEC_ARRAY_NOT_FOUND:
+            (void)printf(
+                "[Error][Array] Operation failed due to an element not being found.\n"
+            );
+            exit(1);
         default:
             (void)printf(
                 "[Error][Array] An unknown error occurred during array operation.\n"
@@ -127,6 +147,99 @@ BasecArrayResult basec_array_pop(BasecArray* array, void* element_out) {
     ) == NULL) return BASEC_ARRAY_MEMOP_FAILURE;
 
     return BASEC_ARRAY_SUCCESS;
+}
+
+/**
+ * @brief Get an element from the array
+ * @param array The array to get from
+ * @param index The index of the element to get
+ * @param element_out The element to get
+ * @return The result of the operation
+ */
+BasecArrayResult basec_array_get(BasecArray* array, u64 index, void* element_out) {
+    if (array == NULL || element_out == NULL) return BASEC_ARRAY_NULL_POINTER;
+    if (index >= array->length) return BASEC_ARRAY_OUT_OF_BOUNDS;
+
+    if (memcpy(
+        element_out,
+        (void*)((u64)array->data + index * array->element_size),
+        array->element_size
+    ) == NULL) return BASEC_ARRAY_MEMOP_FAILURE;
+
+    return BASEC_ARRAY_SUCCESS;
+}
+
+/**
+ * @brief Set an element in the array
+ * @param array The array to set in
+ * @param index The index of the element to set
+ * @param element The element to set
+ * @return The result of the operation
+ */
+BasecArrayResult basec_array_set(BasecArray* array, u64 index, void* element) {
+    if (array == NULL || element == NULL) return BASEC_ARRAY_NULL_POINTER;
+    if (index >= array->length) return BASEC_ARRAY_OUT_OF_BOUNDS;
+
+    if (memcpy(
+        (void*)((u64)array->data + index * array->element_size),
+        element,
+        array->element_size
+    ) == NULL) return BASEC_ARRAY_MEMOP_FAILURE;
+
+    return BASEC_ARRAY_SUCCESS;
+}
+
+/**
+ * @brief Check if the array contains an element
+ * @param array The array to check
+ * @param element The element to check
+ * @param contains_out The result of the operation
+ * @return The result of the operation
+ */
+BasecArrayResult basec_array_contains(BasecArray* array, void* element, bool* contains_out) {
+    if (array == NULL || element == NULL || contains_out == NULL) {
+        return BASEC_ARRAY_NULL_POINTER;
+    }
+
+    for (u64 i = 0; i < array->length; i++) {
+        if (memcmp(
+            (void*)((u64)array->data + i * array->element_size),
+            element,
+            array->element_size
+        ) == 0) {
+            *contains_out = true;
+            return BASEC_ARRAY_SUCCESS;
+        }
+    }
+
+    *contains_out = false;
+    return BASEC_ARRAY_SUCCESS;
+}
+
+/** 
+ * @brief Find the index of an element in the array
+ * @param array The array to find from
+ * @param element The element to find
+ * @return The result of the operation
+ */
+BasecArrayResult basec_array_find(BasecArray* array, void* element, u64* index_out) {
+    if (array == NULL || element == NULL || index_out == NULL) {
+        return BASEC_ARRAY_NULL_POINTER;
+    }
+
+    for (u64 i = 0; i < array->length; i++) {
+        if (memcmp(
+            (void*)((u64)array->data + i * array->element_size),
+            element,
+            array->element_size
+        ) == 0) {
+            *index_out = i;
+            return BASEC_ARRAY_SUCCESS;
+        }
+    }
+
+    *index_out = -1;
+    return BASEC_ARRAY_NOT_FOUND;
 }
 
 /**
