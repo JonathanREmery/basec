@@ -200,6 +200,111 @@ BasecStringResult basec_string_find(BasecString* string, const c_str substr, u64
     return BASEC_STRING_SUCCESS;
 }
 
+/** 
+ * @brief Find all instances of a substring in the string
+ * @param string The string to find the substrings in
+ * @param substr The substring to find
+ * @param array_out The array to store the indices in
+ * @return The result of the operation
+ */
+BasecStringResult basec_string_find_all(
+    BasecString* string,
+    const c_str substr,
+    BasecArray** array_out
+) {
+    if (string == NULL || substr == NULL || array_out == NULL) return BASEC_STRING_NULL_POINTER;
+
+    BasecArrayResult array_result;
+    u64              substr_len;
+
+    if (*array_out == NULL) {
+        array_result = basec_array_create(
+            array_out,
+            sizeof(u64),
+            2
+        );
+        if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
+    }
+
+    substr_len = strlen(substr);
+    for (u64 i = 0; i < string->length - substr_len; i++) {
+        if (strncmp(string->data + i, substr, substr_len) == 0) {
+            array_result = basec_array_append(*array_out, &i);
+            if (array_result != BASEC_ARRAY_SUCCESS) {
+                (void)basec_array_destroy(array_out);
+                return BASEC_STRING_ARRAY_FAILURE;
+            }
+        }
+    }
+
+    return BASEC_STRING_SUCCESS;
+}
+
+/**
+ * @brief Replace a substring in the string
+ * @param string The string to replace the substring in
+ * @param find The substring to find
+ * @param replace The string to replace the substring with
+ * @param result_out The result of the operation
+ */
+BasecStringResult basec_string_replace(
+    BasecString* string,
+    const c_str  find,
+    const c_str  replace,
+    BasecString** result_out
+) {
+    if (string == NULL || find == NULL || replace == NULL || result_out == NULL) {
+        return BASEC_STRING_NULL_POINTER;
+    }
+
+    BasecStringResult string_result = BASEC_STRING_SUCCESS;
+    BasecString*      result        = NULL;
+    c_str             str           = NULL;
+    u64               substr_start  = 0;
+    u64               find_len      = 0;
+
+    str = (c_str)malloc(string->length + 1);
+    if (str == NULL) return BASEC_STRING_ALLOCATION_FAILURE;
+
+    if (strncpy(str, string->data, string->length) == NULL) {
+        return BASEC_STRING_MEMOP_FAILURE;
+    }
+    str[string->length] = '\0';
+
+    string_result = basec_string_create(&result, "", string->length);
+    if (string_result != BASEC_STRING_SUCCESS) return string_result;
+
+    find_len = strlen(find);
+    for (u64 i = 0; i < string->length - find_len; i++) {
+        if (strncmp(str + i, find, find_len) == 0) {
+            c8 substr[i - substr_start + 1];
+            strncpy(substr, str + substr_start, i - substr_start);
+            substr[i - substr_start] = '\0';
+
+            string_result = basec_string_append(result, substr);
+            if (string_result != BASEC_STRING_SUCCESS) return string_result;
+
+            string_result = basec_string_append(result, replace);
+            if (string_result != BASEC_STRING_SUCCESS) return string_result;
+
+            substr_start = i + find_len;
+            i += find_len - 1;
+        }
+    }
+    
+    string_result = basec_string_append(result, str + substr_start);
+    if (string_result != BASEC_STRING_SUCCESS) return string_result;
+
+    if (*result_out != NULL) {
+        string_result = basec_string_destroy(result_out);
+        if (string_result != BASEC_STRING_SUCCESS) return string_result;
+    }
+    *result_out = result;
+
+    free(str);
+    return BASEC_STRING_SUCCESS;
+}
+
 /**
  * @brief Split a string into an array of strings
  * @param string The string to split
@@ -216,13 +321,13 @@ BasecStringResult basec_string_split(
         return BASEC_STRING_NULL_POINTER;
     }
 
-    BasecArray*       substr_indices;
-    BasecArrayResult  array_result;
-    BasecString*      substring;
-    BasecStringResult string_result;
-    u64               substr_start;
-    u64               substr_end;
-    u64               delim_len;
+    BasecArrayResult  array_result  = BASEC_ARRAY_SUCCESS;
+    BasecArray*       indices       = NULL;
+    BasecStringResult string_result = BASEC_STRING_SUCCESS;
+    u64               substr_start  = 0;
+    u64               substr_end    = string->length;
+    u64               delim_len     = strlen(delimiter);
+    BasecString*      substring     = NULL;
 
     if (*array_out == NULL) { 
         array_result = basec_array_create(
@@ -234,103 +339,60 @@ BasecStringResult basec_string_split(
         if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
     }
 
-    array_result = basec_array_create(
-        &substr_indices,
-        sizeof(u64),
-        2
+    string_result = basec_string_find_all(
+        string,
+        delimiter,
+        &indices
     );
-    if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
+    if (string_result != BASEC_STRING_SUCCESS) return string_result;
 
-    substr_start = 0;
-    substr_end   = string->length;
-    delim_len    = strlen(delimiter);
-
-    if (delim_len < string->length) {
-        for (u64 i = 0; i < string->length - delim_len; i++) {
-            if (strncmp(
-                string->data + i,
-                delimiter,
-                delim_len
-            ) == 0) {
-                substr_end = i;
-
-                array_result = basec_array_push(
-                    substr_indices,
-                    &substr_start
-                );
-                if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
-
-                array_result = basec_array_push(
-                    substr_indices,
-                    &substr_end
-                );
-                if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
-
-                substr_start = i + delim_len;
-            }
-        }
-    }
-
-    if (substr_indices->length == 0) {
-        array_result = basec_array_push(
-            substr_indices,
-            &substr_start
-        );
+    for (u64 i = 0; i < indices->length; i++) {
+        array_result = basec_array_get(indices, i, &substr_end);
         if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
 
-        substr_end = string->length;
-        array_result = basec_array_push(
-            substr_indices,
-            &substr_end
-        );
-        if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
-    } else {
-        substr_start = substr_end + delim_len;
-        array_result = basec_array_push(
-            substr_indices,
-            &substr_start
-        );
-        if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
-        
-        substr_end = string->length;
-        array_result = basec_array_push(
-            substr_indices,
-            &substr_end
-        );
-        if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
-    }
-
-    for (u64 i = 0; i < substr_indices->length; i += 2) {
-        array_result = basec_array_get(
-            substr_indices,
-            i,
-            &substr_start
-        );
-        if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
-
-        array_result = basec_array_get(
-            substr_indices,
-            i + 1,
-            &substr_end
-        );
-        if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
-
-        c_str substr = string->data + substr_start;
-        substr[substr_end - substr_start] = '\0';
+        (void)printf("\n[Debug][String] substr_start: %lu\n", substr_start);
+        (void)printf("[Debug][String] substr_end: %lu\n", substr_end);
 
         string_result = basec_string_create(
             &substring,
-            substr,
+            string->data + substr_start,
             substr_end - substr_start
         );
         if (string_result != BASEC_STRING_SUCCESS) return string_result;
 
-        array_result = basec_array_push(
-            *array_out,
-            &substring
+        array_result = basec_array_append(*array_out, &substring);
+        if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
+
+        substr_start = substr_end + delim_len;
+    }
+
+    if (indices->length == 0) {
+        string_result = basec_string_create(
+            &substring,
+            string->data + substr_start,
+            substr_end - substr_start
         );
+        if (string_result != BASEC_STRING_SUCCESS) return string_result;
+
+        array_result = basec_array_append(*array_out, &substring);
+        if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
+    } else {
+        substr_start = substr_end + delim_len;
+        substr_end = string->length;
+
+        string_result = basec_string_create(
+            &substring,
+            string->data + substr_start,
+            substr_end - substr_start
+        );
+        if (string_result != BASEC_STRING_SUCCESS) return string_result;
+
+        array_result = basec_array_append(*array_out, &substring);
         if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
     }
+
+    array_result = basec_array_destroy(&indices);
+    if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
 
     return BASEC_STRING_SUCCESS;
 }

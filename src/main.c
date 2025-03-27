@@ -7,9 +7,7 @@
 
 static void _build(void) {
     BuildSystem* build_system = NULL;
-    basec_build_handle_result(basec_build_system_create(&build_system));
-
-    BuildTarget basec = {
+    BuildTarget  basec        = {
         .name = "basec",
         .sources = {
             "src/main.c",
@@ -22,6 +20,8 @@ static void _build(void) {
         }
     };
 
+    basec_build_handle_result(basec_build_system_create(&build_system));
+
     basec_build_handle_result(basec_build_system_add_target(build_system, basec));
     basec_build_handle_result(basec_build_system_build(build_system));
 
@@ -31,9 +31,9 @@ static void _build(void) {
 int main(void) {
     _build();
 
-    c_str str = "A1, B2, C3, D4";
-    BasecString* string;
-    BasecArray*  values;
+    c_str        str    = "A1, B2, C3, D4";
+    BasecString* string = NULL;
+    // BasecArray*  values = NULL; 
 
     (void)printf("[Debug][String] str: %s\n", str);
 
@@ -45,28 +45,33 @@ int main(void) {
         )
     );
 
-    basec_array_handle_result(
-        basec_array_create(
-            &values,
-            sizeof(BasecString*),
-            16
-        )
-    );
-
     basec_string_handle_result(
-        basec_string_split(
+        basec_string_replace(
             string,
             ", ",
-            &values
+            "|",
+            &string
         )
     );
 
-    (void)printf("[Debug][String] split(\", \")\n");
-    for (u64 i = 0; i < values->length; i++) {
-        BasecString* value;
-        basec_array_handle_result(basec_array_get(values, i, &value));
-        (void)printf("[Debug][String] -> %s\n", value->data);
-    }
+    (void)printf("[Debug][String] replace(\"A\", \"B\")\n");
+    (void)printf("[Debug][String] -> %s\n", string->data);
+
+    // basec_string_handle_result(
+    //     basec_string_split(
+    //         string,
+    //         ", ",
+    //         &values
+    //     )
+    // );
+
+    // (void)printf("[Debug][String] split(\", \")\n");
+    // for (u64 i = 0; i < values->length; i++) {
+    //     BasecString* value;
+    //     basec_array_handle_result(basec_array_get(values, i, &value));
+    //     (void)printf("[Debug][String] -> %s\n", value->data);
+    // }
+    // if (values->length == 0) (void)printf("[Debug][String] -> none\n");
 
     basec_string_handle_result(
         basec_string_destroy(
@@ -74,11 +79,11 @@ int main(void) {
         )
     );
 
-    basec_string_handle_result(
-        basec_strings_destroy(
-            &values
-        )
-    );
+    // basec_string_handle_result(
+    //     basec_strings_destroy(
+    //         &values
+    //     )
+    // );
 
     BasecArray* arr;
     basec_array_handle_result(basec_array_create(&arr, sizeof(u8), 10));

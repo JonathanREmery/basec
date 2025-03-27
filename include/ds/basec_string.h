@@ -89,7 +89,38 @@ BasecStringResult basec_string_prepend(BasecString* string, const c_str prepend)
  * @param index_out The index of the substring
  * @return The result of the operation
  */
-BasecStringResult basec_string_find(BasecString* string, const c_str substr, u64* index_out);
+BasecStringResult basec_string_find(
+    BasecString* string,
+    const c_str substr,
+    u64* index_out
+);
+
+/**
+ * @brief Find all instances of a substring in the string
+ * @param string The string to find the substrings in
+ * @param substr The substring to find
+ * @param array_out The array to store the indices in
+ * @return The result of the operation
+ */
+BasecStringResult basec_string_find_all(
+    BasecString* string,
+    const c_str  substr,
+    BasecArray** array_out
+);
+
+/**
+ * @brief Replace a substring in the string
+ * @param string The string to replace the substring in
+ * @param find The substring to find
+ * @param replace The string to replace with
+ * @param result_out The result of the operation
+ */
+BasecStringResult basec_string_replace(
+    BasecString*  string,
+    const c_str   find,
+    const c_str   replace,
+    BasecString** result_out
+);
 
 /**
  * @brief Append a string to the string
@@ -108,7 +139,7 @@ BasecStringResult basec_string_append(BasecString* string, const c_str append);
  */
 BasecStringResult basec_string_split(
     BasecString* string,
-    const c_str delimiter,
+    const c_str  delimiter,
     BasecArray** array_out
 );
 

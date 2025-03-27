@@ -128,6 +128,17 @@ BasecArrayResult basec_array_push(BasecArray* array, void* element) {
 }
 
 /**
+ * @brief Append an element to the array (same as push)
+ * @param array The array to append to
+ * @param element The element to append
+ * @return The result of the operation
+ */
+BasecArrayResult basec_array_append(BasecArray* array, void* element) {
+    if (array == NULL || element == NULL) return BASEC_ARRAY_NULL_POINTER;
+    return basec_array_push(array, element);
+}
+
+/**
  * @brief Pop an element from the array
  * @param array The array to pop from
  * @param element_out The element to pop
