@@ -31,43 +31,54 @@ static void _build(void) {
 int main(void) {
     _build();
 
-    BasecString* string = NULL;
+    c_str str = "A1, B2, C3, D4";
+    BasecString* string;
+    BasecArray*  values;
 
-    c_str str;
-    u64 length;
-    u64 capacity;
+    (void)printf("[Debug][String] str: %s\n", str);
 
-    basec_string_handle_result(basec_string_create(&string, ", ", 128));
+    basec_string_handle_result(
+        basec_string_create(
+            &string,
+            str,
+            32
+        )
+    );
 
-    basec_string_handle_result(basec_string_c_str(string, &str));
-    basec_string_handle_result(basec_string_length(string, &length));
-    basec_string_handle_result(basec_string_capacity(string, &capacity));
+    basec_array_handle_result(
+        basec_array_create(
+            &values,
+            sizeof(BasecString*),
+            16
+        )
+    );
 
-    (void)printf("string: %s\n", str);
-    (void)printf("-> length: %zu\n", length);
-    (void)printf("-> capacity: %zu\n\n", capacity);
+    basec_string_handle_result(
+        basec_string_split(
+            string,
+            ", ",
+            &values
+        )
+    );
 
-    basec_string_handle_result(basec_string_prepend(string, "Hello"));
+    (void)printf("[Debug][String] split(\", \")\n");
+    for (u64 i = 0; i < values->length; i++) {
+        BasecString* value;
+        basec_array_handle_result(basec_array_get(values, i, &value));
+        (void)printf("[Debug][String] -> %s\n", value->data);
+    }
 
-    basec_string_handle_result(basec_string_c_str(string, &str));
-    basec_string_handle_result(basec_string_length(string, &length));
-    basec_string_handle_result(basec_string_capacity(string, &capacity));
+    basec_string_handle_result(
+        basec_string_destroy(
+            &string
+        )
+    );
 
-    (void)printf("string: %s\n", str);
-    (void)printf("-> length: %zu\n", length);
-    (void)printf("-> capacity: %zu\n\n", capacity);
-
-    basec_string_handle_result(basec_string_append(string, "World!"));
-
-    basec_string_handle_result(basec_string_c_str(string, &str));
-    basec_string_handle_result(basec_string_length(string, &length));
-    basec_string_handle_result(basec_string_capacity(string, &capacity));
-
-    printf("string: %s\n", str);
-    printf("-> length: %zu\n", length);
-    printf("-> capacity: %zu\n\n", capacity);
-
-    basec_string_handle_result(basec_string_destroy(&string));
+    basec_string_handle_result(
+        basec_strings_destroy(
+            &values
+        )
+    );
 
     BasecArray* arr;
     basec_array_handle_result(basec_array_create(&arr, sizeof(u8), 10));

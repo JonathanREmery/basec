@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include "basec_types.h"
+#include "ds/basec_array.h"
 
 /**
  * @brief A string
@@ -31,6 +32,7 @@ typedef enum {
     BASEC_STRING_ALLOCATION_FAILURE,
     BASEC_STRING_MEMOP_FAILURE,
     BASEC_STRING_NOT_FOUND,
+    BASEC_STRING_ARRAY_FAILURE,
 } BasecStringResult;
 
 /**
@@ -98,10 +100,30 @@ BasecStringResult basec_string_find(BasecString* string, const c_str substr, u64
 BasecStringResult basec_string_append(BasecString* string, const c_str append);
 
 /**
+ * @brief Split a string into an array of strings
+ * @param string The string to split
+ * @param delimiter The delimiter to split the string by
+ * @param array_out The array to store the split strings in
+ * @return The result of the operation
+ */
+BasecStringResult basec_string_split(
+    BasecString* string,
+    const c_str delimiter,
+    BasecArray** array_out
+);
+
+/**
  * @brief Destroy a string
  * @param string The string to destroy
  * @return The result of the operation
  */
 BasecStringResult basec_string_destroy(BasecString** string);
+
+/**
+ * @brief Destroy an array of strings
+ * @param string_arr The array of strings to destroy
+ * @return The result of the operation
+ */
+BasecStringResult basec_strings_destroy(BasecArray** string_arr);
 
 #endif
