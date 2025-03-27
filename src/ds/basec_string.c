@@ -10,7 +10,8 @@ static const u8 _GROWTH_FACTOR = 2;
  * @return The result of the operation
  */
 static BasecStringResult _basec_string_grow(BasecString* string, u64 new_capacity) {
-    if (string == NULL || new_capacity <= 0) return BASEC_STRING_NULL_POINTER;
+    if (string == NULL) return BASEC_STRING_NULL_POINTER;
+    if (new_capacity <= 0) return BASEC_STRING_INVALID_CAPACITY;
 
     string->data = (char*)realloc(string->data, new_capacity * _GROWTH_FACTOR);
     if (string->data == NULL) return BASEC_STRING_ALLOCATION_FAILURE;
@@ -30,6 +31,11 @@ void basec_string_handle_result(BasecStringResult result) {
         case BASEC_STRING_NULL_POINTER:
             (void)printf(
                 "[Error][String] Operation failed due to a null pointer reference.\n"
+            );
+            exit(1);
+        case BASEC_STRING_INVALID_CAPACITY:
+            (void)printf(
+                "[Error][String] Invalid capacity provided to string operation.\n"
             );
             exit(1);
         case BASEC_STRING_ALLOCATION_FAILURE:
@@ -63,7 +69,8 @@ void basec_string_handle_result(BasecStringResult result) {
  * @return The result of the operation
  */
 BasecStringResult basec_string_create(BasecString** string, const c_str str, u64 capacity) {
-    if (str == NULL || capacity <= 0) return BASEC_STRING_NULL_POINTER;
+    if (string == NULL || str == NULL) return BASEC_STRING_NULL_POINTER;
+    if (capacity <= 0) return BASEC_STRING_INVALID_CAPACITY;
 
     *string = (BasecString*)malloc(sizeof(BasecString));
     if (*string == NULL) return BASEC_STRING_ALLOCATION_FAILURE;
@@ -72,15 +79,18 @@ BasecStringResult basec_string_create(BasecString** string, const c_str str, u64
     if ((*string)->length > capacity) capacity = (*string)->length * _GROWTH_FACTOR;
 
     (*string)->data = (c_str)malloc(capacity + 1);
-    if ((*string)->data == NULL) return BASEC_STRING_ALLOCATION_FAILURE;
+    if ((*string)->data == NULL) {
+        free(*string);
+        return BASEC_STRING_ALLOCATION_FAILURE;
+    }
 
-    if (strncpy(
-        (*string)->data,
-        str,
-        (*string)->length
-    ) == NULL) return BASEC_STRING_MEMOP_FAILURE;
+    if (strncpy((*string)->data, str, (*string)->length) == NULL) {
+        free((*string)->data);
+        free(*string);
+        return BASEC_STRING_MEMOP_FAILURE;
+    }
+
     (*string)->data[(*string)->length] = '\0';
-
     (*string)->capacity = capacity;
 
     return BASEC_STRING_SUCCESS;
@@ -134,10 +144,14 @@ BasecStringResult basec_string_capacity(BasecString* string, u64* capacity_out) 
 BasecStringResult basec_string_prepend(BasecString* string, const c_str prepend_str) {
     if (string == NULL || prepend_str == NULL) return BASEC_STRING_NULL_POINTER;
 
-    u64 prepend_len = strlen(prepend_str);
-    u64 new_len = string->length + prepend_len;
+    u64               prepend_len = strlen(prepend_str);
+    u64               new_len     = string->length + prepend_len;
+    BasecStringResult result      = BASEC_STRING_SUCCESS;
 
-    if (new_len > string->capacity) _basec_string_grow(string, new_len);
+    if (new_len > string->capacity) {
+        result = _basec_string_grow(string, new_len);
+        if (result != BASEC_STRING_SUCCESS) return result;
+    }
     
     if (memmove(
         string->data + prepend_len,
@@ -165,20 +179,34 @@ BasecStringResult basec_string_append(BasecString* string, const c_str append_st
     if (string == NULL || append_str == NULL) return BASEC_STRING_NULL_POINTER;
 
     u64 append_len = strlen(append_str);
-    u64 new_len = string->length + append_len;
+    u64 new_len    = string->length + append_len;
+    BasecStringResult result = BASEC_STRING_SUCCESS;
 
-    if (new_len > string->capacity) _basec_string_grow(string, new_len);
+    if (new_len > string->capacity) {
+        result = _basec_string_grow(string, new_len);
+        if (result != BASEC_STRING_SUCCESS) return result;
+    }
 
     if (strncpy(
         string->data + string->length,
         append_str,
         append_len
     ) == NULL) return BASEC_STRING_MEMOP_FAILURE;
-
-    string->length = new_len;
     string->data[string->length] = '\0';
 
+    string->length = new_len;
     return BASEC_STRING_SUCCESS;
+}
+
+/**
+ * @brief Push a string to the string (same as append)
+ * @param string The string to push to
+ * @param push_str The string to push
+ * @return The result of the operation
+ */
+BasecStringResult basec_string_push(BasecString* string, const c_str push_str) {
+    if (string == NULL || push_str == NULL) return BASEC_STRING_NULL_POINTER;
+    return basec_string_append(string, push_str);
 }
 
 /**
@@ -227,7 +255,7 @@ BasecStringResult basec_string_find_all(
     }
 
     substr_len = strlen(substr);
-    for (u64 i = 0; i < string->length - substr_len; i++) {
+    for (u64 i = 0; i < string->length - substr_len + 1; i++) {
         if (strncmp(string->data + i, substr, substr_len) == 0) {
             array_result = basec_array_append(*array_out, &i);
             if (array_result != BASEC_ARRAY_SUCCESS) {
@@ -275,7 +303,7 @@ BasecStringResult basec_string_replace(
     if (string_result != BASEC_STRING_SUCCESS) return string_result;
 
     find_len = strlen(find);
-    for (u64 i = 0; i < string->length - find_len; i++) {
+    for (u64 i = 0; i < string->length - find_len + 1; i++) {
         if (strncmp(str + i, find, find_len) == 0) {
             c8 substr[i - substr_start + 1];
             strncpy(substr, str + substr_start, i - substr_start);
@@ -322,78 +350,53 @@ BasecStringResult basec_string_split(
     }
 
     BasecArrayResult  array_result  = BASEC_ARRAY_SUCCESS;
-    BasecArray*       indices       = NULL;
-    BasecStringResult string_result = BASEC_STRING_SUCCESS;
+    BasecArray*       array         = NULL;
+    u64               delim_len     = 0;
     u64               substr_start  = 0;
-    u64               substr_end    = string->length;
-    u64               delim_len     = strlen(delimiter);
+    BasecStringResult string_result = BASEC_STRING_SUCCESS;
     BasecString*      substring     = NULL;
 
-    if (*array_out == NULL) { 
-        array_result = basec_array_create(
-            array_out,
-            sizeof(BasecString*),
-            2
-        );
+    array_result = basec_array_create(
+        &array,
+        sizeof(BasecString*),
+        2
+    );
+    if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
 
-        if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
+    delim_len = strlen(delimiter);
+    for (u64 i = 0; i < string->length - delim_len + 1; i++) {
+        if (strncmp(string->data + i, delimiter, delim_len) == 0) {
+            c8 substr[i - substr_start + 1];
+            strncpy(substr, string->data + substr_start, i - substr_start);
+            substr[i - substr_start] = '\0';
+
+            string_result = basec_string_create(&substring, substr, i - substr_start + 1);
+            if (string_result != BASEC_STRING_SUCCESS) return string_result;
+
+            array_result = basec_array_append(array, &substring);
+            if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
+
+            substr_start = i + delim_len;
+            i += delim_len - 1;
+        }
     }
 
-    string_result = basec_string_find_all(
-        string,
-        delimiter,
-        &indices
+    string_result = basec_string_create(
+        &substring,
+        string->data + substr_start,
+        string->length - substr_start + 1
     );
     if (string_result != BASEC_STRING_SUCCESS) return string_result;
 
-    for (u64 i = 0; i < indices->length; i++) {
-        array_result = basec_array_get(indices, i, &substr_end);
-        if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
-
-        (void)printf("\n[Debug][String] substr_start: %lu\n", substr_start);
-        (void)printf("[Debug][String] substr_end: %lu\n", substr_end);
-
-        string_result = basec_string_create(
-            &substring,
-            string->data + substr_start,
-            substr_end - substr_start
-        );
-        if (string_result != BASEC_STRING_SUCCESS) return string_result;
-
-        array_result = basec_array_append(*array_out, &substring);
-        if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
-
-        substr_start = substr_end + delim_len;
-    }
-
-    if (indices->length == 0) {
-        string_result = basec_string_create(
-            &substring,
-            string->data + substr_start,
-            substr_end - substr_start
-        );
-        if (string_result != BASEC_STRING_SUCCESS) return string_result;
-
-        array_result = basec_array_append(*array_out, &substring);
-        if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
-    } else {
-        substr_start = substr_end + delim_len;
-        substr_end = string->length;
-
-        string_result = basec_string_create(
-            &substring,
-            string->data + substr_start,
-            substr_end - substr_start
-        );
-        if (string_result != BASEC_STRING_SUCCESS) return string_result;
-
-        array_result = basec_array_append(*array_out, &substring);
-        if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
-    }
-
-    array_result = basec_array_destroy(&indices);
+    array_result = basec_array_append(array, &substring);
     if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
 
+    if (*array_out != NULL) {
+        array_result = basec_array_destroy(array_out);
+        if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
+    }
+
+    *array_out = array;
     return BASEC_STRING_SUCCESS;
 }
 
@@ -419,12 +422,20 @@ BasecStringResult basec_string_destroy(BasecString** string) {
 BasecStringResult basec_strings_destroy(BasecArray** string_arr) {
     if (*string_arr == NULL) return BASEC_STRING_NULL_POINTER;
 
+    BasecArrayResult  array_result;
+    BasecString*      substr;
+    BasecStringResult string_result;
+
     for (u64 i = 0; i < (*string_arr)->length; i++) {
-        BasecString* substr;
-        basec_array_get(*string_arr, i, &substr);
-        basec_string_destroy(&substr);
+        array_result = basec_array_get(*string_arr, i, &substr);
+        if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
+
+        string_result = basec_string_destroy(&substr);
+        if (string_result != BASEC_STRING_SUCCESS) return string_result;
     }
 
-    basec_array_destroy(string_arr);
+    array_result = basec_array_destroy(string_arr);
+    if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
+
     return BASEC_STRING_SUCCESS;
 }

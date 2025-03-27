@@ -33,18 +33,16 @@ int main(void) {
 
     c_str        str    = "A1, B2, C3, D4";
     BasecString* string = NULL;
-    // BasecArray*  values = NULL; 
+    BasecArray*  indices = NULL;
+    BasecArray*  values = NULL; 
 
     (void)printf("[Debug][String] str: %s\n", str);
 
     basec_string_handle_result(
-        basec_string_create(
-            &string,
-            str,
-            32
-        )
+        basec_string_create(&string, str, strlen(str))
     );
 
+    (void)printf("[Debug][String] replace(\", \", \"|\")\n");
     basec_string_handle_result(
         basec_string_replace(
             string,
@@ -53,25 +51,39 @@ int main(void) {
             &string
         )
     );
-
-    (void)printf("[Debug][String] replace(\"A\", \"B\")\n");
     (void)printf("[Debug][String] -> %s\n", string->data);
 
-    // basec_string_handle_result(
-    //     basec_string_split(
-    //         string,
-    //         ", ",
-    //         &values
-    //     )
-    // );
+    basec_string_handle_result(
+        basec_string_split(
+            string,
+            "|",
+            &values
+        )
+    );
 
-    // (void)printf("[Debug][String] split(\", \")\n");
-    // for (u64 i = 0; i < values->length; i++) {
-    //     BasecString* value;
-    //     basec_array_handle_result(basec_array_get(values, i, &value));
-    //     (void)printf("[Debug][String] -> %s\n", value->data);
-    // }
-    // if (values->length == 0) (void)printf("[Debug][String] -> none\n");
+    basec_string_handle_result(
+        basec_string_find_all(
+            string,
+            "|",
+            &indices
+        )
+    );
+
+    (void)printf("[Debug][String] find_all(\" \")\n");
+    for (u64 i = 0; i < indices->length; i++) {
+        u64 index;
+        basec_array_handle_result(basec_array_get(indices, i, &index));
+        (void)printf("[Debug][String] -> %lu\n", index);
+    }
+    if (indices->length == 0) (void)printf("[Debug][String] -> none\n");
+
+    (void)printf("[Debug][String] split(\", \")\n");
+    for (u64 i = 0; i < values->length; i++) {
+        BasecString* value;
+        basec_array_handle_result(basec_array_get(values, i, &value));
+        (void)printf("[Debug][String] -> %s\n", value->data);
+    }
+    if (values->length == 0) (void)printf("[Debug][String] -> none\n");
 
     basec_string_handle_result(
         basec_string_destroy(
@@ -79,11 +91,17 @@ int main(void) {
         )
     );
 
-    // basec_string_handle_result(
-    //     basec_strings_destroy(
-    //         &values
-    //     )
-    // );
+    basec_array_handle_result(
+        basec_array_destroy(
+            &indices
+        )
+    );
+
+    basec_string_handle_result(
+        basec_strings_destroy(
+            &values
+        )
+    );
 
     BasecArray* arr;
     basec_array_handle_result(basec_array_create(&arr, sizeof(u8), 10));

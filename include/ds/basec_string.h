@@ -29,6 +29,7 @@ typedef struct {
 typedef enum {
     BASEC_STRING_SUCCESS,
     BASEC_STRING_NULL_POINTER,
+    BASEC_STRING_INVALID_CAPACITY,
     BASEC_STRING_ALLOCATION_FAILURE,
     BASEC_STRING_MEMOP_FAILURE,
     BASEC_STRING_NOT_FOUND,
@@ -77,10 +78,26 @@ BasecStringResult basec_string_capacity(BasecString* string, u64* capacity_out);
 /**
  * @brief Prepend a string to the string
  * @param string The string to prepend to
- * @param prepend The string to prepend
+ * @param prepend_str The string to prepend
  * @return The result of the operation
  */
-BasecStringResult basec_string_prepend(BasecString* string, const c_str prepend);
+BasecStringResult basec_string_prepend(BasecString* string, const c_str prepend_str);
+
+/**
+ * @brief Append a string to the string
+ * @param string The string to append to
+ * @param append_str The string to append
+ * @return The result of the operation
+ */
+BasecStringResult basec_string_append(BasecString* string, const c_str append_str);
+
+/**
+ * @brief Push a string to the string (same as append)
+ * @param string The string to push to
+ * @param push_str The string to push
+ * @return The result of the operation
+ */
+BasecStringResult basec_string_push(BasecString* string, const c_str push_str);
 
 /**
  * @brief Find a substring in the string
@@ -114,6 +131,7 @@ BasecStringResult basec_string_find_all(
  * @param find The substring to find
  * @param replace The string to replace with
  * @param result_out The result of the operation
+ * @return The result of the operation
  */
 BasecStringResult basec_string_replace(
     BasecString*  string,
@@ -121,14 +139,6 @@ BasecStringResult basec_string_replace(
     const c_str   replace,
     BasecString** result_out
 );
-
-/**
- * @brief Append a string to the string
- * @param string The string to append to
- * @param append The string to append
- * @return The result of the operation
- */
-BasecStringResult basec_string_append(BasecString* string, const c_str append);
 
 /**
  * @brief Split a string into an array of strings
