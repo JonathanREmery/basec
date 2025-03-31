@@ -20,10 +20,8 @@ static void _build(void) {
     };
 
     basec_build_handle_result(basec_build_system_create(&build_system));
-
     basec_build_handle_result(basec_build_system_add_target(build_system, basec));
     basec_build_handle_result(basec_build_system_build(build_system));
-
     basec_build_handle_result(basec_build_system_destroy(&build_system));
 }
 
