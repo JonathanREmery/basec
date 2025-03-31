@@ -258,7 +258,7 @@ BasecStringResult basec_string_contains(
     }
 
     char* substr_ptr = strstr(string->data, substr);
-    *contains_out = substr_ptr == NULL;
+    *contains_out = substr_ptr != NULL;
 
     return BASEC_STRING_SUCCESS;
 }
@@ -478,7 +478,7 @@ BasecStringResult basec_string_split(
  * @param string The string to destroy
  */
 BasecStringResult basec_string_destroy(BasecString** string) {
-    if (*string == NULL) return BASEC_STRING_NULL_POINTER;
+    if (string == NULL || *string == NULL) return BASEC_STRING_NULL_POINTER;
 
     free((*string)->data);
     free(*string);
@@ -493,7 +493,7 @@ BasecStringResult basec_string_destroy(BasecString** string) {
  * @return The result of the operation
  */
 BasecStringResult basec_strings_destroy(BasecArray** string_arr) {
-    if (*string_arr == NULL) return BASEC_STRING_NULL_POINTER;
+    if (string_arr == NULL || *string_arr == NULL) return BASEC_STRING_NULL_POINTER;
 
     BasecArrayResult  array_result;
     BasecString*      substr;
