@@ -49,7 +49,11 @@ void basec_string_handle_result(BasecStringResult result);
  * @param capacity The capacity of the string
  * @return The result of the operation
  */
-BasecStringResult basec_string_create(BasecString** string, const c_str str, u64 capacity);
+BasecStringResult basec_string_create(
+    BasecString** string,
+    const c_str   str,
+    u64           capacity
+);
 
 /**
  * @brief Get the string as a c_str
@@ -73,7 +77,10 @@ BasecStringResult basec_string_length(BasecString* string, u64* length_out);
  * @param capacity_out The capacity of the string
  * @return The result of the operation
  */
-BasecStringResult basec_string_capacity(BasecString* string, u64* capacity_out);
+BasecStringResult basec_string_capacity(
+    BasecString* string,
+    u64*         capacity_out
+);
 
 /**
  * @brief Prepend a string to the string
@@ -81,7 +88,10 @@ BasecStringResult basec_string_capacity(BasecString* string, u64* capacity_out);
  * @param prepend_str The string to prepend
  * @return The result of the operation
  */
-BasecStringResult basec_string_prepend(BasecString* string, const c_str prepend_str);
+BasecStringResult basec_string_prepend(
+    BasecString* string,
+    const c_str  prepend_str
+);
 
 /**
  * @brief Append a string to the string
@@ -89,7 +99,10 @@ BasecStringResult basec_string_prepend(BasecString* string, const c_str prepend_
  * @param append_str The string to append
  * @return The result of the operation
  */
-BasecStringResult basec_string_append(BasecString* string, const c_str append_str);
+BasecStringResult basec_string_append(
+    BasecString* string,
+    const c_str  append_str
+);
 
 /**
  * @brief Push a string to the string (same as append)
@@ -108,8 +121,8 @@ BasecStringResult basec_string_push(BasecString* string, const c_str push_str);
  */
 BasecStringResult basec_string_find(
     BasecString* string,
-    const c_str substr,
-    u64* index_out
+    const c_str  substr,
+    u64*         index_out
 );
 
 /**

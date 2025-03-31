@@ -9,7 +9,10 @@ static const u8 _GROWTH_FACTOR = 2;
  * @param new_capacity The new capacity of the string
  * @return The result of the operation
  */
-static BasecStringResult _basec_string_grow(BasecString* string, u64 new_capacity) {
+static BasecStringResult _basec_string_grow(
+    BasecString* string,
+    u64          new_capacity
+) {
     if (string == NULL) return BASEC_STRING_NULL_POINTER;
     if (new_capacity <= 0) return BASEC_STRING_INVALID_CAPACITY;
 
@@ -21,8 +24,8 @@ static BasecStringResult _basec_string_grow(BasecString* string, u64 new_capacit
 }
 
 /**
- * @brief Handle the result of a string operation by printing an appropriate error message.
- * @param result The result of the string operation to handle, indicating success or the type of error encountered.
+ * @brief Handle the result of a string operation
+ * @param result The result of the string operation to handle
  */
 void basec_string_handle_result(BasecStringResult result) {
     switch (result) {
@@ -30,22 +33,28 @@ void basec_string_handle_result(BasecStringResult result) {
             break;
         case BASEC_STRING_NULL_POINTER:
             (void)printf(
-                "[Error][String] Operation failed due to a null pointer reference.\n"
+                "[Error][String] "
+                "Operation failed due to a null pointer reference.\n"
             );
             exit(1);
         case BASEC_STRING_INVALID_CAPACITY:
             (void)printf(
-                "[Error][String] Invalid capacity provided to string operation.\n"
+                "[Error][String] "
+                "Invalid capacity provided to string operation.\n"
             );
             exit(1);
         case BASEC_STRING_ALLOCATION_FAILURE:
             (void)printf(
-                "[Error][String] Memory allocation failed while attempting to create or manipulate the string.\n"
+                "[Error][String] "
+                "Memory allocation failed "
+                "while attempting to create or manipulate the string.\n"
             );
             exit(1);
         case BASEC_STRING_MEMOP_FAILURE:
             (void)printf(
-                "[Error][String] A memory operation failed, indicating potential corruption or access issues.\n"
+                "[Error][String] "
+                "A memory operation failed, "
+                "indicating potential corruption or access issues.\n"
             );
             exit(1);
         case BASEC_STRING_ARRAY_FAILURE:
@@ -55,7 +64,8 @@ void basec_string_handle_result(BasecStringResult result) {
             exit(1);
         default:
             (void)printf(
-                "[Error][String] An unknown error occurred during string operation.\n"
+                "[Error][String] "
+                "An unknown error occurred during string operation.\n"
             );
             exit(1);
     }
@@ -68,7 +78,11 @@ void basec_string_handle_result(BasecStringResult result) {
  * @param capacity The capacity of the string
  * @return The result of the operation
  */
-BasecStringResult basec_string_create(BasecString** string, const c_str str, u64 capacity) {
+BasecStringResult basec_string_create(
+    BasecString** string,
+    const c_str   str,
+    u64           capacity
+) {
     if (string == NULL || str == NULL) return BASEC_STRING_NULL_POINTER;
     if (capacity <= 0) return BASEC_STRING_INVALID_CAPACITY;
 
@@ -76,7 +90,9 @@ BasecStringResult basec_string_create(BasecString** string, const c_str str, u64
     if (*string == NULL) return BASEC_STRING_ALLOCATION_FAILURE;
 
     (*string)->length = strlen(str);
-    if ((*string)->length > capacity) capacity = (*string)->length * _GROWTH_FACTOR;
+    if ((*string)->length > capacity) {
+        capacity = (*string)->length * _GROWTH_FACTOR;
+    }
 
     (*string)->data = (c_str)malloc(capacity + 1);
     if ((*string)->data == NULL) {
@@ -128,8 +144,13 @@ BasecStringResult basec_string_length(BasecString* string, u64* length_out) {
  * @param capacity_out The capacity of the string
  * @return The result of the operation
  */
-BasecStringResult basec_string_capacity(BasecString* string, u64* capacity_out) {
-    if (string == NULL || capacity_out == NULL) return BASEC_STRING_NULL_POINTER;
+BasecStringResult basec_string_capacity(
+    BasecString* string,
+    u64*         capacity_out
+) {
+    if (string == NULL || capacity_out == NULL) {
+        return BASEC_STRING_NULL_POINTER;
+    }
 
     *capacity_out = string->capacity;
     return BASEC_STRING_SUCCESS;
@@ -141,8 +162,13 @@ BasecStringResult basec_string_capacity(BasecString* string, u64* capacity_out) 
  * @param prepend_str The string to prepend
  * @return The result of the operation
  */
-BasecStringResult basec_string_prepend(BasecString* string, const c_str prepend_str) {
-    if (string == NULL || prepend_str == NULL) return BASEC_STRING_NULL_POINTER;
+BasecStringResult basec_string_prepend(
+    BasecString* string,
+    const c_str  prepend_str
+) {
+    if (string == NULL || prepend_str == NULL) {
+        return BASEC_STRING_NULL_POINTER;
+    }
 
     u64               prepend_len = strlen(prepend_str);
     u64               new_len     = string->length + prepend_len;
@@ -175,14 +201,17 @@ BasecStringResult basec_string_prepend(BasecString* string, const c_str prepend_
  * @param append_str The string to append
  * @return The result of the operation
  */
-BasecStringResult basec_string_append(BasecString* string, const c_str append_str) {
+BasecStringResult basec_string_append(
+    BasecString* string,
+    const c_str  append_str
+) {
     if (string == NULL || append_str == NULL) return BASEC_STRING_NULL_POINTER;
 
-    u64 append_len = strlen(append_str);
-    u64 new_len    = string->length + append_len;
-    BasecStringResult result = BASEC_STRING_SUCCESS;
+    u64               append_len = strlen(append_str);
+    u64               new_len    = string->length + append_len;
+    BasecStringResult result     = BASEC_STRING_SUCCESS;
 
-    if (new_len > string->capacity) {
+    if (new_len >= string->capacity) {
         result = _basec_string_grow(string, new_len);
         if (result != BASEC_STRING_SUCCESS) return result;
     }
@@ -192,7 +221,7 @@ BasecStringResult basec_string_append(BasecString* string, const c_str append_st
         append_str,
         append_len
     ) == NULL) return BASEC_STRING_MEMOP_FAILURE;
-    string->data[string->length] = '\0';
+    string->data[new_len] = '\0';
 
     string->length = new_len;
     return BASEC_STRING_SUCCESS;
@@ -204,7 +233,10 @@ BasecStringResult basec_string_append(BasecString* string, const c_str append_st
  * @param push_str The string to push
  * @return The result of the operation
  */
-BasecStringResult basec_string_push(BasecString* string, const c_str push_str) {
+BasecStringResult basec_string_push(
+    BasecString* string,
+    const c_str  push_str
+) {
     if (string == NULL || push_str == NULL) return BASEC_STRING_NULL_POINTER;
     return basec_string_append(string, push_str);
 }
@@ -216,7 +248,11 @@ BasecStringResult basec_string_push(BasecString* string, const c_str push_str) {
  * @param index_out The index of the substring
  * @return The result of the operation
  */
-BasecStringResult basec_string_find(BasecString* string, const c_str substr, u64* index_out) {
+BasecStringResult basec_string_find(
+    BasecString* string,
+    const c_str  substr,
+    u64*         index_out
+) {
     if (string == NULL || substr == NULL || index_out == NULL) {
         return BASEC_STRING_NULL_POINTER;
     }
@@ -237,10 +273,12 @@ BasecStringResult basec_string_find(BasecString* string, const c_str substr, u64
  */
 BasecStringResult basec_string_find_all(
     BasecString* string,
-    const c_str substr,
+    const c_str  substr,
     BasecArray** array_out
 ) {
-    if (string == NULL || substr == NULL || array_out == NULL) return BASEC_STRING_NULL_POINTER;
+    if (string == NULL || substr == NULL || array_out == NULL) {
+        return BASEC_STRING_NULL_POINTER;
+    }
 
     BasecArrayResult array_result;
     u64              substr_len;
@@ -251,7 +289,9 @@ BasecStringResult basec_string_find_all(
             sizeof(u64),
             2
         );
-        if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
+        if (array_result != BASEC_ARRAY_SUCCESS) {
+            return BASEC_STRING_ARRAY_FAILURE;
+        }
     }
 
     substr_len = strlen(substr);
@@ -276,20 +316,23 @@ BasecStringResult basec_string_find_all(
  * @param result_out The result of the operation
  */
 BasecStringResult basec_string_replace(
-    BasecString* string,
-    const c_str  find,
-    const c_str  replace,
+    BasecString*  string,
+    const c_str   find,
+    const c_str   replace,
     BasecString** result_out
 ) {
-    if (string == NULL || find == NULL || replace == NULL || result_out == NULL) {
+    if (
+            string  == NULL || find       == NULL || 
+            replace == NULL || result_out == NULL
+    ) {
         return BASEC_STRING_NULL_POINTER;
     }
 
-    BasecStringResult string_result = BASEC_STRING_SUCCESS;
-    BasecString*      result        = NULL;
     c_str             str           = NULL;
-    u64               substr_start  = 0;
+    BasecStringResult string_result = BASEC_STRING_SUCCESS;
+    BasecString*      new_string    = NULL;
     u64               find_len      = 0;
+    u64               substr_start  = 0;
 
     str = (c_str)malloc(string->length + 1);
     if (str == NULL) return BASEC_STRING_ALLOCATION_FAILURE;
@@ -299,7 +342,7 @@ BasecStringResult basec_string_replace(
     }
     str[string->length] = '\0';
 
-    string_result = basec_string_create(&result, "", string->length);
+    string_result = basec_string_create(&new_string, "", string->length);
     if (string_result != BASEC_STRING_SUCCESS) return string_result;
 
     find_len = strlen(find);
@@ -309,10 +352,10 @@ BasecStringResult basec_string_replace(
             strncpy(substr, str + substr_start, i - substr_start);
             substr[i - substr_start] = '\0';
 
-            string_result = basec_string_append(result, substr);
+            string_result = basec_string_append(new_string, substr);
             if (string_result != BASEC_STRING_SUCCESS) return string_result;
 
-            string_result = basec_string_append(result, replace);
+            string_result = basec_string_append(new_string, replace);
             if (string_result != BASEC_STRING_SUCCESS) return string_result;
 
             substr_start = i + find_len;
@@ -320,14 +363,14 @@ BasecStringResult basec_string_replace(
         }
     }
     
-    string_result = basec_string_append(result, str + substr_start);
+    string_result = basec_string_append(new_string, str + substr_start);
     if (string_result != BASEC_STRING_SUCCESS) return string_result;
 
     if (*result_out != NULL) {
         string_result = basec_string_destroy(result_out);
         if (string_result != BASEC_STRING_SUCCESS) return string_result;
     }
-    *result_out = result;
+    *result_out = new_string;
 
     free(str);
     return BASEC_STRING_SUCCESS;
@@ -342,7 +385,7 @@ BasecStringResult basec_string_replace(
  */
 BasecStringResult basec_string_split(
     BasecString* string,
-    const c_str delimiter,
+    const c_str  delimiter,
     BasecArray** array_out
 ) {
     if (string == NULL || delimiter == NULL || array_out == NULL) {
@@ -370,11 +413,17 @@ BasecStringResult basec_string_split(
             strncpy(substr, string->data + substr_start, i - substr_start);
             substr[i - substr_start] = '\0';
 
-            string_result = basec_string_create(&substring, substr, i - substr_start + 1);
+            string_result = basec_string_create(
+                &substring,
+                substr,
+                i - substr_start + 1
+            );
             if (string_result != BASEC_STRING_SUCCESS) return string_result;
 
             array_result = basec_array_append(array, &substring);
-            if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
+            if (array_result != BASEC_ARRAY_SUCCESS) {
+                return BASEC_STRING_ARRAY_FAILURE;
+            }
 
             substr_start = i + delim_len;
             i += delim_len - 1;
@@ -393,7 +442,9 @@ BasecStringResult basec_string_split(
 
     if (*array_out != NULL) {
         array_result = basec_array_destroy(array_out);
-        if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
+        if (array_result != BASEC_ARRAY_SUCCESS) {
+            return BASEC_STRING_ARRAY_FAILURE;
+        }
     }
 
     *array_out = array;
@@ -428,7 +479,9 @@ BasecStringResult basec_strings_destroy(BasecArray** string_arr) {
 
     for (u64 i = 0; i < (*string_arr)->length; i++) {
         array_result = basec_array_get(*string_arr, i, &substr);
-        if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_STRING_ARRAY_FAILURE;
+        if (array_result != BASEC_ARRAY_SUCCESS) {
+            return BASEC_STRING_ARRAY_FAILURE;
+        }
 
         string_result = basec_string_destroy(&substr);
         if (string_result != BASEC_STRING_SUCCESS) return string_result;

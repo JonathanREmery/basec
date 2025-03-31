@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "util/basec_build.h"
 #include "ds/basec_string.h"
@@ -31,16 +30,25 @@ static void _build(void) {
 int main(void) {
     _build();
 
-    c_str        str    = "A1, B2, C3, D4";
-    BasecString* string = NULL;
+    c_str        str     = "A1, B2, C3, D4";
+    BasecString* string  = NULL;
     BasecArray*  indices = NULL;
-    BasecArray*  values = NULL; 
-
-    (void)printf("[Debug][String] str: %s\n", str);
+    BasecArray*  values  = NULL; 
 
     basec_string_handle_result(
         basec_string_create(&string, str, strlen(str))
     );
+
+    (void)printf("[Debug][String] string: %s\n", string->data);
+
+    (void)printf("[Debug][String] append(\", E5\")\n");
+    basec_string_handle_result(
+        basec_string_append(
+            string,
+            ", E5"
+        )
+    );
+    (void)printf("[Debug][String] -> %s\n", string->data);
 
     (void)printf("[Debug][String] replace(\", \", \"|\")\n");
     basec_string_handle_result(
@@ -69,7 +77,7 @@ int main(void) {
         )
     );
 
-    (void)printf("[Debug][String] find_all(\" \")\n");
+    (void)printf("[Debug][String] find_all(\"|\")\n");
     for (u64 i = 0; i < indices->length; i++) {
         u64 index;
         basec_array_handle_result(basec_array_get(indices, i, &index));
@@ -77,7 +85,7 @@ int main(void) {
     }
     if (indices->length == 0) (void)printf("[Debug][String] -> none\n");
 
-    (void)printf("[Debug][String] split(\", \")\n");
+    (void)printf("[Debug][String] split(\"|\")\n");
     for (u64 i = 0; i < values->length; i++) {
         BasecString* value;
         basec_array_handle_result(basec_array_get(values, i, &value));

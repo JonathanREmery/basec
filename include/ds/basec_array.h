@@ -13,7 +13,7 @@
 
 /**
  * @struct BasecArray
- * @brief A dynamic array implementation
+ * @brief A dynamic array
  */
 typedef struct {
     void* data;
@@ -53,8 +53,8 @@ void basec_array_handle_result(BasecArrayResult result);
  */
 BasecArrayResult basec_array_create(
     BasecArray** array, 
-    u64 element_size, 
-    u64 capacity
+    u64          element_size, 
+    u64          capacity
 );
 
 /**
@@ -88,7 +88,11 @@ BasecArrayResult basec_array_pop(BasecArray* array, void* element_out);
  * @param element_out The element to get
  * @return The result of the operation
  */
-BasecArrayResult basec_array_get(BasecArray* array, u64 index, void* element_out);
+BasecArrayResult basec_array_get(
+    BasecArray* array,
+    u64         index,
+    void*       element_out
+);
 
 /**
  * @brief Set an element in the array
@@ -106,7 +110,11 @@ BasecArrayResult basec_array_set(BasecArray* array, u64 index, void* element);
  * @param contains_out The result of the operation
  * @return The result of the operation
  */
-BasecArrayResult basec_array_contains(BasecArray* array, void* element, bool* contains_out);
+BasecArrayResult basec_array_contains(
+    BasecArray* array,
+    void*       element,
+    bool*       contains_out
+);
 
 /**
  * @brief Find the index of an element in the array
@@ -115,7 +123,11 @@ BasecArrayResult basec_array_contains(BasecArray* array, void* element, bool* co
  * @param index_out The index of the element to find
  * @return The result of the operation
  */
-BasecArrayResult basec_array_find(BasecArray* array, void* element, u64* index_out);
+BasecArrayResult basec_array_find(
+    BasecArray* array,
+    void*       element,
+    u64*        index_out
+);
 
 /**
  * @brief Destroy an array

@@ -27,47 +27,56 @@ void basec_array_handle_result(BasecArrayResult result) {
             break;
         case BASEC_ARRAY_NULL_POINTER:
             (void)printf(
-                "[Error][Array] Operation failed due to a null pointer reference.\n"
+                "[Error][Array] "
+                "Operation failed due to a null pointer reference.\n"
             );
             exit(1);
         case BASEC_ARRAY_INVALID_ELEMENT_SIZE:
             (void)printf(
-                "[Error][Array] Operation failed due to an invalid element size.\n"
+                "[Error][Array] "
+                "Operation failed due to an invalid element size.\n"
             );
             exit(1);
         case BASEC_ARRAY_INVALID_CAPACITY:
             (void)printf(
-                "[Error][Array] Operation failed due to an invalid capacity.\n"
+                "[Error][Array] "
+                "Operation failed due to an invalid capacity.\n"
             );
             exit(1);
         case BASEC_ARRAY_ALLOCATION_FAILURE:
             (void)printf(
-                "[Error][Array] Operation failed due to an allocation failure.\n"
+                "[Error][Array] "
+                "Operation failed due to an allocation failure.\n"
             );
             exit(1);
         case BASEC_ARRAY_MEMOP_FAILURE:
             (void)printf(
-                "[Error][Array] Operation failed due to a memory operation failure.\n"
+                "[Error][Array] "
+                "Operation failed due to a memory operation failure.\n"
             );
             exit(1);
         case BASEC_ARRAY_EMPTY:
             (void)printf(
-                "[Error][Array] Operation failed due to an empty array.\n"
+                "[Error][Array] "
+                "Operation failed due to an empty array.\n"
             );
             exit(1);
         case BASEC_ARRAY_OUT_OF_BOUNDS:
             (void)printf(
-                "[Error][Array] Operation failed due to an out of bounds index.\n"
+                "[Error][Array] "
+                "Operation failed due to an out of bounds index.\n"
             );
             exit(1);
         case BASEC_ARRAY_NOT_FOUND:
             (void)printf(
-                "[Error][Array] Operation failed due to an element not being found.\n"
+                "[Error][Array] "
+                "Operation failed due to an element not being found.\n"
             );
             exit(1);
         default:
             (void)printf(
-                "[Error][Array] An unknown error occurred during array operation.\n"
+                "[Error][Array] "
+                "An unknown error occurred during array operation.\n"
             );
             exit(1);
     }
@@ -81,8 +90,8 @@ void basec_array_handle_result(BasecArrayResult result) {
  */
 BasecArrayResult basec_array_create(
     BasecArray** array, 
-    u64 element_size, 
-    u64 capacity
+    u64          element_size, 
+    u64          capacity
 ) {
     if (array == NULL) return BASEC_ARRAY_NULL_POINTER;
     if (element_size <= 0) return BASEC_ARRAY_INVALID_ELEMENT_SIZE;
@@ -102,17 +111,19 @@ BasecArrayResult basec_array_create(
 }
 
 /**
- * @brief Push an element to the array
- * @param array The array to push to
- * @param element The element to push
+ * @brief Append an element to the array
+ * @param array The array to append to
+ * @param element The element to append
  * @return The result of the operation
  */
-BasecArrayResult basec_array_push(BasecArray* array, void* element) {
+BasecArrayResult basec_array_append(BasecArray* array, void* element) {
     if (array == NULL) return BASEC_ARRAY_NULL_POINTER;
     if (element == NULL) return BASEC_ARRAY_NULL_POINTER;
 
+    BasecArrayResult result = BASEC_ARRAY_SUCCESS;
+
     if (array->length >= array->capacity) {
-        BasecArrayResult result = _basec_array_grow(array);
+        result = _basec_array_grow(array);
         if (result != BASEC_ARRAY_SUCCESS) return result;
     }
 
@@ -123,19 +134,18 @@ BasecArrayResult basec_array_push(BasecArray* array, void* element) {
     ) == NULL) return BASEC_ARRAY_MEMOP_FAILURE;
 
     array->length++;
-
     return BASEC_ARRAY_SUCCESS;
 }
 
 /**
- * @brief Append an element to the array (same as push)
- * @param array The array to append to
- * @param element The element to append
+ * @brief Push an element to the array (same as append)
+ * @param array The array to push to
+ * @param element The element to push
  * @return The result of the operation
  */
-BasecArrayResult basec_array_append(BasecArray* array, void* element) {
+BasecArrayResult basec_array_push(BasecArray* array, void* element) {
     if (array == NULL || element == NULL) return BASEC_ARRAY_NULL_POINTER;
-    return basec_array_push(array, element);
+    return basec_array_append(array, element);
 }
 
 /**
@@ -167,7 +177,11 @@ BasecArrayResult basec_array_pop(BasecArray* array, void* element_out) {
  * @param element_out The element to get
  * @return The result of the operation
  */
-BasecArrayResult basec_array_get(BasecArray* array, u64 index, void* element_out) {
+BasecArrayResult basec_array_get(
+    BasecArray* array,
+    u64         index,
+    void*       element_out
+) {
     if (array == NULL || element_out == NULL) return BASEC_ARRAY_NULL_POINTER;
     if (index >= array->length) return BASEC_ARRAY_OUT_OF_BOUNDS;
 
@@ -207,7 +221,11 @@ BasecArrayResult basec_array_set(BasecArray* array, u64 index, void* element) {
  * @param contains_out The result of the operation
  * @return The result of the operation
  */
-BasecArrayResult basec_array_contains(BasecArray* array, void* element, bool* contains_out) {
+BasecArrayResult basec_array_contains(
+    BasecArray* array,
+    void*       element,
+    bool*       contains_out
+) {
     if (array == NULL || element == NULL || contains_out == NULL) {
         return BASEC_ARRAY_NULL_POINTER;
     }
@@ -233,7 +251,11 @@ BasecArrayResult basec_array_contains(BasecArray* array, void* element, bool* co
  * @param element The element to find
  * @return The result of the operation
  */
-BasecArrayResult basec_array_find(BasecArray* array, void* element, u64* index_out) {
+BasecArrayResult basec_array_find(
+    BasecArray* array,
+    void*       element,
+    u64*        index_out
+) {
     if (array == NULL || element == NULL || index_out == NULL) {
         return BASEC_ARRAY_NULL_POINTER;
     }
