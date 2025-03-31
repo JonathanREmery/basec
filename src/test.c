@@ -30,8 +30,12 @@ int main(void) {
     BasecTestSuite* test_suite = NULL;
 
     basec_test_handle_result(basec_test_suite_create(&test_suite));
+
     basec_test_handle_result(test_string_add_tests(test_suite));
+
     basec_test_handle_result(basec_test_suite_run(test_suite));
+    basec_test_handle_result(basec_test_suite_print_results(test_suite));
+
     basec_test_handle_result(basec_test_suite_destroy(&test_suite));
 
     return 0;

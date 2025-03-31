@@ -8,12 +8,12 @@
 bool test_string_create(c_str fail_message) {
     BasecString* string = NULL;
 
-    basec_string_create(&string, "Hello, World!", 13);
+    basec_string_create(&string, "Hello, World!", 16);
 
     if (strncmp(string->data, "Hello, World!", 13) != 0) {
         (void)strncpy(
             fail_message,
-            "String data does not match expected value\n",
+            "String data does not match expected value",
             BASEC_TEST_FAIL_MESSAGE_MAX_LEN
         );
         return false;
@@ -22,16 +22,16 @@ bool test_string_create(c_str fail_message) {
     if (string->length != 13) {
         (void)strncpy(
             fail_message,
-            "String length does not match expected value\n",
+            "String length does not match expected value",
             BASEC_TEST_FAIL_MESSAGE_MAX_LEN
         );
         return false;
     }
 
-    if (string->capacity != 14) {
+    if (string->capacity != 16) {
         (void)strncpy(
             fail_message,
-            "String capacity does not match expected value\n",
+            "String capacity does not match expected value",
             BASEC_TEST_FAIL_MESSAGE_MAX_LEN
         );
         return false;
@@ -56,7 +56,7 @@ bool test_string_destroy(c_str fail_message) {
     if (string != NULL) {
         (void)strncpy(
             fail_message,
-            "String was not destroyed\n",
+            "String was not destroyed",
             BASEC_TEST_FAIL_MESSAGE_MAX_LEN
         );
         return false;

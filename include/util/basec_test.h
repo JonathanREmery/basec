@@ -147,4 +147,11 @@ BasecTestResult basec_test_suite_run(BasecTestSuite* test_suite);
  */
 BasecTestResult basec_test_suite_destroy(BasecTestSuite** test_suite);
 
+/**
+ * @brief Print the results of a test suite
+ * @param test_suite The test suite to print the results of
+ * @return The result of the operation
+ */
+BasecTestResult basec_test_suite_print_results(BasecTestSuite* test_suite);
+
 #endif

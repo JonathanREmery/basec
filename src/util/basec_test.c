@@ -277,3 +277,53 @@ BasecTestResult basec_test_suite_destroy(BasecTestSuite** test_suite) {
 
     return BASEC_TEST_SUCCESS;
 }
+
+/**
+ * @brief Print the results of a test suite
+ * @param test_suite The test suite to print the results of
+ * @return The result of the operation
+ */
+BasecTestResult basec_test_suite_print_results(BasecTestSuite* test_suite) {
+    if (test_suite == NULL) return BASEC_TEST_NULL_POINTER;
+    
+    BasecArrayResult array_result = BASEC_ARRAY_SUCCESS;
+    BasecTestModule* test_module  = NULL;
+    BasecTest*       test         = NULL;
+    u64              total_tests  = 0;
+    u64              successful_tests = 0;
+
+    (void)printf("=== basec testing ===\n");
+
+    for (u64 i = 0; i < test_suite->modules->length; i++) {
+        array_result = basec_array_get(test_suite->modules, i, &test_module);
+        if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_TEST_ARRAY_FAILURE;
+
+        (void)printf("\n%s\n", test_module->name);
+
+        for (u64 j = 0; j < test_module->tests->length; j++) {
+            array_result = basec_array_get(test_module->tests, j, &test);
+            if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_TEST_ARRAY_FAILURE;
+
+            if (j < test_module->tests->length - 1) {
+                (void)printf("├──");
+            } else {
+                (void)printf("└──");
+            }
+
+            (void)printf("%s: %s\n", test->name, test->is_success ? "success" : "failure");
+            
+            if (!test->is_success) {
+                (void)printf("│  └──%s\n", test->fail_message);
+            } else {
+                successful_tests++;
+            }
+            
+            total_tests++;
+        }
+    }
+    
+    (void)printf("\ntests (%lu/%lu)\n\n", successful_tests, total_tests);
+    (void)printf("=== basec testing ===\n");
+
+    return BASEC_TEST_SUCCESS;
+}

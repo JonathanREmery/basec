@@ -11,10 +11,12 @@ basec
 ├── include                -- Header Files
 │   ├── basec_types.h        -- Common Types
 │   ├── ds                   -- Data Structures
+│   │   └── tests              -- Data Structure Tests
 │   └── util                 -- Utilities
 └── src                    -- Source Files
     ├── ds                   -- Data Structures
     ├── main.c               -- Example Code
+    ├── test.c               -- Test Code
     └── util                 -- Utilities
 ```
 
@@ -185,4 +187,149 @@ basec_array_handle_result(
 
 (void)printf("find(%lu): %lu", element, index);
 // find(3): 2
+```
+
+## Test Suite
+
+basec has a Test Suite that can be used to manage tests for different Modules.
+The workflow is to create test functions that return a boolean value reflecting
+the success or failure, and takes in a failure message. If the test fails it's
+up to the test function to set the failure message. Then a Test can be created.
+Tests are organized into TestModules. Which are run by the TestSuite. An 
+example of this might look something like this.
+
+```c
+/* arithmetic.h */
+i64 add(i64 x, i64 y);
+i64 sub(i64 x, i64 y);
+
+/* arithmetic.c */
+i64 add(i64 x, i64 y) {
+    return x + y;
+}
+
+i64 sub(i64 x, i64 y) {
+    return x - y;
+}
+
+/* test_arithmetic.h */
+bool            test_add(c_str fail_message);
+bool            test_sub(c_str fail_message);
+BasecTestResult test_arithmetic_add_tests(BasecTestSuite* test_suite)l
+
+/* test_arithmetic.c */
+bool test_add(c_str fail_message) {
+    if (add(5, 3) != 8) {
+        (void)strncpy(
+            fail_message,
+            "add(5, 3) != 8",
+            BASEC_TEST_FAIL_MESSAGE_MAX_LEN
+        );
+        return false;
+    }
+
+    if (add(7, -1) != 6) {
+        (void)strncpy(
+            fail_message,
+            "add(7, -1) != 6",
+            BASEC_TEST_FAIL_MESSAGE_MAX_LEN
+        );
+        return false;
+    }
+
+    return true;
+}
+
+bool test_sub(c_str fail_message) {
+    if (sub(5, 3) != 2) {
+        (void)strncpy(
+            fail_message,
+            "sub(5, 3) != 2",
+            BASEC_TEST_FAIL_MESSAGE_MAX_LEN
+        );
+        return false;
+    }
+
+    if (sub(7, -1) != 8) {
+        (void)strncpy(
+            fail_message,
+            "sub(7, -1) != 8",
+            BASEC_TEST_FAIL_MESSAGE_MAX_LEN
+        );
+        return false;
+    }
+
+    return true;
+}
+
+BasecTestResult test_arithmetic_add_tests(TestSuite* test_suite) {
+    BasecTestResult  test_result = BASEC_TEST_SUCCESS;
+    BasecTest*       add_test = NULL;
+    BasecTest*       sub_test = NULL;
+    BasecTestModule* test_module = NULL;
+
+    test_result = basec_test_create(
+        &add_test,
+        "test_add",
+        "Test the addition function",
+        &test_add
+    );
+    if (test_result != BASEC_TEST_SUCCESS) return test_result;
+
+    test_result = basec_test_create(
+        &sub_test,
+        "test_sub",
+        "Test the subtraction function",
+        &test_sub
+    );
+    if (test_result != BASEC_TEST_SUCCESS) {
+        (void)basec_test_destroy(&add_test);
+        return test_result;
+    }
+    
+    test_result = basec_test_module_create(
+        &test_module,
+        "Arithmetic"
+    );
+    if (test_result != BASEC_TEST_SUCCESS) {
+        (void)basec_test_destroy(&add_test);
+        (void)basec_test_destroy(&sub_test);
+        return test_result;
+    }
+
+    test_result = basec_test_module_add_test(test_module, add_test);
+    if (test_result != BASEC_TEST_SUCCESS) {
+        (void)basec_test_destroy(&add_test);
+        (void)basec_test_destroy(&sub_test);
+        (void)basec_test_module_destroy(&test_module);
+        return test_result;
+    }
+
+    test_result = basec_test_module_add_test(test_module, sub_test);
+    if (test_result != BASEC_TEST_SUCCESS) {
+        (void)basec_test_destroy(&sub_test);
+        (void)basec_test_module_destroy(&test_module);
+        return test_result;
+    }
+    
+    test_result = basec_test_suite_add_module(test_suite, test_module);
+    if (test_result != BASEC_TEST_SUCCESS) {
+        (void)basec_test_module_destroy(&test_module);
+        return test_result;
+    }
+
+    return BASEC_TEST_SUCCESS;
+}
+
+/* test.c */
+BasecTestSuite* test_suite = NULL;
+
+basec_test_handle_result(basec_test_suite_create(&test_suite));
+
+basec_test_handle_result(test_arithmetic_add_tests(test_suite));
+
+basec_test_handle_result(basec_test_suite_run(test_suite));
+basec_test_handle_result(basec_test_suite_print_results(test_suite));
+
+basec_test_handle_result(basec_test_suite_destroy(&test_suite));
 ```
