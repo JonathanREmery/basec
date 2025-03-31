@@ -58,20 +58,20 @@ BasecArrayResult basec_array_create(
 );
 
 /**
- * @brief Push an element to the array
- * @param array The array to push to
- * @param element The element to push
- * @return The result of the operation
- */
-BasecArrayResult basec_array_push(BasecArray* array, void* element);
-
-/**
- * @brief Append an element to the array (same as push)
+ * @brief Append an element to the array
  * @param array The array to append to
  * @param element The element to append
  * @return The result of the operation
  */
 BasecArrayResult basec_array_append(BasecArray* array, void* element);
+
+/**
+ * @brief Push an element to the array (same as append)
+ * @param array The array to push to
+ * @param element The element to push
+ * @return The result of the operation
+ */
+BasecArrayResult basec_array_push(BasecArray* array, void* element);
 
 /**
  * @brief Pop an element from the array
@@ -127,6 +127,19 @@ BasecArrayResult basec_array_find(
     BasecArray* array,
     void*       element,
     u64*        index_out
+);
+
+/**
+ * @brief Find all instances of an element in the array
+ * @param array The array to find the element in
+ * @param element The element to find
+ * @param array_out The array to store the indices in
+ * @return The result of the operation
+ */
+BasecArrayResult basec_array_find_all(
+    BasecArray*  array,
+    void*        element,
+    BasecArray** array_out
 );
 
 /**

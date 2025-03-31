@@ -276,6 +276,59 @@ BasecArrayResult basec_array_find(
 }
 
 /**
+ * @brief Find all instances of an element in the array
+ * @param array The array to find the element in
+ * @param element The element to find
+ * @param array_out The array to store the indices in
+ * @return The result of the operation
+ */
+BasecArrayResult basec_array_find_all(
+    BasecArray*  array,
+    void*        element,
+    BasecArray** array_out
+) {
+    if (array == NULL || element == NULL || array_out == NULL) {
+        return BASEC_ARRAY_NULL_POINTER;
+    }
+
+    BasecArrayResult array_result;
+    BasecArray*      indices;
+
+    array_result = basec_array_create(
+        &indices,
+        sizeof(u64),
+        2
+    );
+    if (array_result != BASEC_ARRAY_SUCCESS) return array_result;
+
+    for (u64 i = 0; i < array->length; i++) {
+        void* cur_element = NULL;
+        array_result = basec_array_get(
+            array,
+            i,
+            cur_element
+        );
+        if (array_result != BASEC_ARRAY_SUCCESS) return array_result;
+
+        if (memcmp(cur_element, element, array->element_size) == 0) {
+            array_result = basec_array_append(
+                indices,
+                &i
+            );
+            if (array_result != BASEC_ARRAY_SUCCESS) return array_result;
+        }
+    }
+
+    if (*array_out != NULL) {
+        array_result = basec_array_destroy(array_out);
+        if (array_result != BASEC_ARRAY_SUCCESS) return array_result;
+    }
+
+    *array_out = indices;
+    return BASEC_ARRAY_SUCCESS;
+}
+
+/**
  * @brief Destroy an array
  * @param array The array to destroy
  * @return The result of the operation

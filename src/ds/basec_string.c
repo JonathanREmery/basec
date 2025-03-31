@@ -242,6 +242,28 @@ BasecStringResult basec_string_push(
 }
 
 /**
+ * @brief Check if string contains substring
+ * @param string The string to find the substring in
+ * @param substr The substring to find
+ * @param contains_out The boolean to store the result in
+ * @return The result of the operation
+ */
+BasecStringResult basec_string_contains(
+    BasecString* string,
+    const c_str  substr,
+    bool*        contains_out
+) {
+    if (string == NULL || substr == NULL || contains_out == NULL) {
+        return BASEC_STRING_NULL_POINTER;
+    }
+
+    char* substr_ptr = strstr(string->data, substr);
+    *contains_out = substr_ptr == NULL;
+
+    return BASEC_STRING_SUCCESS;
+}
+
+/**
  * @brief Find a substring in the string
  * @param string The string to find the substring in
  * @param substr The substring to find

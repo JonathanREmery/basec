@@ -1,4 +1,4 @@
-.vscode/
-bin/
+basec
 compile_commands.json
 .cache/
+.vscode/
