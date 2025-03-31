@@ -109,45 +109,5 @@ int main(void) {
         )
     );
 
-    BasecArray* arr;
-    basec_array_handle_result(basec_array_create(&arr, sizeof(u8), 10));
-    
-    u8 x = 0;
-    basec_array_handle_result(basec_array_push(arr, &x));
-    x = 1;
-    basec_array_handle_result(basec_array_push(arr, &x));
-    x = 2;
-    basec_array_handle_result(basec_array_push(arr, &x));
-    x = 3;
-    basec_array_handle_result(basec_array_push(arr, &x));
-
-    (void)printf("array: 0x%lX\n", (u64)arr);
-    for (u64 i = 0; i < arr->length; i++) {
-        u8 element;
-        basec_array_handle_result(basec_array_get(arr, i, &element));
-        (void)printf("-> [%zu] %d\n", i, element);
-
-        u8 incremented_element = element + 1;
-        basec_array_handle_result(basec_array_set(arr, i, &incremented_element));
-    }
-
-    x = 3;
-    bool contains;
-    basec_array_handle_result(basec_array_contains(arr, &x, &contains));
-    (void)printf("contains %d: %d\n", x, contains);
-
-    u64 index;
-    basec_array_handle_result(basec_array_find(arr, &x, &index));
-    (void)printf("index of %d: %zu\n", x, index);
-
-    (void)printf("popping from array\n");
-
-    u8 y;
-    while (basec_array_pop(arr, &y) == BASEC_ARRAY_SUCCESS) {
-        (void)printf("-> [%zu] %d\n", arr->length, y);
-    }
-
-    basec_array_handle_result(basec_array_destroy(&arr));
-
     return 0;
 }

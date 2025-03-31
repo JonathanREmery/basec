@@ -33,6 +33,8 @@ typedef struct {
  */
 typedef struct {
     BasecArray* modules;
+    BasecArray* passed_tests;
+    BasecArray* failed_tests;
 } BasecTestSuite;
 
 /**
@@ -104,9 +106,15 @@ BasecTestResult basec_test_module_add_test(BasecTestModule* test_module, BasecTe
 /**
  * @brief Run a test module
  * @param test_module The test module to run
+ * @param passed_tests The array to store passed tests
+ * @param failed_tests The array to store failed tests
  * @return The result of the operation
  */
-BasecTestResult basec_test_module_run(BasecTestModule* test_module);
+BasecTestResult basec_test_module_run(
+    BasecTestModule* test_module,
+    BasecArray* passed_tests,
+    BasecArray* failed_tests
+);
 
 /**
  * @brief Destroy a test module

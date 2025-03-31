@@ -5,8 +5,8 @@
 
 #include "util/basec_build.h"
 
-#define _BASEC_BUILD_BIN_DIR                     "bin"
-#define _BASEC_BUILD_COMPILE_COMMAND             "gcc -Wall -Wextra -Werror -pedantic -o "
+#define _BASEC_BUILD_BIN_DIR                      "bin"
+#define _BASEC_BUILD_COMPILE_COMMAND              "gcc -Wall -Wextra -Werror -pedantic -o "
 #define _BASEC_BUILD_COMPILE_COMMAND_LENGTH       4096
 #define _BASEC_BUILD_COMPILE_OUTPUT_LINE_LENGTH   256
 #define _BASEC_BUILD_COMPILE_OUTPUT_BUFFER_LENGTH 4096

@@ -133,9 +133,15 @@ BasecTestResult basec_test_module_add_test(BasecTestModule* test_module, BasecTe
 /**
  * @brief Run a test module
  * @param test_module The test module to run
+ * @param passed_tests The array to store passed tests
+ * @param failed_tests The array to store failed tests
  * @return The result of the operation
  */
-BasecTestResult basec_test_module_run(BasecTestModule* test_module) {
+BasecTestResult basec_test_module_run(
+    BasecTestModule* test_module,
+    BasecArray* passed_tests,
+    BasecArray* failed_tests
+) {
     if (test_module == NULL) return BASEC_TEST_NULL_POINTER;
 
     BasecArrayResult array_result = BASEC_ARRAY_SUCCESS;
@@ -148,6 +154,14 @@ BasecTestResult basec_test_module_run(BasecTestModule* test_module) {
 
         test_result = basec_test_run(test);
         if (test_result != BASEC_TEST_SUCCESS) return test_result;
+
+        if (test->is_success) {
+            array_result = basec_array_append(passed_tests, &test);
+            if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_TEST_ARRAY_FAILURE;
+        } else {
+            array_result = basec_array_append(failed_tests, &test);
+            if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_TEST_ARRAY_FAILURE;
+        }
     }
 
     return BASEC_TEST_SUCCESS;
@@ -195,11 +209,27 @@ BasecTestResult basec_test_suite_create(BasecTestSuite** test_suite) {
     if (*test_suite == NULL) return BASEC_TEST_ALLOCATION_FAILURE;
 
     (*test_suite)->modules = NULL;
+    (*test_suite)->passed_tests = NULL;
+    (*test_suite)->failed_tests = NULL;
 
     array_result = basec_array_create(
         &(*test_suite)->modules,
         sizeof(BasecTestModule*),
         5
+    );
+    if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_TEST_ARRAY_FAILURE;
+    
+    array_result = basec_array_create(
+        &(*test_suite)->passed_tests,
+        sizeof(BasecTest*),
+        10
+    );
+    if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_TEST_ARRAY_FAILURE;
+    
+    array_result = basec_array_create(
+        &(*test_suite)->failed_tests,
+        sizeof(BasecTest*),
+        10
     );
     if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_TEST_ARRAY_FAILURE;
 
@@ -242,7 +272,11 @@ BasecTestResult basec_test_suite_run(BasecTestSuite* test_suite) {
         array_result = basec_array_get(test_suite->modules, i, &test_module);
         if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_TEST_ARRAY_FAILURE;
 
-        test_result = basec_test_module_run(test_module);
+        test_result = basec_test_module_run(
+            test_module,
+            test_suite->passed_tests,
+            test_suite->failed_tests
+        );
         if (test_result != BASEC_TEST_SUCCESS) return test_result;
     }
 
@@ -271,6 +305,12 @@ BasecTestResult basec_test_suite_destroy(BasecTestSuite** test_suite) {
 
     array_result = basec_array_destroy(&(*test_suite)->modules);
     if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_TEST_ARRAY_FAILURE;
+    
+    array_result = basec_array_destroy(&(*test_suite)->passed_tests);
+    if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_TEST_ARRAY_FAILURE;
+
+    array_result = basec_array_destroy(&(*test_suite)->failed_tests);
+    if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_TEST_ARRAY_FAILURE;
 
     free(*test_suite);
     *test_suite = NULL;
@@ -286,44 +326,120 @@ BasecTestResult basec_test_suite_destroy(BasecTestSuite** test_suite) {
 BasecTestResult basec_test_suite_print_results(BasecTestSuite* test_suite) {
     if (test_suite == NULL) return BASEC_TEST_NULL_POINTER;
     
+    const char* GREEN = "\033[0;32m";
+    const char* RED = "\033[0;31m";
+    const char* YELLOW = "\033[0;33m";
+    const char* BLUE = "\033[0;34m";
+    const char* BOLD = "\033[1m";
+    const char* RESET = "\033[0m";
+    
+    const char* HORIZONTAL = "─";
+    const char* VERTICAL = "│";
+    const char* TEE = "├";
+    const char* CORNER = "└";
+    const char* ARROW = "→";
+    
     BasecArrayResult array_result = BASEC_ARRAY_SUCCESS;
     BasecTestModule* test_module  = NULL;
     BasecTest*       test         = NULL;
-    u64              total_tests  = 0;
-    u64              successful_tests = 0;
-
-    (void)printf("=== basec testing ===\n");
+    u64 successful_tests          = test_suite->passed_tests->length;
+    u64 failed_tests              = test_suite->failed_tests->length;
+    u64 total_tests               = successful_tests + failed_tests;
+    
+    (void)printf("\n%s%s===================================%s\n", BOLD, BLUE, RESET);
+    (void)printf("%s%s         BASEC TEST RESULTS        %s\n", BOLD, BLUE, RESET);
+    (void)printf("%s%s===================================%s\n\n", BOLD, BLUE, RESET);
 
     for (u64 i = 0; i < test_suite->modules->length; i++) {
         array_result = basec_array_get(test_suite->modules, i, &test_module);
         if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_TEST_ARRAY_FAILURE;
 
-        (void)printf("\n%s\n", test_module->name);
-
+        (void)printf("%s%s[MODULE] %s%s\n", BOLD, YELLOW, test_module->name, RESET);
+        
         for (u64 j = 0; j < test_module->tests->length; j++) {
             array_result = basec_array_get(test_module->tests, j, &test);
             if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_TEST_ARRAY_FAILURE;
 
             if (j < test_module->tests->length - 1) {
-                (void)printf("├──");
+                (void)printf("  %s%s%s%s ", BOLD, TEE, HORIZONTAL, RESET);
             } else {
-                (void)printf("└──");
+                (void)printf("  %s%s%s%s ", BOLD, CORNER, HORIZONTAL, RESET);
             }
 
-            (void)printf("%s: %s\n", test->name, test->is_success ? "success" : "failure");
-            
-            if (!test->is_success) {
-                (void)printf("│  └──%s\n", test->fail_message);
+            if (test->is_success) {
+                (void)printf("%s%s✓%s %s\n", GREEN, BOLD, RESET, test->name);
             } else {
-                successful_tests++;
+                (void)printf("%s%s✗%s %s\n", RED, BOLD, RESET, test->name);
+                
+                if (j < test_module->tests->length - 1) {
+                    (void)printf(
+                        "  %s  %s%s %s%s\n",
+                        VERTICAL,
+                        RED,
+                        ARROW,
+                        test->fail_message,
+                        RESET
+                    );
+                } else {
+                    (void)printf("    %s%s %s%s\n", RED, ARROW, test->fail_message, RESET);
+                }
             }
-            
-            total_tests++;
+        }
+        
+        if (i < test_suite->modules->length - 1) {
+            (void)printf("\n");
         }
     }
     
-    (void)printf("\ntests (%lu/%lu)\n\n", successful_tests, total_tests);
-    (void)printf("=== basec testing ===\n");
+    (void)printf("\n%s%s===================================%s\n", BOLD, BLUE, RESET);
+    
+    float pass_percentage = (total_tests > 0) ? 
+                            ((float)successful_tests / total_tests) * 100.0f :
+                            0.0f;
+    (void)printf("  %sTotal tests:%s %lu\n", BOLD, RESET, total_tests);
+    
+    if (failed_tests == 0) {
+        (void)printf(
+            "  %s%sPassed:%s %lu/%lu (100%%)\n",
+            BOLD,
+            GREEN,
+            RESET,
+            successful_tests,
+            total_tests
+        );
+    } else {
+        (void)printf(
+            "  %s%sPassed:%s %lu/%lu (%.1f%%)\n",
+            BOLD,
+            (pass_percentage >= 80.0f) ? GREEN : (pass_percentage >= 50.0f) ? YELLOW : RED,
+            RESET,
+            successful_tests,
+            total_tests,
+            pass_percentage
+        );
+
+        (void)printf(
+            "  %s%sFailed:%s %lu/%lu\n",
+            BOLD,
+            RED,
+            RESET,
+            failed_tests,
+            total_tests
+        );
+        
+        (void)printf("\n%s%s FAILURE DETAILS %s\n", BOLD, RED, RESET);
+        (void)printf("%s%s-------------------%s\n", BOLD, RED, RESET);
+        
+        for (u64 i = 0; i < failed_tests; i++) {
+            array_result = basec_array_get(test_suite->failed_tests, i, &test);
+            if (array_result != BASEC_ARRAY_SUCCESS) return BASEC_TEST_ARRAY_FAILURE;
+            
+            (void)printf("%s%s%lu)%s %s\n", BOLD, RED, i + 1, RESET, test->name);
+            (void)printf("   %s%s%s %s%s\n\n", BOLD, RED, ARROW, test->fail_message, RESET);
+        }
+    }
+    
+    (void)printf("%s%s===================================%s\n\n", BOLD, BLUE, RESET);
 
     return BASEC_TEST_SUCCESS;
 }
