@@ -38,13 +38,10 @@ static void _build(void) {
     BuildTarget  basec        = {
         .name = "basec",
         .sources = {
-            "src/main.c",
-            "src/util/basec_build.c",
-            "src/ds/basec_string.c",
-            "src/ds/basec_array.c",
+            // source files
         },
         .includes = {
-            "include",
+            // include directories
         }
     };
 
@@ -139,10 +136,10 @@ be stored, but every element must be the same type. Some supported operations
 are `append/push`, `pop`, `get`, `set`, `contains`, `find`, and `find_all`.
 
 ```c
-BasecArray* array    = NULL;
-u64         element  = 3;
-bool        contains = false;
-u64         index    = 0;
+BasecArray* array        = NULL;
+u64         find_element = 3;
+bool        contains     = false;
+u64         index        = 0;
 
 basec_array_handle_result(
     basec_array_create(&array, sizeof(u64), 10)
@@ -170,10 +167,10 @@ for (u64 i = 0; i < array->length; i++) {
 // -> 5
 
 basec_array_handle_result(
-    basec_array_contains(array, (void*)&element, &contains)
+    basec_array_contains(array, (void*)&find_element, &contains)
 );
 
-(void)printf("contains(%lu): ", element);
+(void)printf("contains(%lu): ", find_element);
 if (contains) {
     (void)printf("true\n");
 } else {
@@ -182,10 +179,10 @@ if (contains) {
 // contains(3): true
 
 basec_array_handle_result(
-    basec_array_find(array, (void*)&element, &index)
+    basec_array_find(array, (void*)&find_element, &index)
 );
 
-(void)printf("find(%lu): %lu", element, index);
+(void)printf("find(%lu): %lu", find_element, index);
 // find(3): 2
 ```
 
@@ -215,7 +212,7 @@ i64 sub(i64 x, i64 y) {
 /* test_arithmetic.h */
 bool            test_add(c_str fail_message);
 bool            test_sub(c_str fail_message);
-BasecTestResult test_arithmetic_add_tests(BasecTestSuite* test_suite)l
+BasecTestResult test_arithmetic_add_tests(BasecTestSuite* test_suite);
 
 /* test_arithmetic.c */
 bool test_add(c_str fail_message) {
@@ -264,8 +261,8 @@ bool test_sub(c_str fail_message) {
 
 BasecTestResult test_arithmetic_add_tests(TestSuite* test_suite) {
     BasecTestResult  test_result = BASEC_TEST_SUCCESS;
-    BasecTest*       add_test = NULL;
-    BasecTest*       sub_test = NULL;
+    BasecTest*       add_test    = NULL;
+    BasecTest*       sub_test    = NULL;
     BasecTestModule* test_module = NULL;
 
     test_result = basec_test_create(
