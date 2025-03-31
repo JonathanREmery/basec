@@ -5,9 +5,11 @@
 
 #include "util/basec_build.h"
 
-#define BASEC_BUILD_BIN_DIR "bin"
-#define BASEC_BUILD_COMPILE_COMMAND "gcc -Wall -Wextra -Werror -pedantic -o "
-#define BASEC_BUILD_COMPILE_COMMAND_LENGTH 4096
+#define _BASEC_BUILD_BIN_DIR                     "bin"
+#define _BASEC_BUILD_COMPILE_COMMAND             "gcc -Wall -Wextra -Werror -pedantic -o "
+#define _BASEC_BUILD_COMPILE_COMMAND_LENGTH       4096
+#define _BASEC_BUILD_COMPILE_OUTPUT_LINE_LENGTH   256
+#define _BASEC_BUILD_COMPILE_OUTPUT_BUFFER_LENGTH 4096
 
 static c_str _exe_path   = NULL;
 static c_str _basec_path = NULL;
@@ -20,7 +22,7 @@ static c_str _basec_path = NULL;
 static c_str _get_exe_path(void) {
     if (_exe_path != NULL) return _exe_path;
 
-    c8 exe_path[PATH_MAX];
+    c8 exe_path[PATH_MAX] = {0};
     if (readlink("/proc/self/exe", exe_path, PATH_MAX) == -1) return NULL;
 
     _exe_path = (c_str)malloc(strlen(exe_path) + 1);
@@ -38,14 +40,19 @@ static c_str _get_exe_path(void) {
 static c_str _get_basec_path(void) {
     if (_basec_path != NULL) return _basec_path;
 
-    c_str exe_path = _get_exe_path();
+    c_str exe_path     = NULL;
+    c_str bin_dir      = NULL;
+    u16   exe_path_len = 0;
+    u16   bin_dir_len  = 0;
+
+    exe_path = _get_exe_path();
     if (exe_path == NULL) return NULL;
 
-    c_str bin_dir = strstr(exe_path, BASEC_BUILD_BIN_DIR);
+    bin_dir = strstr(exe_path, _BASEC_BUILD_BIN_DIR);
     if (bin_dir == NULL) return NULL;
 
-    u16 exe_path_len = strlen(exe_path);
-    u16 bin_dir_len = strlen(bin_dir);
+    exe_path_len = strlen(exe_path);
+    bin_dir_len = strlen(bin_dir);
 
     _basec_path = (c_str)malloc(exe_path_len - bin_dir_len + 1);
     if (_basec_path == NULL) return NULL;
@@ -64,14 +71,19 @@ static c_str _get_basec_path(void) {
  */
 static c_str _absolute_path(c_str path) {
     if (path == NULL) return NULL;
+    
+    c_str basec_path     = NULL;
+    u16   path_len       = 0;
+    u16   basec_path_len = 0;
+    c_str absolute_path  = NULL;
 
-    c_str basec_path = _get_basec_path();
+    basec_path = _get_basec_path();
     if (basec_path == NULL) return NULL;
 
-    u16 path_len = strlen(path);
-    u16 basec_path_len = strlen(basec_path);
+    path_len = strlen(path);
+    basec_path_len = strlen(basec_path);
 
-    c_str absolute_path = (c_str)malloc(path_len + basec_path_len + 1);
+    absolute_path = (c_str)malloc(path_len + basec_path_len + 1);
     if (absolute_path == NULL) return NULL;
 
     (void)strncpy(absolute_path, basec_path, basec_path_len);
@@ -90,17 +102,18 @@ static c_str _absolute_path(c_str path) {
 static bool _needs_build(BuildTarget* target) {
     if (target == NULL) return false;
 
-    struct stat bin_stat;
+    struct stat bin_stat     = {0};
+    struct stat source_stat  = {0};
+    struct stat include_stat = {0};
+
     if (stat(target->bin, &bin_stat) != 0) return true;
 
     for (u16 i = 0; i < target->source_count; i++) {
-        struct stat source_stat;
         if (stat(target->sources[i], &source_stat) != 0) return true;
         if (source_stat.st_mtime > bin_stat.st_mtime) return true;
     }
 
     for (u16 i = 0; i < target->include_count; i++) {
-        struct stat include_stat;
         if (stat(target->includes[i], &include_stat) != 0) return true;
         if (include_stat.st_mtime > bin_stat.st_mtime) return true;
     }
@@ -189,19 +202,23 @@ BasecBuildResult basec_build_system_create(BuildSystem** build_system) {
  */
 BasecBuildResult basec_build_system_add_target(BuildSystem* build_system, BuildTarget target) {
     if (build_system == NULL || target.name == NULL) return BASEC_BUILD_NULL_POINTER;
-    if (build_system->target_count >= BASEC_BUILD_MAX_TARGETS) return BASEC_BUILD_MAX_TARGETS_FAILURE;
+    if (build_system->target_count >= BASEC_BUILD_MAX_TARGETS) {
+        return BASEC_BUILD_MAX_TARGETS_FAILURE;
+    }
 
-    BuildTarget* new_target = (BuildTarget*)malloc(sizeof(BuildTarget));
+    BuildTarget* new_target         = NULL;
+    c8           bin_path[PATH_MAX] = {0};
+
+    new_target = (BuildTarget*)malloc(sizeof(BuildTarget));
     if (new_target == NULL) return BASEC_BUILD_ALLOCATION_FAILURE;
 
     new_target->name = target.name;
 
-    c8 bin_path[PATH_MAX];
     (void)snprintf(
         bin_path,
         sizeof(bin_path),
         "%s/%s",
-        BASEC_BUILD_BIN_DIR,
+        _BASEC_BUILD_BIN_DIR,
         target.name
     );
     new_target->bin = _absolute_path(bin_path);
@@ -241,17 +258,25 @@ BasecBuildResult basec_build_system_add_target(BuildSystem* build_system, BuildT
  */
 BasecBuildResult basec_build_system_build(BuildSystem* build_system) {
     if (build_system == NULL) return BASEC_BUILD_NULL_POINTER;
+    
+    BuildTarget* target                                                   = NULL;
+    c8           compile_command[_BASEC_BUILD_COMPILE_COMMAND_LENGTH]     = {0};
+    FILE*        compile_proc                                             = NULL;
+    c8           output_line[_BASEC_BUILD_COMPILE_OUTPUT_LINE_LENGTH]     = {0};
+    c8           output_buffer[_BASEC_BUILD_COMPILE_OUTPUT_BUFFER_LENGTH] = {0};
+    u8           cur_output_len                                           = 0;
+    bool         has_error                                                = false;
+    u8           return_code                                              = 0;
+    c_str        self                                                     = NULL;
 
     for (u16 i = 0; i < build_system->target_count; i++) {
-        BuildTarget* target = build_system->targets[i];
+        target = build_system->targets[i];
         if (!_needs_build(target)) continue;
-
-        c8 compile_command[BASEC_BUILD_COMPILE_COMMAND_LENGTH];
 
         // "gcc -Wall -Wextra -Werror -pedantic -o "
         (void)strncpy(
             compile_command,
-            BASEC_BUILD_COMPILE_COMMAND,
+            _BASEC_BUILD_COMPILE_COMMAND,
             sizeof(compile_command)
         );
 
@@ -289,23 +314,52 @@ BasecBuildResult basec_build_system_build(BuildSystem* build_system) {
             );
             (void)strncat(compile_command, " ", 2);
         }
+        
+        // Redirect stderr to stdout
+        (void)strncat(compile_command, "2>&1", 5);
 
-        FILE* compile_proc = popen(compile_command, "r");
-        if (compile_proc == NULL) return BASEC_BUILD_PROC_FAILURE;
-
-        c8 output_buffer[128];
-        while (fgets(output_buffer, sizeof(output_buffer), compile_proc) != NULL);
-
-        u8 return_code = pclose(compile_proc);
-        if (return_code != 0) {
-            (void)printf("%s", output_buffer);
-            return BASEC_BUILD_COMPILE_FAILURE;
+        compile_proc = popen(compile_command, "r");
+        if (compile_proc == NULL) {
+            (void)printf("[Error][Build] Failed to open compilation process\n");
+            return BASEC_BUILD_PROC_FAILURE;
         }
 
-        c_str self = _get_exe_path();
-        if (strncmp(target->bin, self, strlen(self)) == 0) {
-            execl(target->bin, target->bin, NULL);
-            return BASEC_BUILD_PROC_FAILURE;
+        while (fgets(output_line, sizeof(output_line), compile_proc) != NULL) {
+            if (strstr(output_line, "error") != NULL) {
+                has_error = true;
+            }
+            
+            size_t line_len = strlen(output_line);
+            if (cur_output_len + line_len < _BASEC_BUILD_COMPILE_OUTPUT_BUFFER_LENGTH) {
+                strncat(output_buffer, output_line, line_len);
+                cur_output_len += line_len;
+            }
+        }
+
+        return_code = pclose(compile_proc);
+        if (return_code != 0 || has_error) {
+            (void)printf(
+                "[Error][Build]"
+                "Compilation failed for target '%s'\n\n",
+                target->name
+            );
+            (void)printf("%s", output_buffer);
+            exit(1);
+        }
+
+        self = _get_exe_path();
+        if (self != NULL && target->bin != NULL) {
+            if (strncmp(target->bin, self, strlen(self)) == 0) {
+                char* argv[2];
+
+                argv[0] = (char*)target->name;
+                argv[1] = NULL;
+                
+                execv(target->bin, argv);
+                
+                perror("[Error][Build] Failed to execute the newly compiled binary");
+                return BASEC_BUILD_PROC_FAILURE;
+            }
         }
     }
 
