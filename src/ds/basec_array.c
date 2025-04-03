@@ -261,8 +261,10 @@ BasecArrayResult basec_array_find(
     }
 
     for (u64 i = 0; i < array->length; i++) {
+        void* cur_element = (void*)((u64)array->data + i * array->element_size);
+
         if (memcmp(
-            (void*)((u64)array->data + i * array->element_size),
+            cur_element,
             element,
             array->element_size
         ) == 0) {
@@ -302,13 +304,7 @@ BasecArrayResult basec_array_find_all(
     if (array_result != BASEC_ARRAY_SUCCESS) return array_result;
 
     for (u64 i = 0; i < array->length; i++) {
-        void* cur_element = NULL;
-        array_result = basec_array_get(
-            array,
-            i,
-            cur_element
-        );
-        if (array_result != BASEC_ARRAY_SUCCESS) return array_result;
+        void* cur_element = (void*)((u64)array->data + i * array->element_size);
 
         if (memcmp(cur_element, element, array->element_size) == 0) {
             array_result = basec_array_append(
@@ -323,8 +319,9 @@ BasecArrayResult basec_array_find_all(
         array_result = basec_array_destroy(array_out);
         if (array_result != BASEC_ARRAY_SUCCESS) return array_result;
     }
-
     *array_out = indices;
+
+    if (indices->length == 0) return BASEC_ARRAY_NOT_FOUND;
     return BASEC_ARRAY_SUCCESS;
 }
 

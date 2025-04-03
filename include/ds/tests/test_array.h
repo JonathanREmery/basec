@@ -47,6 +47,27 @@ bool test_array_get(c_str fail_message);
 bool test_array_set(c_str fail_message);
 
 /**
+ * @brief Test checking if an array contains an element
+ * @param fail_message The message to display if the test fails
+ * @return The result of the test
+ */
+bool test_array_contains(c_str fail_message);
+
+/**
+ * @brief Test finding an element in an array
+ * @param fail_message The message to display if the test fails
+ * @return The result of the test
+ */
+bool test_array_find(c_str fail_message);
+
+/**
+ * @brief Test finding all instances of an element in an array
+ * @param fail_message The message to display if the test fails
+ * @return The result of the test
+ */
+bool test_array_find_all(c_str fail_message);
+
+/**
  * @brief Test the destruction of an array
  * @param fail_message The message to display if the test fails
  * @return The result of the test
