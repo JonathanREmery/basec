@@ -334,7 +334,7 @@ BasecArrayResult basec_array_find_all(
  * @return The result of the operation
  */
 BasecArrayResult basec_array_destroy(BasecArray** array) {
-    if (array == NULL) return BASEC_ARRAY_NULL_POINTER;
+    if (array == NULL || *array == NULL) return BASEC_ARRAY_NULL_POINTER;
 
     free((*array)->data);
     free(*array);

@@ -1,5 +1,6 @@
 #include "util/basec_build.h"
 #include "ds/tests/test_string.h"
+#include "ds/tests/test_array.h"
 
 static void _build(void) {
     BuildSystem* build_system = NULL;
@@ -12,6 +13,7 @@ static void _build(void) {
             "src/ds/basec_array.c",
             "src/util/basec_test.c",
             "src/ds/tests/test_string.c",
+            "src/ds/tests/test_array.c",
         },
         .includes = {
             "include",
@@ -32,6 +34,7 @@ int main(void) {
     basec_test_handle_result(basec_test_suite_create(&test_suite));
 
     basec_test_handle_result(test_string_add_tests(test_suite));
+    basec_test_handle_result(test_array_add_tests(test_suite));
 
     basec_test_handle_result(basec_test_suite_run(test_suite));
     basec_test_handle_result(basec_test_suite_print_results(test_suite));

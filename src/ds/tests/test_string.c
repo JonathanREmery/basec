@@ -1448,7 +1448,7 @@ BasecTestResult test_string_add_tests(BasecTestSuite* test_suite) {
     BasecTest*       split_test         = NULL;
     BasecTest*       destroy_test       = NULL;
     BasecTest*       destroy_array_test = NULL;
-    BasecTestModule* test_module        = NULL;
+    BasecTestModule* string_module      = NULL;
 
     test_result = basec_test_create(
         &create_test,
@@ -1680,7 +1680,7 @@ BasecTestResult test_string_add_tests(BasecTestSuite* test_suite) {
     }
     
     test_result = basec_test_module_create(
-        &test_module,
+        &string_module,
         "String"
     );
     if (test_result != BASEC_TEST_SUCCESS) {
@@ -1701,7 +1701,7 @@ BasecTestResult test_string_add_tests(BasecTestSuite* test_suite) {
         return test_result;
     }
 
-    test_result = basec_test_module_add_test(test_module, create_test);
+    test_result = basec_test_module_add_test(string_module, create_test);
     if (test_result != BASEC_TEST_SUCCESS) {
         (void)basec_test_destroy(&create_test);
         (void)basec_test_destroy(&c_str_test);
@@ -1717,11 +1717,11 @@ BasecTestResult test_string_add_tests(BasecTestSuite* test_suite) {
         (void)basec_test_destroy(&split_test);
         (void)basec_test_destroy(&destroy_test);
         (void)basec_test_destroy(&destroy_array_test);
-        (void)basec_test_module_destroy(&test_module);
+        (void)basec_test_module_destroy(&string_module);
         return test_result;
     }
     
-    test_result = basec_test_module_add_test(test_module, c_str_test);
+    test_result = basec_test_module_add_test(string_module, c_str_test);
     if (test_result != BASEC_TEST_SUCCESS) {
         (void)basec_test_destroy(&c_str_test);
         (void)basec_test_destroy(&length_test);
@@ -1736,11 +1736,11 @@ BasecTestResult test_string_add_tests(BasecTestSuite* test_suite) {
         (void)basec_test_destroy(&split_test);
         (void)basec_test_destroy(&destroy_test);
         (void)basec_test_destroy(&destroy_array_test);
-        (void)basec_test_module_destroy(&test_module);
+        (void)basec_test_module_destroy(&string_module);
         return test_result;
     }
     
-    test_result = basec_test_module_add_test(test_module, length_test);
+    test_result = basec_test_module_add_test(string_module, length_test);
     if (test_result != BASEC_TEST_SUCCESS) {
         (void)basec_test_destroy(&length_test);
         (void)basec_test_destroy(&capacity_test);
@@ -1754,11 +1754,11 @@ BasecTestResult test_string_add_tests(BasecTestSuite* test_suite) {
         (void)basec_test_destroy(&split_test);
         (void)basec_test_destroy(&destroy_test);
         (void)basec_test_destroy(&destroy_array_test);
-        (void)basec_test_module_destroy(&test_module);
+        (void)basec_test_module_destroy(&string_module);
         return test_result;
     }
     
-    test_result = basec_test_module_add_test(test_module, capacity_test);
+    test_result = basec_test_module_add_test(string_module, capacity_test);
     if (test_result != BASEC_TEST_SUCCESS) {
         (void)basec_test_destroy(&capacity_test);
         (void)basec_test_destroy(&prepend_test);
@@ -1771,11 +1771,11 @@ BasecTestResult test_string_add_tests(BasecTestSuite* test_suite) {
         (void)basec_test_destroy(&split_test);
         (void)basec_test_destroy(&destroy_test);
         (void)basec_test_destroy(&destroy_array_test);
-        (void)basec_test_module_destroy(&test_module);
+        (void)basec_test_module_destroy(&string_module);
         return test_result;
     }
     
-    test_result = basec_test_module_add_test(test_module, prepend_test);
+    test_result = basec_test_module_add_test(string_module, prepend_test);
     if (test_result != BASEC_TEST_SUCCESS) {
         (void)basec_test_destroy(&prepend_test);
         (void)basec_test_destroy(&append_test);
@@ -1787,11 +1787,11 @@ BasecTestResult test_string_add_tests(BasecTestSuite* test_suite) {
         (void)basec_test_destroy(&split_test);
         (void)basec_test_destroy(&destroy_test);
         (void)basec_test_destroy(&destroy_array_test);
-        (void)basec_test_module_destroy(&test_module);
+        (void)basec_test_module_destroy(&string_module);
         return test_result;
     }
     
-    test_result = basec_test_module_add_test(test_module, append_test);
+    test_result = basec_test_module_add_test(string_module, append_test);
     if (test_result != BASEC_TEST_SUCCESS) {
         (void)basec_test_destroy(&append_test);
         (void)basec_test_destroy(&push_test);
@@ -1802,11 +1802,11 @@ BasecTestResult test_string_add_tests(BasecTestSuite* test_suite) {
         (void)basec_test_destroy(&split_test);
         (void)basec_test_destroy(&destroy_test);
         (void)basec_test_destroy(&destroy_array_test);
-        (void)basec_test_module_destroy(&test_module);
+        (void)basec_test_module_destroy(&string_module);
         return test_result;
     }
     
-    test_result = basec_test_module_add_test(test_module, push_test);
+    test_result = basec_test_module_add_test(string_module, push_test);
     if (test_result != BASEC_TEST_SUCCESS) {
         (void)basec_test_destroy(&push_test);
         (void)basec_test_destroy(&contains_test);
@@ -1816,11 +1816,11 @@ BasecTestResult test_string_add_tests(BasecTestSuite* test_suite) {
         (void)basec_test_destroy(&split_test);
         (void)basec_test_destroy(&destroy_test);
         (void)basec_test_destroy(&destroy_array_test);
-        (void)basec_test_module_destroy(&test_module);
+        (void)basec_test_module_destroy(&string_module);
         return test_result;
     }
     
-    test_result = basec_test_module_add_test(test_module, contains_test);
+    test_result = basec_test_module_add_test(string_module, contains_test);
     if (test_result != BASEC_TEST_SUCCESS) {
         (void)basec_test_destroy(&contains_test);
         (void)basec_test_destroy(&find_test);
@@ -1829,11 +1829,11 @@ BasecTestResult test_string_add_tests(BasecTestSuite* test_suite) {
         (void)basec_test_destroy(&split_test);
         (void)basec_test_destroy(&destroy_test);
         (void)basec_test_destroy(&destroy_array_test);
-        (void)basec_test_module_destroy(&test_module);
+        (void)basec_test_module_destroy(&string_module);
         return test_result;
     }
     
-    test_result = basec_test_module_add_test(test_module, find_test);
+    test_result = basec_test_module_add_test(string_module, find_test);
     if (test_result != BASEC_TEST_SUCCESS) {
         (void)basec_test_destroy(&find_test);
         (void)basec_test_destroy(&find_all_test);
@@ -1841,58 +1841,58 @@ BasecTestResult test_string_add_tests(BasecTestSuite* test_suite) {
         (void)basec_test_destroy(&split_test);
         (void)basec_test_destroy(&destroy_test);
         (void)basec_test_destroy(&destroy_array_test);
-        (void)basec_test_module_destroy(&test_module);
+        (void)basec_test_module_destroy(&string_module);
         return test_result;
     }
     
-    test_result = basec_test_module_add_test(test_module, find_all_test);
+    test_result = basec_test_module_add_test(string_module, find_all_test);
     if (test_result != BASEC_TEST_SUCCESS) {
         (void)basec_test_destroy(&find_all_test);
         (void)basec_test_destroy(&replace_test);
         (void)basec_test_destroy(&split_test);
         (void)basec_test_destroy(&destroy_test);
         (void)basec_test_destroy(&destroy_array_test);
-        (void)basec_test_module_destroy(&test_module);
+        (void)basec_test_module_destroy(&string_module);
         return test_result;
     }
     
-    test_result = basec_test_module_add_test(test_module, replace_test);
+    test_result = basec_test_module_add_test(string_module, replace_test);
     if (test_result != BASEC_TEST_SUCCESS) {
         (void)basec_test_destroy(&replace_test);
         (void)basec_test_destroy(&split_test);
         (void)basec_test_destroy(&destroy_test);
         (void)basec_test_destroy(&destroy_array_test);
-        (void)basec_test_module_destroy(&test_module);
+        (void)basec_test_module_destroy(&string_module);
         return test_result;
     }
     
-    test_result = basec_test_module_add_test(test_module, split_test);
+    test_result = basec_test_module_add_test(string_module, split_test);
     if (test_result != BASEC_TEST_SUCCESS) {
         (void)basec_test_destroy(&split_test);
         (void)basec_test_destroy(&destroy_test);
         (void)basec_test_destroy(&destroy_array_test);
-        (void)basec_test_module_destroy(&test_module);
+        (void)basec_test_module_destroy(&string_module);
         return test_result;
     }
 
-    test_result = basec_test_module_add_test(test_module, destroy_test);
+    test_result = basec_test_module_add_test(string_module, destroy_test);
     if (test_result != BASEC_TEST_SUCCESS) {
         (void)basec_test_destroy(&destroy_test);
         (void)basec_test_destroy(&destroy_array_test);
-        (void)basec_test_module_destroy(&test_module);
+        (void)basec_test_module_destroy(&string_module);
         return test_result;
     }
     
-    test_result = basec_test_module_add_test(test_module, destroy_array_test);
+    test_result = basec_test_module_add_test(string_module, destroy_array_test);
     if (test_result != BASEC_TEST_SUCCESS) {
         (void)basec_test_destroy(&destroy_array_test);
-        (void)basec_test_module_destroy(&test_module);
+        (void)basec_test_module_destroy(&string_module);
         return test_result;
     }
     
-    test_result = basec_test_suite_add_module(test_suite, test_module);
+    test_result = basec_test_suite_add_module(test_suite, string_module);
     if (test_result != BASEC_TEST_SUCCESS) {
-        (void)basec_test_module_destroy(&test_module);
+        (void)basec_test_module_destroy(&string_module);
         return test_result;
     }
 
