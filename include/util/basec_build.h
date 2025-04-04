@@ -15,6 +15,7 @@
 #include <linux/limits.h>
 
 #include "basec_types.h"
+#include "ds/basec_string.h"
 
 #define BASEC_BUILD_MAX_TARGETS  1024
 #define BASEC_BUILD_MAX_SOURCES  1024
@@ -32,9 +33,15 @@
  */
 typedef struct {
     c_str name;
+    c_str cc;
+    c_str cflags; 
+    c_str debug_flag;
+    c_str bin_flag;
     c_str bin;
+    c_str source_flag;
     c_str sources[BASEC_BUILD_MAX_SOURCES];
     u16   source_count;
+    c_str include_flag;
     c_str includes[BASEC_BUILD_MAX_INCLUDES];
     u16   include_count;
 } BuildTarget;
@@ -63,6 +70,7 @@ typedef enum {
     BASEC_BUILD_MAX_TARGETS_FAILURE,
     BASEC_BUILD_MAX_SOURCES_FAILURE,
     BASEC_BUILD_MAX_INCLUDES_FAILURE,
+    BASEC_BUILD_STRING_FAILURE,
     BASEC_BUILD_MEMOP_FAILURE,
     BASEC_BUILD_PROC_FAILURE,
     BASEC_BUILD_COMPILE_FAILURE,
