@@ -30,19 +30,30 @@ you change your project's code, basec's build system will detect this and
 automatically rebuild, then replace itself with the latest binary. This means
 you simply run your program and don't have to worry about compiling.
 
+Everything from the compiler used to the flags can be specified, or left to the defaults (gcc). A rebuild and debug flag must be specified, to toggle auto-rebuilding and debug builds.
+
 ```c
 #include "util/basec_build.h"
 
 static void _build(void) {
     BuildSystem* build_system = NULL;
     BuildTarget  basec        = {
-        .name = "basec",
-        .sources = {
+        .name         = "basec",
+        .cc           = "gcc",
+        .cflags       = "-Wall -Wextra",
+        .debug_flag   = "-g",
+        .bin_flag     = "-o",
+        .bin          = "bin/basec",
+        .source_flag  = "",
+        .sources      = {
             // source files
         },
-        .includes = {
+        .include_flag = "-I",
+        .includes     = {
             // include directories
-        }
+        },
+        .rebuild      = true,
+        .debug        = true
     };
 
     basec_build_handle_result(
