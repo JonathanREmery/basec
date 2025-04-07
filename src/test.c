@@ -5,14 +5,9 @@
 static void _build(void) {
     BuildSystem* build_system = NULL;
     BuildTarget  test         = {
-        .name         = "test",
-        .cc           = "gcc",
-        .cflags       = "-Wall -Wextra -Werror",
-        .debug_flag   = "-g",
-        .bin_flag     = "-o",
-        .bin          = "bin/test",
-        .source_flag  = "",
-        .sources      = {
+        .name    = "test",
+        .bin     = "bin/test",
+        .sources = {
             "src/test.c",
             "src/util/basec_build.c",
             "src/ds/basec_string.c",
@@ -21,8 +16,7 @@ static void _build(void) {
             "src/ds/tests/test_string.c",
             "src/ds/tests/test_array.c",
         },
-        .include_flag = "-I",
-        .includes     = {
+        .includes = {
             "include",
         }
     };

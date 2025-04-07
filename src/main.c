@@ -7,21 +7,15 @@
 static void _build(void) {
     BuildSystem* build_system = NULL;
     BuildTarget  basec        = {
-        .name         = "basec",
-        .cc           = "gcc",
-        .cflags       = "-Wall -Wextra -Werror",
-        .debug_flag   = "-g",
-        .bin_flag     = "-o",
-        .bin          = "bin/basec",
-        .source_flag  = "",
-        .sources      = {
+        .name     = "basec",
+        .bin      = "bin/basec",
+        .sources  = {
             "src/main.c",
             "src/util/basec_build.c",
             "src/ds/basec_string.c",
             "src/ds/basec_array.c",
         },
-        .include_flag = "-I",
-        .includes     = {
+        .includes = {
             "include",
         }
     };

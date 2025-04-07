@@ -5,6 +5,13 @@
 
 #include "util/basec_build.h"
 
+#define _BASEC_BUILD_DEFAULT_CC           "gcc"
+#define _BASEC_BUILD_DEFAULT_CFLAGS       "-Wall -Wextra -Werror -pedantic"
+#define _BASEC_BUILD_DEFAULT_DEBUG_FLAG   "-g"
+#define _BASEC_BUILD_DEFAULT_BIN_FLAG     "-o"
+#define _BASEC_BUILD_DEFAULT_SOURCE_FLAG  ""
+#define _BASEC_BUILD_DEFAULT_INCLUDE_FLAG "-I"
+
 #define _BASEC_BUILD_COMPILE_COMMAND_LENGTH       4096
 #define _BASEC_BUILD_COMPILE_OUTPUT_LINE_LENGTH   256
 #define _BASEC_BUILD_COMPILE_OUTPUT_BUFFER_LENGTH 4096
@@ -200,14 +207,18 @@ BasecBuildResult basec_build_system_create(BuildSystem** build_system) {
  */
 BasecBuildResult basec_build_system_add_target(BuildSystem* build_system, BuildTarget target) {
     if (build_system == NULL) return BASEC_BUILD_NULL_POINTER;
-
-    if (target.name         == NULL || target.cc          == NULL ||
-        target.cflags       == NULL || target.debug_flag  == NULL ||
-        target.bin_flag     == NULL || target.bin         == NULL ||
-        target.source_flag  == NULL || target.sources[0]  == NULL || 
-        target.include_flag == NULL || target.includes[0] == NULL) {
-         return BASEC_BUILD_NULL_POINTER;
+    
+    if (target.name         == NULL || target.bin         == NULL ||
+        target.sources[0]   == NULL || target.includes[0] == NULL) {
+        return BASEC_BUILD_NULL_POINTER;
     }
+    
+    if (target.cc           == NULL) target.cc           = _BASEC_BUILD_DEFAULT_CC;
+    if (target.cflags       == NULL) target.cflags       = _BASEC_BUILD_DEFAULT_CFLAGS;
+    if (target.debug_flag   == NULL) target.debug_flag   = _BASEC_BUILD_DEFAULT_DEBUG_FLAG;
+    if (target.bin_flag     == NULL) target.bin_flag     = _BASEC_BUILD_DEFAULT_BIN_FLAG;
+    if (target.source_flag  == NULL) target.source_flag  = _BASEC_BUILD_DEFAULT_SOURCE_FLAG;
+    if (target.include_flag == NULL) target.include_flag = _BASEC_BUILD_DEFAULT_INCLUDE_FLAG;
 
     if (build_system->target_count >= BASEC_BUILD_MAX_TARGETS) {
         return BASEC_BUILD_MAX_TARGETS_FAILURE;
@@ -357,6 +368,13 @@ BasecBuildResult basec_build_system_build(BuildSystem* build_system) {
         );
         if (string_result != BASEC_STRING_SUCCESS) return BASEC_BUILD_STRING_FAILURE;
 
+        // " "
+        string_result = basec_string_append(
+            compile_command,
+            " "
+        );
+        if (string_result != BASEC_STRING_SUCCESS) return BASEC_BUILD_STRING_FAILURE;
+
         for (u16 j = 0; j < target->source_count; j++) {
             // "{target_source} "
             string_result = basec_string_append(
@@ -380,6 +398,13 @@ BasecBuildResult basec_build_system_build(BuildSystem* build_system) {
         );
         if (string_result != BASEC_STRING_SUCCESS) return BASEC_BUILD_STRING_FAILURE;
 
+        // " "
+        string_result = basec_string_append(
+            compile_command,
+            " "
+        );
+        if (string_result != BASEC_STRING_SUCCESS) return BASEC_BUILD_STRING_FAILURE;
+
         for (u16 j = 0; j < target->include_count; j++) {
             // "{include} "
             string_result = basec_string_append(
@@ -387,7 +412,7 @@ BasecBuildResult basec_build_system_build(BuildSystem* build_system) {
                 target->includes[j]
             );
             if (string_result != BASEC_STRING_SUCCESS) return BASEC_BUILD_STRING_FAILURE;
-            
+
             // " "
             string_result = basec_string_append(
                 compile_command,
