@@ -17,19 +17,23 @@
 #include "basec_types.h"
 #include "ds/basec_string.h"
 
-#define BASEC_BUILD_MAX_TARGETS  1024
-#define BASEC_BUILD_MAX_SOURCES  1024
-#define BASEC_BUILD_MAX_INCLUDES 1024
-
 /**
  * @brief A build target
  * 
  * @param name The name of the target
+ * @param cc The compiler to use
+ * @param cflags The compiler flags
+ * @param debug_flag The debug flag
+ * @param bin_flag The binary flag
  * @param bin The path to the binary file
- * @param sources The sources of the target
+ * @param source_flag The source flag
  * @param source_count The number of sources
- * @param includes The includes of the target
+ * @param sources The sources of the target
+ * @param include_flag The include flag
  * @param include_count The number of includes
+ * @param includes The includes of the target
+ * @param rebuild Whether to rebuild the target
+ * @param debug Whether to enable debug mode
  */
 typedef struct {
     c_str name;
@@ -39,11 +43,11 @@ typedef struct {
     c_str bin_flag;
     c_str bin;
     c_str source_flag;
-    c_str sources[BASEC_BUILD_MAX_SOURCES];
     u16   source_count;
+    c_str sources[U16_MAX];
     c_str include_flag;
-    c_str includes[BASEC_BUILD_MAX_INCLUDES];
     u16   include_count;
+    c_str includes[U16_MAX];
     bool  rebuild;
     bool  debug;
 } BuildTarget;
@@ -51,12 +55,12 @@ typedef struct {
 /**
  * @brief A build system
  * 
- * @param targets The targets of the build system
  * @param target_count The number of targets
+ * @param targets The targets of the build system
  */
 typedef struct {
-    BuildTarget* targets[BASEC_BUILD_MAX_TARGETS];
     u16          target_count;
+    BuildTarget* targets[U16_MAX];
 } BuildSystem;
 
 /**

@@ -46,24 +46,19 @@ static c_str _get_root_path(c_str bin_path) {
     if (_root_path != NULL) return _root_path;
 
     c_str exe_path     = NULL;
-    c_str bin_dir      = NULL;
-    u16   exe_path_len = 0;
-    u16   bin_dir_len  = 0;
+    c_str bin_path_abs = NULL;
 
     exe_path = _get_exe_path();
     if (exe_path == NULL) return NULL;
 
-    bin_dir = strstr(exe_path, bin_path);
-    if (bin_dir == NULL) return NULL;
+    bin_path_abs = strstr(exe_path, bin_path);
+    if (bin_path_abs == NULL) return NULL;
 
-    exe_path_len = strlen(exe_path);
-    bin_dir_len = strlen(bin_dir);
-
-    _root_path = (c_str)malloc(exe_path_len - bin_dir_len + 1);
+    _root_path = (c_str)malloc((u64)bin_path_abs - (u64)exe_path + 1);
     if (_root_path == NULL) return NULL;
 
-    (void)strncpy(_root_path, exe_path, exe_path_len - bin_dir_len);
-    _root_path[exe_path_len - bin_dir_len] = '\0';
+    (void)strncpy(_root_path, exe_path, (u64)bin_path_abs - (u64)exe_path);
+    _root_path[(u64)bin_path_abs - (u64)exe_path] = '\0';
 
     return _root_path;
 }
@@ -115,12 +110,12 @@ static bool _needs_build(BuildTarget* target) {
 
     for (u16 i = 0; i < target->source_count; i++) {
         if (stat(target->sources[i], &source_stat) != 0) return true;
-        if (source_stat.st_mtime > bin_stat.st_mtime) return true;
+        if (source_stat.st_mtime > bin_stat.st_mtime)    return true;
     }
 
     for (u16 i = 0; i < target->include_count; i++) {
         if (stat(target->includes[i], &include_stat) != 0) return true;
-        if (include_stat.st_mtime > bin_stat.st_mtime) return true;
+        if (include_stat.st_mtime > bin_stat.st_mtime)     return true;
     }
 
     return false;
@@ -160,6 +155,16 @@ void basec_build_handle_result(BasecBuildResult result) {
                 "[Error][Build] Exceeded the maximum number of include files allowed\n"
             );
             exit(1);
+        case BASEC_BUILD_STRING_FAILURE:
+            (void)printf(
+                "[Error][Build] String operation failed during the build process\n"
+            );
+            exit(1);
+        case BASEC_BUILD_MEMOP_FAILURE:
+            (void)printf(
+                "[Error][Build] Memory operation failed during the build process\n"
+            );
+            exit(1);
         case BASEC_BUILD_PROC_FAILURE:
             (void)printf(
                 "[Error][Build] A failure occurred during the build process execution\n"
@@ -190,10 +195,10 @@ BasecBuildResult basec_build_system_create(BuildSystem** build_system) {
     *build_system = (BuildSystem*)malloc(sizeof(BuildSystem));
     if (*build_system == NULL) return BASEC_BUILD_ALLOCATION_FAILURE;
 
-    for (u16 i = 0; i < BASEC_BUILD_MAX_TARGETS; i++) {
+    (*build_system)->target_count = 0;
+    for (u16 i = 0; i < U16_MAX; i++) {
         (*build_system)->targets[i] = NULL;
     }
-    (*build_system)->target_count = 0;
 
     return BASEC_BUILD_SUCCESS;
 }
@@ -212,6 +217,10 @@ BasecBuildResult basec_build_system_add_target(BuildSystem* build_system, BuildT
         target.sources[0]   == NULL || target.includes[0] == NULL) {
         return BASEC_BUILD_NULL_POINTER;
     }
+
+    if (build_system->target_count >= U16_MAX) {
+        return BASEC_BUILD_MAX_TARGETS_FAILURE;
+    }
     
     if (target.cc           == NULL) target.cc           = _BASEC_BUILD_DEFAULT_CC;
     if (target.cflags       == NULL) target.cflags       = _BASEC_BUILD_DEFAULT_CFLAGS;
@@ -219,10 +228,6 @@ BasecBuildResult basec_build_system_add_target(BuildSystem* build_system, BuildT
     if (target.bin_flag     == NULL) target.bin_flag     = _BASEC_BUILD_DEFAULT_BIN_FLAG;
     if (target.source_flag  == NULL) target.source_flag  = _BASEC_BUILD_DEFAULT_SOURCE_FLAG;
     if (target.include_flag == NULL) target.include_flag = _BASEC_BUILD_DEFAULT_INCLUDE_FLAG;
-
-    if (build_system->target_count >= BASEC_BUILD_MAX_TARGETS) {
-        return BASEC_BUILD_MAX_TARGETS_FAILURE;
-    }
 
     BuildTarget* new_target = NULL;
 
@@ -237,24 +242,28 @@ BasecBuildResult basec_build_system_add_target(BuildSystem* build_system, BuildT
     new_target->bin         = _absolute_path(target.bin, target.bin);
 
     new_target->source_flag = target.source_flag;
-    for (u16 i = 0; i < BASEC_BUILD_MAX_SOURCES; i++) {
+    for (u16 i = 0; i < U16_MAX; i++) {
         if (target.sources[i] == NULL) break;
-        new_target->sources[i] = _absolute_path(target.sources[i], target.bin);
-        new_target->source_count++;
+        new_target->sources[new_target->source_count++] = _absolute_path(
+            target.sources[i],
+            target.bin
+        );
 
-        if (new_target->source_count >= BASEC_BUILD_MAX_SOURCES) {
+        if (new_target->source_count >= U16_MAX) {
             free(new_target);
             return BASEC_BUILD_MAX_SOURCES_FAILURE;
         }
     }
     
     new_target->include_flag = target.include_flag;
-    for (u16 i = 0; i < BASEC_BUILD_MAX_INCLUDES; i++) {
+    for (u16 i = 0; i < U16_MAX; i++) {
         if (target.includes[i] == NULL) break;
-        new_target->includes[i] = _absolute_path(target.includes[i], target.bin);
-        new_target->include_count++;
+        new_target->includes[new_target->include_count++] = _absolute_path(
+            target.includes[i],
+            target.bin
+        );
 
-        if (new_target->include_count >= BASEC_BUILD_MAX_INCLUDES) {
+        if (new_target->include_count >= U16_MAX) {
             free(new_target);
             return BASEC_BUILD_MAX_INCLUDES_FAILURE;
         }
@@ -287,7 +296,7 @@ BasecBuildResult basec_build_system_build(BuildSystem* build_system) {
     c_str        self                                                     = NULL;
 
     for (u16 i = 0; i < build_system->target_count; i++) {
-        BasecStringResult string_result = BASEC_STRING_SUCCESS;
+        BasecStringResult string_result   = BASEC_STRING_SUCCESS;
         BasecString*      compile_command = NULL;
 
         target = build_system->targets[i];
@@ -442,7 +451,7 @@ BasecBuildResult basec_build_system_build(BuildSystem* build_system) {
             if (strstr(output_line, "error") != NULL) {
                 has_error = true;
             }
-            
+
             size_t line_len = strlen(output_line);
             if (cur_output_len + line_len < _BASEC_BUILD_COMPILE_OUTPUT_BUFFER_LENGTH) {
                 strncat(output_buffer, output_line, line_len);
@@ -468,10 +477,10 @@ BasecBuildResult basec_build_system_build(BuildSystem* build_system) {
 
                 argv[0] = (char*)target->name;
                 argv[1] = NULL;
-                
+
                 execv(target->bin, argv);
-                
-                perror("[Error][Build] Failed to execute the newly compiled binary");
+
+                (void)printf("[Error][Build] Failed to execute the newly compiled binary");
                 return BASEC_BUILD_PROC_FAILURE;
             }
         }
