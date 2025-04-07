@@ -44,6 +44,8 @@ typedef struct {
     c_str include_flag;
     c_str includes[BASEC_BUILD_MAX_INCLUDES];
     u16   include_count;
+    bool  rebuild;
+    bool  debug;
 } BuildTarget;
 
 /**

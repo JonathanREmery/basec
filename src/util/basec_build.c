@@ -260,6 +260,9 @@ BasecBuildResult basec_build_system_add_target(BuildSystem* build_system, BuildT
         }
     }
 
+    new_target->rebuild = target.rebuild;
+    new_target->debug   = target.debug;
+
     build_system->targets[build_system->target_count++] = new_target;
 
     return BASEC_BUILD_SUCCESS;
@@ -288,8 +291,8 @@ BasecBuildResult basec_build_system_build(BuildSystem* build_system) {
         BasecString*      compile_command = NULL;
 
         target = build_system->targets[i];
-        if (!_needs_build(target)) continue; // TODO: Make optional
-        
+        if (!target->rebuild || !_needs_build(target)) continue;
+
         string_result = basec_string_create(
             &compile_command,
             "",
@@ -325,20 +328,21 @@ BasecBuildResult basec_build_system_build(BuildSystem* build_system) {
         );
         if (string_result != BASEC_STRING_SUCCESS) return BASEC_BUILD_STRING_FAILURE;
         
-        // TODO: Make optional
-        // "{debug_flag}"
-        string_result = basec_string_append(
-            compile_command,
-            target->debug_flag
-        );
-        if (string_result != BASEC_STRING_SUCCESS) return BASEC_BUILD_STRING_FAILURE;
+        if (target->debug) {
+            // "{debug_flag}"
+            string_result = basec_string_append(
+                compile_command,
+                target->debug_flag
+            );
+            if (string_result != BASEC_STRING_SUCCESS) return BASEC_BUILD_STRING_FAILURE;
         
-        // " "
-        string_result = basec_string_append(
-            compile_command,
-            " "
-        );
-        if (string_result != BASEC_STRING_SUCCESS) return BASEC_BUILD_STRING_FAILURE;
+            // " "
+            string_result = basec_string_append(
+                compile_command,
+                " "
+            );
+            if (string_result != BASEC_STRING_SUCCESS) return BASEC_BUILD_STRING_FAILURE;
+        }
         
         // "{bin_flag}"
         string_result = basec_string_append(

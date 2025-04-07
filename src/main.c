@@ -17,7 +17,9 @@ static void _build(void) {
         },
         .includes = {
             "include",
-        }
+        },
+        .rebuild  = true,
+        .debug    = true
     };
 
     basec_build_handle_result(basec_build_system_create(&build_system));
